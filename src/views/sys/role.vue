@@ -21,6 +21,7 @@
       <el-table-column prop="createDate" label="创建时间" sortable="custom" header-align="center" align="center" width="180"></el-table-column>
       <el-table-column label="操作" fixed="right" header-align="center" align="center" width="150">
         <template v-slot="scope">
+          <el-button v-if="state.hasPermission('sys:role:update')" type="primary" link @click="showPermissionManager(scope.row.id)">权限管理</el-button>
           <el-button v-if="state.hasPermission('sys:role:update')" type="primary" link @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
           <el-button v-if="state.hasPermission('sys:role:delete')" type="primary" link @click="state.deleteHandle(scope.row.id)">删除</el-button>
         </template>
@@ -29,6 +30,7 @@
     <el-pagination :current-page="state.page" :page-sizes="[10, 20, 50, 100]" :page-size="state.limit" :total="state.total" layout="total, sizes, prev, pager, next, jumper" @size-change="state.pageSizeChangeHandle" @current-change="state.pageCurrentChangeHandle"> </el-pagination>
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update ref="addOrUpdateRef" @refreshDataList="state.getDataList"></add-or-update>
+    <permission-management v-model="showPermission" :roleId="currentRoleId"  @success="handlePermissionSuccess"></permission-management>
   </div>
 </template>
 
@@ -36,7 +38,7 @@
 import useView from "@/hooks/useView";
 import { reactive, ref, toRefs } from "vue";
 import AddOrUpdate from "./role-add-or-update.vue";
-
+import PermissionManagement  from "@/components/report/list.vue";
 const view = reactive({
   getDataListURL: "/sys/role/page",
   getDataListIsPage: true,
@@ -46,11 +48,19 @@ const view = reactive({
     name: ""
   }
 });
-
+const showPermission = ref(false)
 const state = reactive({ ...useView(view), ...toRefs(view) });
-
+const currentRoleId = ref(null);
 const addOrUpdateRef = ref();
 const addOrUpdateHandle = (id?: number) => {
   addOrUpdateRef.value.init(id);
 };
+const showPermissionManager = (id) => {
+  currentRoleId.value = id
+  showPermission.value = true
+}
+const handlePermissionSuccess  = () => {
+  //ElMessage.success('权限操作成功')
+  showPermission.value = false
+}
 </script>
