@@ -269,7 +269,7 @@ const handleSearch = () => {
 // 重置搜索
 const resetSearch = () => {
   searchForm.activityType = ''
-  searchForm.activityName = ''
+  searchForm.activityId = ''
   handleSearch()
 }
 
