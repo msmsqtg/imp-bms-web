@@ -35,7 +35,7 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   (response) => {
     // 响应成功
-    if (response.data.code === 0) {
+    if (response.data.code === 200) {
       return response;
     }
 

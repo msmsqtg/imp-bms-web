@@ -88,7 +88,7 @@ const onLogin = () => {
         .post("/login", login)
         .then((res) => {
           state.loading = false;
-          if (res.code === 0) {
+          if (res.code === 200) {
             setCache(CacheToken, res.data, true);
             ElMessage.success("登录成功");
             router.push("/");
