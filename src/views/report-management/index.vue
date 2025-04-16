@@ -32,9 +32,9 @@
           >
             <el-option
               v-for="item in reportTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
+              :key="item.reportId"
+              :label="item.reportName"
+              :value="item.reportId"
             />
           </el-select>
         </el-form-item>
@@ -49,9 +49,9 @@
     <!-- 搜索条件 -->
     <el-card class="search-box">
       <el-form :inline="true" :model="searchForm">
-        <el-form-item label="机构" key="orgId">
+        <el-form-item label="机构" key="orgIds">
           <el-select
-            v-model="searchForm.orgId"
+            v-model="searchForm.orgIds"
             placeholder="请选择机构"
             clearable
             filterable
@@ -62,9 +62,9 @@
           >
             <el-option
               v-for="item in filteredOrgs"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
+              :key="item.orgId"
+              :label="item.orgName"
+              :value="item.orgId"
             />
           </el-select>
         </el-form-item>
@@ -132,7 +132,6 @@
             range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
-            value-format="yyyy-MM-dd HH:mm:ss"  
             :default-time="[
               new Date(2000, 0, 1, 0, 0, 0), 
               new Date(2000, 0, 1, 23, 59, 59)
@@ -405,16 +404,12 @@ const reportForm = reactive({
 })
 const dialogVisible = ref(false)
 // 报表类型选项
-const reportTypeOptions = [
-  { value:1, label: '拼团列表' },
-  { value:2, label: '拼团日志' },
-  { value:3, label: '奖品列表' }
-]
+const reportTypeOptions = ref([])
 const filteredActivities = ref([])
 // 当前报表名称
 const currentReportName = computed(() => {
-  const item = reportTypeOptions.find(item => item.value === reportForm.reportId)
-  return item ? item.label : '请选择报表'
+  const item = reportTypeOptions.value.find(item => item.reportId === reportForm.reportId)
+  return item ? item.reportName : '请选择报表'
 })
 
 // 活动选项
@@ -423,13 +418,14 @@ const dialogTableData = ref([])
 const num = ref(1)
 // 搜索表单
 const searchForm = reactive({
-  orgId: '',
+  orgIds:[],
+  orgNames:[],
   phone: '',
   agentCode: '',
   orderNo: '',
-  createTime: [],
-  status: '',
-  productName:''
+  startTime: '',
+  endTime:'',
+  status: ''
 })
 
 // 机构选项
@@ -438,7 +434,7 @@ const filteredOrgs = ref([])
 const filterOrg = (query) => {
   const searchText = query?.toLowerCase() || '';
   filteredOrgs.value = orgOptions.value.filter(item =>
-    item.name && item.name.toLowerCase().includes(searchText)
+    item.orgName && item.orgName.toLowerCase().includes(searchText)
   );
 };
 // 状态选项
@@ -468,7 +464,41 @@ const getActivityList = ()=>{
 //活动列表数据修改
 const handleImpIdChange = (e) =>{
   if(e){
-
+    reportForm.reportId = "";
+    searchForm.orgIds = []
+    searchForm.orgNames = []
+     baseService
+    .get("/imp/activity/user/imp/report/list", {
+      roleImpId:e
+    }).then((res) => {
+      state.loading = false;
+      console.log("resres",res)
+      if (res.code == 200) {      
+        reportTypeOptions.value = res.data;       
+      } else {
+        ElMessage.error(res.msg);
+      }
+      })
+      .catch(() => {
+        state.loading = false;     
+      });
+     baseService
+    .get("/imp/activity/user/imp/org/list", {
+      roleImpId:e
+    }).then((res) => {
+      state.loading = false;
+      console.log("resres",res)
+      if (res.code == 200) {      
+        orgOptions.value = res.data;
+        filteredOrgs.value = [...res.data]       
+      } else {
+        ElMessage.error(res.msg);
+      }
+      })
+      .catch(() => {
+        state.loading = false;     
+      });
+    //imp/activity/user/imp/org/list
   }
 }
 const filterActivity = (query) => {
@@ -516,7 +546,7 @@ const getStatusLabel = (status) => {
 }
 // 获取报表类型标签
 const getReportTypeLabel = (type) => {
-  const item = reportTypeOptions.find(item => item.value === type)
+  const item = reportTypeOptions.value.find(item => item.value === type)
   return item ? item.label : type
 }
 
@@ -539,11 +569,13 @@ const handleSearch = () => {
 
 // 重置搜索
 const resetSearch = () => {
-  searchForm.orgId = ''
+  searchForm.orgIds = []
+  searchForm.orgNames = []
   searchForm.phone = ''
   searchForm.agentCode = ''
   searchForm.orderNo = ''
-  searchForm.createTime = []
+  searchForm.startTime = ""
+  searchForm.endTime = ""
   searchForm.status = '';
   dateRange.value = [];
   handleSearch();
@@ -555,14 +587,25 @@ const fetchTableData = () => {
     ElMessage.warning('请先选择报表类型')
     return
   }
-
+  if(dateRange.value.length>0){
+    searchForm.startTime = dateRange.value[0];
+    searchForm.endTime = dateRange.value[1]
+  }else{
+    searchForm.startTime = ""
+    searchForm.endTime = ""
+  }
+  if(searchForm.orgIds.length>0){
+     searchForm.orgNames = orgOptions.value.filter(item => searchForm.orgIds.includes(item.orgId)).map(item => item.orgName);
+  }else{
+    searchForm.orgNames=[];
+  }
   loading.value = truncate
   if(reportForm.reportId==1){
     //拼团记录
     baseService
     .get("/imp/activity/member/list", {
       impId:reportForm.impId,
-      ...pagination,
+      ...pagination,      
       ...searchForm
     })
     .then((res) => {
@@ -570,8 +613,13 @@ const fetchTableData = () => {
       console.log("resres",res)
       if (res.code == 200) {
         loading.value = false;
-        tableData.value = res.data.data;
-        pagination.total = Number(res.data.total);
+        if(res.data.data){
+          tableData.value = res.data.data || [];
+          pagination.total = Number(res.data.total);
+        }else{
+          tableData.value = []
+          pagination.total = 0
+        }
       } else {
         ElMessage.error(res.msg);
       }
@@ -593,8 +641,13 @@ const fetchTableData = () => {
       console.log("resres",res)
       if (res.code == 200) {
         loading.value = false;
-        tableData.value = res.data.data;
-        pagination.total = Number(res.data.total);
+        if(res.data.data){
+          tableData.value = res.data.data || [];
+          pagination.total = Number(res.data.total);
+        }else{
+          tableData.value = []
+          pagination.total = 0
+        }
       } else {
         ElMessage.error(res.msg);
       }
@@ -616,8 +669,13 @@ const fetchTableData = () => {
       console.log("resres",res)
       if (res.code == 200) {
         loading.value = false;
-        tableData.value = res.data.data;
-        pagination.total = Number(res.data.total);
+        if(res.data.data){
+          tableData.value = res.data.data || [];
+          pagination.total = Number(res.data.total);
+        }else{
+          tableData.value = []
+          pagination.total = 0
+        }
       } else {
         ElMessage.error(res.msg);
       }
