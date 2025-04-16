@@ -9,29 +9,16 @@
     <!-- 搜索区域 -->
     <el-card shadow="never" class="search-box">
       <el-form :model="searchForm" inline>
-        <el-form-item label="活动类型">
-          <el-select 
-            v-model="searchForm.activityType" 
-            placeholder="请选择活动类型"
-            clearable
-            style="width: 200px"
-          >
-            <el-option
-              v-for="item in activityTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        
+        <el-form-item label="活动类型">  
+          <ren-select v-model="searchForm.impType" dict-type="activity_type" placeholder="请选择活动类型"  @change="handleTypeChange"></ren-select>
+        </el-form-item>        
         <el-form-item label="活动名称">        
-          <el-select v-model="searchForm.activityId" placeholder="请选择活动名称">
+          <el-select v-model="searchForm.impId" placeholder="请选择活动名称">
             <el-option
-              v-for="item in activityOptions"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
+              v-for="item in tableActivityOptions"
+              :key="item.impId"
+              :label="item.impName"
+              :value="item.impId"
             />
           </el-select>
         </el-form-item>
@@ -48,13 +35,13 @@
     <el-card shadow="never" class="table-box">
       <el-table :data="tableData" border v-loading="loading">
         <el-table-column type="index" label="序号" width="60" align="center" />
-        <el-table-column prop="activityType" label="活动类型" width="120" align="center">
+        <el-table-column prop="impType" label="活动类型" width="120" align="center">
           <template #default="{ row }">
-            {{ getActivityTypeLabel(row.activityType) }}
+            {{ row.impType==2?'拼团活动':'组团活动' }}
           </template>
         </el-table-column>
-        <el-table-column prop="activityName" label="活动名称" min-width="150" />
-        <el-table-column prop="createTime" label="创建时间" width="180" align="center" />
+        <el-table-column prop="impName" label="活动名称" min-width="150" />
+        <el-table-column prop="createDate" label="创建时间" width="180" align="center" />
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="text" size="small" @click="handleEdit(row)">编辑</el-button>
@@ -68,7 +55,7 @@
       <!-- 分页 -->
       <el-pagination
         class="pagination"
-        v-model:current-page="pagination.currentPage"
+        v-model:current-page="pagination.pageIndex"
         v-model:page-size="pagination.pageSize"
         :total="pagination.total"
         :page-sizes="[10, 20, 50, 100]"
@@ -86,52 +73,39 @@
       :close-on-click-modal="false"
     >
       <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
-        <el-form-item label="活动类型" prop="activityType">
-          <el-select 
-            v-model="formData.activityType" 
-            placeholder="请选择活动类型"
-            @change="handleActivityTypeChange"
-          >
-            <el-option
-              v-for="item in activityTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
+        <el-form-item label="活动类型" prop="impType">        
+          <ren-select v-model="formData.impType" dict-type="activity_type" placeholder="请选择活动类型"  @change="dialogHandleTypeChange"></ren-select>
         </el-form-item>
         
-        <el-form-item label="活动名称" prop="activityId">
+        <el-form-item label="活动名称" prop="impId">
           <el-select 
-            v-model="formData.activityId" 
+            v-model="formData.impId" 
             placeholder="请选择活动名称"
             filterable
+            @change="handleIdChange"
           >
             <el-option
               v-for="item in activityOptions"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
+              :key="item.impId"
+              :label="item.impName"
+              :value="item.impId"
             />
           </el-select>
         </el-form-item>        
-        <el-form-item label="权限报表" prop="permissions">
+        <el-form-item label="机构权限" prop="orgId">
           <el-tree
             ref="treeRef"
             :data="permissionTree"
             show-checkbox
             node-key="id"
-            :props="treeProps"
+            :props="treeProps"            
             :default-expand-all="true"
           />
         </el-form-item>
-        <el-form-item label="报表权限" prop="type"> 
-        <el-checkbox-group v-model="formData.type">
-          <el-checkbox label="美食/餐厅线上活动" name="type"></el-checkbox>
-          <el-checkbox label="地推活动" name="type"></el-checkbox>
-          <el-checkbox label="线下主题活动" name="type"></el-checkbox>
-          <el-checkbox label="单纯品牌曝光" name="type"></el-checkbox>
-        </el-checkbox-group>
+        <el-form-item label="报表权限" prop="reportId"> 
+           <el-checkbox-group v-model="formData.reportId">
+            <el-checkbox :label="item.reportId" name="type"  v-for="(item,index) in activitySysOptions" :key="index">{{item.reportName}}</el-checkbox>
+          </el-checkbox-group>          
         </el-form-item>
       </el-form>
       
@@ -144,9 +118,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { nextTick,ref, reactive, computed, watch,onMounted, } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { CacheToken } from "@/constants/cacheKey";
+import baseService from "@/service/baseService";
+import { useAppStore } from "@/store";
+import { getDictDataList } from "@/utils/utils";
+import useView from "@/hooks/useView";
 
+const store = useAppStore();
+
+const state = reactive({
+  loading: false
+});
 const props = defineProps({
   modelValue: Boolean,
   roleId: String || Number // 可选的初始活动ID
@@ -166,38 +150,19 @@ const dialogVisible = computed({
 
 // 搜索表单
 const searchForm = reactive({
-  activityType: '',
-  activityId:''
+  impType: "",
+  impId:''
 })
-
-// 活动类型字典
-const activityTypeOptions = [
-  { value: '1', label: '线上活动' },
-  { value: '2', label: '线下活动' },
-  { value: '3', label: '混合活动' }
-]
-
+const tableActivityOptions = ref([])
+const activitySysOptions = ref([])
 // 表格数据
-const tableData = ref([
-  {
-    id: '1',
-    activityType: '1',
-    activityName: '双十一促销活动',
-    createTime: '2023-10-15 14:30:22'
-  },
-  {
-    id: '2',
-    activityType: '2',
-    activityName: '年度客户答谢会',
-    createTime: '2023-09-20 10:15:33'
-  }
-])
+const tableData = ref([])
 
 // 分页
 const pagination = reactive({
-  currentPage: 1,
+  pageIndex: 1,
   pageSize: 10,
-  total: 2
+  total: 0
 })
 
 // 加载状态
@@ -211,65 +176,48 @@ const treeRef = ref(null)
 
 // 表单数据
 const formData = reactive({
-  id: '',
-  activityType: '',
-  activityId: '',
-  permissions: [],
-  type:[]
+  roleImpId:'',
+  impType: '',
+  impId: '',
+  orgId: [],
+  reportId:[]
 })
 
 // 表单验证规则
 const rules = {
-  activityType: [{ required: true, message: '请选择活动类型', trigger: 'change' }],
-  activityId: [{ required: true, message: '请选择活动名称', trigger: 'change' }],
-  permissions: [{ required: true, message: '请选择权限报表', trigger: 'change' }]
+  impType: [{ required: true, message: '请选择活动类型', trigger: 'change' }],
+  impId: [{ required: true, message: '请选择活动名称', trigger: 'change' }]  
 }
 
 // 活动名称下拉选项
 const activityOptions = ref([])
 
 // 权限树数据
-const permissionTree = ref([
-  {
-    id: '1',
-    label: '报表权限',
-    children: [
-      { id: '1-1', label: '销售报表' },
-      { id: '1-2', label: '库存报表' },
-      { id: '1-3', label: '财务报表' }
-    ]
-  },
-  {
-    id: '2',
-    label: '操作权限',
-    children: [
-      { id: '2-1', label: '导出数据' },
-      { id: '2-2', label: '打印报表' }
-    ]
-  }
-])
+const permissionTree = ref([])
 
 const treeProps = {
   children: 'children',
-  label: 'label'
+  label: 'name'
 }
 
 // 获取活动类型标签
 const getActivityTypeLabel = (value) => {
-  const item = activityTypeOptions.find(item => item.value === value)
-  return item ? item.label : value
+  // const item = activityTypeOptions.find(item => item.value === value)
+  // return item ? item.label : value
 }
-
+	onMounted(() => {
+    fetchTableData();
+  })
 // 搜索
 const handleSearch = () => {
-  pagination.currentPage = 1
+  pagination.pageIndex = 1
   fetchTableData()
 }
 
 // 重置搜索
 const resetSearch = () => {
-  searchForm.activityType = ''
-  searchForm.activityId = ''
+  searchForm.impType = ''
+  searchForm.impId = ''
   handleSearch()
 }
 
@@ -277,9 +225,24 @@ const resetSearch = () => {
 const fetchTableData = () => {
   loading.value = true
   // 这里应该是API调用
-  setTimeout(() => {
-    loading.value = false
-  }, 500)
+  baseService
+.get("/imp/activity/role/imp/list", {
+  roleId:props.roleId,
+  ...pagination,
+  ...searchForm
+})
+.then((res) => {
+  state.loading = false;
+  if (res.code === 200) {
+     loading.value = false;
+     tableData.value = res.data.data;
+  } else {
+    ElMessage.error(res.msg);
+  }
+  })
+  .catch(() => {
+    state.loading = false;     
+  });
 }
 
 // 分页变化
@@ -289,7 +252,7 @@ const handleSizeChange = (val) => {
 }
 
 const handleCurrentChange = (val) => {
-  pagination.currentPage = val
+  pagination.pageIndex = val
   fetchTableData()
 }
 
@@ -304,23 +267,26 @@ const showAddDialog = () => {
 const handleEdit = (row) => {
   dialogTitle.value = '编辑报表权限'
   resetForm()
-  
-  // 模拟从API获取详情数据
-  Object.assign(formData, {
-    id: row.id,
-    activityType: row.activityType,
-    activityId: row.activityId || '101' // 模拟数据
+  baseService
+  .get("/imp/activity/role/imp/info", {
+    roleId:props.roleId,
+    impId:row.impId,
+    roleImpId:row.id
   })
-  
-  // 加载活动名称选项
-  loadActivityOptions(row.activityType)
-  
-  // // 模拟设置选中的权限
-  // nextTick(() => {
-  //   treeRef.value?.setCheckedKeys(['1-1', '2-1']) // 模拟选中的权限
-  // })
-  
-  innerDialogVisible.value = true
+  .then((res) => {
+    state.loading = false;
+    if (res.code === 200) {
+      Object.assign(formData, res.data);
+      innerDialogVisible.value = true;      
+      dialogHandleTypeChange(formData.impType,false); 
+      handleIdChange(formData.impId);                   
+    } else {
+      ElMessage.error(res.msg);
+    }
+    })
+  .catch(() => {
+      state.loading = false;     
+  });
 }
 
 // 删除
@@ -340,43 +306,17 @@ const handleDelete = (row) => {
 
 // 重置表单
 const resetForm = () => {
-  formData.id = ''
-  formData.activityType = ''
-  formData.activityId = ''
-  formData.permissions = []
-  
-  // nextTick(() => {
-  //   treeRef.value?.setCheckedKeys([])
-  //   formRef.value?.resetFields()
-  // })
-}
-
-// 活动类型变化时加载活动名称
-const handleActivityTypeChange = (val) => {
-  formData.activityId = ''
-  loadActivityOptions(val)
-}
-
-// 加载活动名称选项
-const loadActivityOptions = (type) => {
-  // 模拟API调用
-  setTimeout(() => {
-    if (type === '1') {
-      activityOptions.value = [
-        { id: '101', name: '双十一促销活动' },
-        { id: '102', name: '618大促活动' }
-      ]
-    } else if (type === '2') {
-      activityOptions.value = [
-        { id: '201', name: '年度客户答谢会' },
-        { id: '202', name: '产品发布会' }
-      ]
-    } else {
-      activityOptions.value = []
+  formData.roleImpId = ''
+  formData.impId = ''
+  formData.orgId =  []
+  formData.impType = ""
+  formData.reportId = []
+   nextTick(() => {
+    if(treeRef.value) {
+      treeRef.value.setCheckedKeys([]);
     }
-  }, 300)
+   });
 }
-
 // 提交表单
 const submitForm = () => {
   formRef.value.validate(async (valid) => {
@@ -394,24 +334,105 @@ const submitForm = () => {
       // 这里应该是API调用
       console.log('提交数据:', {
         ...formData,
-        permissions: allCheckedKeys
+        orgId: allCheckedKeys
       })
-      
-      ElMessage.success(dialogTitle.value + '成功')
-      innerDialogVisible.value = false
-      emit('success')
-      fetchTableData()
+      baseService
+      .post("/imp/activity/org/report/create", {...formData,orgId: allCheckedKeys,roleId:Number(props.roleId)})
+      .then((res) => {
+        state.loading = false;
+        if (res.code === 200) {
+          ElMessage.success(dialogTitle.value + '成功')
+          innerDialogVisible.value = false ;         
+          fetchTableData()    
+        } else {
+          ElMessage.error(res.msg);
+        }
+        })
+      .catch(() => {
+          state.loading = false;     
+      });
+     
+     
     }
   })
 }
 
-// 初始化时如果有activityId，设置搜索条件
-watch(() => props.activityId, (val) => {
-  if (val) {
-    searchForm.activityId = val
-    fetchTableData()
-  }
-}, { immediate: true })
+const handleTypeChange = (type) =>{
+  baseService
+  .get("/imp/activity/list", {type})
+  .then((res) => {
+    state.loading = false;
+    if (res.code === 200) {
+      console.log(res);
+      tableActivityOptions.value = res.data;
+      searchForm.impId = "";
+    } else {
+      ElMessage.error(res.msg);
+    }
+    })
+    .catch(() => {
+      state.loading = false;     
+    });  
+}
+ 
+const dialogHandleTypeChange  = (type,isCheck=true) =>{
+  //
+   baseService
+  .get("/imp/activity/report", {type})
+  .then((res) => {
+    state.loading = false;
+    if (res.code === 200) {
+      activitySysOptions.value = res.data;      
+    } else {
+      ElMessage.error(res.msg);
+    }
+    })
+    .catch(() => {
+      state.loading = false;
+    });
+  baseService
+  .get("/imp/activity/list", {type})
+  .then((res) => {
+    state.loading = false;
+    if (res.code === 200) {
+      console.log(res);
+      activityOptions.value = res.data;
+      if(isCheck) formData.impId = "";
+    } else {
+      ElMessage.error(res.msg);
+    }
+    })
+    .catch(() => {
+      state.loading = false;
+    });
+}
+const handleIdChange = (impId)=>{
+  console.log('idid',impId);
+   baseService
+  .get("/imp/activity/org/list", {impId:Number(impId)})
+  .then((res) => {
+    state.loading = false;
+    if (res.code === 200) {
+      permissionTree.value = [res.data];   
+      setTimeout(()=>{
+        if(treeRef.value) {
+          formData.orgId.forEach(item => treeRef.value.setChecked(item*1, true));
+        } 
+      },100)
+    } else {
+      ElMessage.error(res.msg);
+    }
+    })
+    .catch(() => {
+      state.loading = false;
+    });
+}
+// // 初始化时如果有activityId，设置搜索条件
+// watch(() => props.activityId, (val) => {
+//   if (val) {   
+//     resetSearch()
+//   }
+// }, { immediate: true })
 </script>
 
 <style scoped>
@@ -426,5 +447,9 @@ watch(() => props.activityId, (val) => {
 .pagination {
   margin-top: 20px;
   justify-content: flex-end;
+}
+:deep(.el-tree__empty-text){
+ 
+  position: relative;
 }
 </style>

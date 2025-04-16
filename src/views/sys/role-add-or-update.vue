@@ -110,7 +110,7 @@ const dataFormSubmitHandle = () => {
       return false;
     }
     dataForm.menuIdList = [...menuListTree.value.getHalfCheckedKeys(), ...menuListTree.value.getCheckedKeys()];
-    dataForm.deptIdList = deptListTree.value.getCheckedKeys();
+    dataForm.deptIdList = [];
     (!dataForm.id ? baseService.post : baseService.put)("/sys/role", dataForm).then((res) => {
       ElMessage.success({
         message: "成功",
