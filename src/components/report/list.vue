@@ -337,7 +337,7 @@ const submitForm = () => {
         orgId: allCheckedKeys
       })
       baseService
-      .post("/imp/activity/org/report/create", {...formData,orgId: allCheckedKeys,roleId:Number(props.roleId)})
+      .post("/imp/activity/org/report/create", {...formData,orgId: allCheckedKeys,roleId:props.roleId})
       .then((res) => {
         state.loading = false;
         if (res.code === 200) {

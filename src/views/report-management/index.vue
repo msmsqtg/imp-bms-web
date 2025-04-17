@@ -5,7 +5,7 @@
       <el-form :inline="true" :model="reportForm">
         <el-form-item label="选择活动">
           <el-select
-            v-model="reportForm.impId"
+            v-model="reportForm.roleImpId"
             placeholder="请选择活动"
             clearable
             filterable
@@ -142,7 +142,7 @@
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="resetSearch">重置</el-button>
           <el-button type="success" @click="handleExport">导出</el-button>
-          <el-button type="info" @click="showExportRecords">导出记录</el-button>
+          <!-- <el-button type="info" @click="showExportRecords">导出记录</el-button> -->
         </el-form-item>
       </el-form>
     </el-card>
@@ -392,6 +392,9 @@ import { CacheToken } from "@/constants/cacheKey";
 import baseService from "@/service/baseService";
 import { useAppStore } from "@/store";
 import { truncate } from 'lodash';
+import { getToken } from "@/utils/cache";
+import app from "@/constants/app";
+import axios from "axios";
 const store = useAppStore();
 
 const state = reactive({
@@ -399,7 +402,7 @@ const state = reactive({
 });
 // 报表表单
 const reportForm = reactive({
-  impId: '',
+  roleImpId: '',
   reportId: ''
 })
 const dialogVisible = ref(false)
@@ -419,7 +422,7 @@ const num = ref(1)
 // 搜索表单
 const searchForm = reactive({
   orgIds:[],
-  orgNames:[],
+  orgNames:"",
   phone: '',
   agentCode: '',
   orderNo: '',
@@ -466,7 +469,7 @@ const handleImpIdChange = (e) =>{
   if(e){
     reportForm.reportId = "";
     searchForm.orgIds = []
-    searchForm.orgNames = []
+    searchForm.orgNames = ""
      baseService
     .get("/imp/activity/user/imp/report/list", {
       roleImpId:e
@@ -570,7 +573,7 @@ const handleSearch = () => {
 // 重置搜索
 const resetSearch = () => {
   searchForm.orgIds = []
-  searchForm.orgNames = []
+  searchForm.orgNames =""
   searchForm.phone = ''
   searchForm.agentCode = ''
   searchForm.orderNo = ''
@@ -595,18 +598,24 @@ const fetchTableData = () => {
     searchForm.endTime = ""
   }
   if(searchForm.orgIds.length>0){
-     searchForm.orgNames = orgOptions.value.filter(item => searchForm.orgIds.includes(item.orgId)).map(item => item.orgName);
+     let org = orgOptions.value.filter(item => searchForm.orgIds.includes(item.orgId)).map(item => item.orgName);
+     searchForm.orgNames = org.join(',')
   }else{
-    searchForm.orgNames=[];
-  }
-  loading.value = truncate
+    searchForm.orgNames="";
+  } 
+  let impId =0;
+  filteredActivities.value.map(item=>{
+    if(item.roleImpId==reportForm.roleImpId) impId = item.impId
+  })
+  loading.value = true
   if(reportForm.reportId==1){
     //拼团记录
     baseService
-    .get("/imp/activity/member/list", {
-      impId:reportForm.impId,
+    .get("/imp/activity/leader/list", {
+      impId,
       ...pagination,      
-      ...searchForm
+      ...searchForm,
+      orgIds:''
     })
     .then((res) => {
       state.loading = false;
@@ -632,9 +641,10 @@ const fetchTableData = () => {
     //拼团日志
     baseService
     .get("/imp/activity/member/list", {
-      impId:reportForm.impId,
+      impId,
       ...pagination,
-      ...searchForm
+      ...searchForm,
+      orgIds:''
     })
     .then((res) => {
       state.loading = false;
@@ -660,9 +670,10 @@ const fetchTableData = () => {
     //拼团奖品
     baseService
     .get("/imp/activity/product/list", {
-      impId:reportForm.impId,
+      impId,
       ...pagination,
-      ...searchForm
+      ...searchForm,
+      orgIds:''
     })
     .then((res) => {
       state.loading = false;
@@ -720,26 +731,137 @@ const  handleClick=(row) =>{
 }
 // 导出
 const handleExport = () => {
-  if (!reportForm.reportType) {
+  console.log(reportForm.reportType)
+  if (!reportForm.reportId) {
     ElMessage.warning('请先选择报表类型')
     return
   }
+  if(dateRange.value.length>0){
+    searchForm.startTime = dateRange.value[0];
+    searchForm.endTime = dateRange.value[1]
+  }else{
+    searchForm.startTime = ""
+    searchForm.endTime = ""
+  }
+  if(searchForm.orgIds.length>0){
+     let org = orgOptions.value.filter(item => searchForm.orgIds.includes(item.orgId)).map(item => item.orgName);
+     searchForm.orgNames = org.join(',')
+  }else{
+    searchForm.orgNames="";
+  }
+  let impId = 0;
+  filteredActivities.value.map(item=>{
+    if(item.roleImpId==reportForm.roleImpId) impId = item.impId
+  }) 
+  const token = getToken();
+  if(reportForm.reportId==1){
+    //拼团记录
+    axios
+    .get(app.api+"/imp/activity/leader/list", {params:{
+     impId,
+      ...pagination,      
+      ...searchForm,
+      orgIds:'',
+      export:true     
+    }, 
+    headers: {
+      'Content-Type': 'application/json',
+      'token': token          
+    },responseType: 'blob'})
+    .then((res) => {
+       const content = res.data
+       exportExcel(content,'拼团列表')  
+      
+      })
+      .catch(() => {
+        state.loading = false;     
+      });
+  }
+  if(reportForm.reportId==2){
+    //拼团日志
+     axios
+    .get(app.api+"/imp/activity/member/list", {params:{
+     impId,
+      ...pagination,      
+      ...searchForm,
+      orgIds:'',
+      export:true     
+    }, 
+    headers: {
+      'Content-Type': 'application/json',
+      'token': token          
+    },responseType: 'blob'})
+    .then((res) => {
+       const content = res.data
+       exportExcel(content,'拼团日志') 
+      })
+      .catch(() => {
+        state.loading = false;     
+      });
+     
+  }
+  if(reportForm.reportId==3){
+    //拼团奖品
+     axios
+    .get(app.api+"/imp/activity/product/list", {params:{
+     impId,
+      ...pagination,      
+      ...searchForm,
+      orgIds:'',
+      export:true     
+    }, 
+    headers: {
+      'Content-Type': 'application/json',
+      'token': token          
+    },responseType: 'blob'})
+    .then((res) => {
+       const content = res.data
+       exportExcel(content,'奖品列表')  
+      
+      })
+      .catch(() => {
+        state.loading = false;     
+      });
+  }
+  // ElMessage.success('导出任务已提交，请稍后在导出记录中查看')
   
-  ElMessage.success('导出任务已提交，请稍后在导出记录中查看')
-  
-  // 模拟添加到导出记录
-  const now = new Date()
-  const timestamp = now.toISOString().replace(/[-:]/g, '').split('.')[0]
-  exportRecords.value.unshift({
-    id: Date.now().toString(),
-    fileName: `${currentReportName.value}_${timestamp}.xlsx`,
-    reportType: reportForm.reportType,
-    createTime: now.toLocaleString(),
-    status: 'success',
-    filePath: `/exports/${reportForm.reportType}_${timestamp}.xlsx`
-  })
+  // // 模拟添加到导出记录
+  // const now = new Date()
+  // const timestamp = now.toISOString().replace(/[-:]/g, '').split('.')[0]
+  // exportRecords.value.unshift({
+  //   id: Date.now().toString(),
+  //   fileName: `${currentReportName.value}_${timestamp}.xlsx`,
+  //   reportType: reportForm.reportType,
+  //   createTime: now.toLocaleString(),
+  //   status: 'success',
+  //   filePath: `/exports/${reportForm.reportType}_${timestamp}.xlsx`
+  // })
 }
-
+const exportExcel = (content,fileName) =>{
+   const now = new Date()
+   const timestamp = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+   const blob = new Blob([content], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    }) // 构造一个blob对象来处理数据    
+    // let blob = new Blob([data], {type: 'application/vnd.ms-excel'})
+    // 对于<a>标签，只有 Firefox 和 Chrome（内核） 支持 download 属性
+    // IE10以上支持blob但是依然不支持download
+    ElMessage.success('导出成功')
+    if ('download' in document.createElement('a')) {
+      // 支持a标签download的浏览器
+      const link = document.createElement('a') // 创建a标签
+      link.download = `${fileName}_${timestamp}.xlsx`, // a标签添加属性
+      link.style.display = 'none'
+      link.href = URL.createObjectURL(blob)
+      document.body.appendChild(link)
+      link.click() // 执行下载
+      URL.revokeObjectURL(link.href) // 释放url
+      document.body.removeChild(link) // 释放标签
+    } else {
+      // 其他浏览器
+      navigator.msSaveBlob(blob, fileName)
+    }
+}
 // 显示导出记录
 const showExportRecords = () => {
    if (!reportForm.reportType) {
