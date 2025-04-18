@@ -613,6 +613,7 @@ const fetchTableData = () => {
     baseService
     .get("/imp/activity/leader/list", {
       impId,
+      roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
       orgIds:''
@@ -642,6 +643,7 @@ const fetchTableData = () => {
     baseService
     .get("/imp/activity/member/list", {
       impId,
+      roleImpId:reportForm.roleImpId,
       ...pagination,
       ...searchForm,
       orgIds:''
@@ -671,6 +673,7 @@ const fetchTableData = () => {
     baseService
     .get("/imp/activity/product/list", {
       impId,
+      roleImpId:reportForm.roleImpId,
       ...pagination,
       ...searchForm,
       orgIds:''
@@ -759,6 +762,7 @@ const handleExport = () => {
     axios
     .get(app.api+"/imp/activity/leader/list", {params:{
      impId,
+     roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
       orgIds:'',
@@ -782,6 +786,7 @@ const handleExport = () => {
      axios
     .get(app.api+"/imp/activity/member/list", {params:{
      impId,
+     roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
       orgIds:'',
@@ -805,6 +810,7 @@ const handleExport = () => {
      axios
     .get(app.api+"/imp/activity/product/list", {params:{
      impId,
+      roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
       orgIds:'',
