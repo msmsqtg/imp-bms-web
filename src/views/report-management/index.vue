@@ -422,7 +422,7 @@ const num = ref(1)
 // 搜索表单
 const searchForm = reactive({
   orgIds:[],
-  orgNames:"",
+  agentNames:"",
   phone: '',
   agentCode: '',
   orderNo: '',
@@ -469,7 +469,7 @@ const handleImpIdChange = (e) =>{
   if(e){
     reportForm.reportId = "";
     searchForm.orgIds = []
-    searchForm.orgNames = ""
+    searchForm.agentNames = ""
      baseService
     .get("/imp/activity/user/imp/report/list", {
       roleImpId:e
@@ -573,7 +573,7 @@ const handleSearch = () => {
 // 重置搜索
 const resetSearch = () => {
   searchForm.orgIds = []
-  searchForm.orgNames =""
+  searchForm.agentNames =""
   searchForm.phone = ''
   searchForm.agentCode = ''
   searchForm.orderNo = ''
@@ -599,9 +599,9 @@ const fetchTableData = () => {
   }
   if(searchForm.orgIds.length>0){
      let org = orgOptions.value.filter(item => searchForm.orgIds.includes(item.orgId)).map(item => item.orgName);
-     searchForm.orgNames = org.join(',')
+     searchForm.agentNames = org.join(',')
   }else{
-    searchForm.orgNames="";
+    searchForm.agentNames="";
   } 
   let impId =0;
   filteredActivities.value.map(item=>{
@@ -745,9 +745,9 @@ const handleExport = () => {
   }
   if(searchForm.orgIds.length>0){
      let org = orgOptions.value.filter(item => searchForm.orgIds.includes(item.orgId)).map(item => item.orgName);
-     searchForm.orgNames = org.join(',')
+     searchForm.agentNames = org.join(',')
   }else{
-    searchForm.orgNames="";
+    searchForm.agentNames="";
   }
   let impId = 0;
   filteredActivities.value.map(item=>{
