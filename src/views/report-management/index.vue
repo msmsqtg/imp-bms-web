@@ -314,7 +314,7 @@
         <!--      状态-->
         <el-table-column prop="status" label="状态">
           <template  #default="{ row }">
-            {{row.status === 1 ? '进行中' : row.status === 2 ? '拼团成功' : '拼团失败'}}
+            {{row.status === 1 ? '进行中' : row.status === 2 ? '拼团失败' : '拼团成功'}}
           </template>
         </el-table-column>
         <el-table-column prop="productImpType" label="奖品类型">
