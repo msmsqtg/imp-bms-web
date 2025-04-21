@@ -45,9 +45,9 @@
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="text" size="small" @click="handleEdit(row)">编辑</el-button>
-            <el-button type="text" size="small" @click="handleDelete(row)" style="color: #f56c6c">
+            <!-- <el-button type="text" size="small" @click="handleDelete(row)" style="color: #f56c6c">
               删除
-            </el-button>
+            </el-button> -->
           </template>
         </el-table-column>
       </el-table>
@@ -236,6 +236,7 @@ const fetchTableData = () => {
   if (res.code === 200) {
      loading.value = false;
      tableData.value = res.data.data;
+     pagination.total = res.data.total;
   } else {
     ElMessage.error(res.msg);
   }
