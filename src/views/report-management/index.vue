@@ -114,6 +114,18 @@
             />
           </el-select>
         </el-form-item>
+         <el-form-item label="拼团用户" v-if="reportForm.reportId==2" key="impType">
+          <el-select
+            v-model="searchForm.impType"
+            placeholder="请选择状态"
+            clearable
+            style="width: 120px"
+          >          
+            <el-option label="全部" :value="0"></el-option>
+            <el-option label="团长" :value="1"></el-option>
+            <el-option label="团员" :value="2"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="组团编号" key="orderNo">
           <el-input
             v-model="searchForm.orderNo"
@@ -165,7 +177,7 @@
               <div v-if="row.userNickname">手机号：{{row.userPhone}}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="userPhone" label="代理人">
+        <el-table-column prop="userPhone" label="代理人" width="200">
           <template  #default="{ row }">
             <div v-if="row.agent">
               <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
@@ -223,7 +235,7 @@
             <div v-if="row.userHelpName">姓名：{{row.userHelpName}}</div>
           </template>
         </el-table-column>
-        <el-table-column prop="userPhone" label="代理人">
+        <el-table-column prop="userPhone" label="代理人" width="200">
           <template #default="{ row }">
             <div v-if="row.agent">
               <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
@@ -278,7 +290,7 @@
         <!--      用户手机号-->
         <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
         <!--      开团信息-->
-        <el-table-column prop="teamLeader" label="开团信息">
+        <el-table-column prop="teamLeader" label="开团信息" width="200">
           <template  #default="{ row }">
             <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
             <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
@@ -291,7 +303,7 @@
           </template>
         </el-table-column>
         <!--      代理人-->
-        <el-table-column  label="代理人">
+        <el-table-column  label="代理人" width="200">
           <template  #default="{ row }">
             <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
             <div v-if="row.agent.agentName">姓名：{{row.agent.agentName}}</div>
@@ -428,7 +440,8 @@ const searchForm = reactive({
   orderNo: '',
   startTime: '',
   endTime:'',
-  status: ''
+  status: '',
+  impType:0
 })
 
 // 机构选项
@@ -580,6 +593,7 @@ const resetSearch = () => {
   searchForm.startTime = ""
   searchForm.endTime = ""
   searchForm.status = '';
+  searchForm.impType = 0
   dateRange.value = [];
   handleSearch();
 }
