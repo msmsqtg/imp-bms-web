@@ -114,6 +114,18 @@
             />
           </el-select>
         </el-form-item>
+         <el-form-item label="拼团用户" v-if="reportForm.reportId==2" key="impType">
+          <el-select
+            v-model="searchForm.impType"
+            placeholder="请选择状态"
+            clearable
+            style="width: 120px"
+          >          
+            <el-option label="全部" :value="0"></el-option>
+            <el-option label="团长" :value="1"></el-option>
+            <el-option label="团员" :value="2"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="组团编号" key="orderNo">
           <el-input
             v-model="searchForm.orderNo"
@@ -428,7 +440,8 @@ const searchForm = reactive({
   orderNo: '',
   startTime: '',
   endTime:'',
-  status: ''
+  status: '',
+  impType:0
 })
 
 // 机构选项
@@ -580,6 +593,7 @@ const resetSearch = () => {
   searchForm.startTime = ""
   searchForm.endTime = ""
   searchForm.status = '';
+  searchForm.impType = 0
   dateRange.value = [];
   handleSearch();
 }
