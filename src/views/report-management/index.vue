@@ -173,12 +173,16 @@
         key="table1"
       >
          <el-table-column prop="orderNo" label="拼团编号"></el-table-column>
-        <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
-        <!--开团信息-->
-        <el-table-column prop="teamLeader" label="开团信息">
+         <el-table-column prop="userPhone" label="用户手机号">
+          <template  #default="{ row }">           
+            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+          </template>
+        </el-table-column>
+        <!--      开团信息-->
+        <el-table-column prop="teamLeader" label="开团信息" width="200">
           <template  #default="{ row }">
-              <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-              <div v-if="row.userPhone || row.userHelpPhone">手机号：{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+            <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
+            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
           </template>
         </el-table-column>
         <el-table-column prop="userPhone" label="代理人" width="200">
@@ -232,12 +236,16 @@
           key="table2"
         >
         <el-table-column prop="orderNo" label="拼团编号" width="170px"></el-table-column>
-        <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
-        <!-- 开团信息 -->
-        <el-table-column prop="teamLeader" label="开团信息">
+         <el-table-column prop="userPhone" label="用户手机号">
+          <template  #default="{ row }">           
+            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+          </template>
+        </el-table-column>
+        <!--      开团信息-->
+        <el-table-column prop="teamLeader" label="开团信息" width="200">
           <template  #default="{ row }">
             <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone || row.userHelpPhone">手机号：{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
           </template>
         </el-table-column>
         <!-- 助力信息 -->
@@ -307,12 +315,16 @@
         <!-- 拼团编号-->
         <el-table-column prop="orderNo" label="拼团编号" width="170px"></el-table-column>
         <!--      用户手机号-->
-        <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
+        <el-table-column prop="userPhone" label="用户手机号">
+          <template  #default="{ row }">           
+            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+          </template>
+        </el-table-column>
         <!--      开团信息-->
         <el-table-column prop="teamLeader" label="开团信息" width="200">
           <template  #default="{ row }">
             <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone || row.userHelpPhone">手机号：{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
           </template>
         </el-table-column>
         <!--      助力信息-->
