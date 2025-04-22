@@ -173,12 +173,16 @@
         key="table1"
       >
          <el-table-column prop="orderNo" label="拼团编号"></el-table-column>
-        <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
-        <!--开团信息-->
-        <el-table-column prop="teamLeader" label="开团信息">
+         <el-table-column prop="userPhone" label="用户手机号">
+          <template  #default="{ row }">           
+            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+          </template>
+        </el-table-column>
+        <!--      开团信息-->
+        <el-table-column prop="teamLeader" label="开团信息" width="200">
           <template  #default="{ row }">
-              <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-              <div v-if="row.userPhone || row.userHelpPhone">手机号：{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+            <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
+            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
           </template>
         </el-table-column>
         <el-table-column prop="userPhone" label="代理人" width="200">
@@ -209,6 +213,13 @@
         </el-table-column>
 
         <el-table-column prop="createTime" label="订单时间"></el-table-column>
+        <el-table-column prop="writeOffStatus" label="核销状态">
+          <template  #default="{ row }">
+            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
+        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
           <template  #default="{ row }">
             <el-button @click="handleClick(row)" type="text" >拼团记录</el-button>
@@ -225,12 +236,16 @@
           key="table2"
         >
         <el-table-column prop="orderNo" label="拼团编号" width="170px"></el-table-column>
-        <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
-        <!-- 开团信息 -->
-        <el-table-column prop="teamLeader" label="开团信息">
+         <el-table-column prop="userPhone" label="用户手机号">
+          <template  #default="{ row }">           
+            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+          </template>
+        </el-table-column>
+        <!--      开团信息-->
+        <el-table-column prop="teamLeader" label="开团信息" width="200">
           <template  #default="{ row }">
             <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone || row.userHelpPhone">手机号：{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
           </template>
         </el-table-column>
         <!-- 助力信息 -->
@@ -267,10 +282,18 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="订单时间"></el-table-column>
+        <el-table-column prop="writeOffStatus" label="核销状态">
+          <template  #default="{ row }">
+            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
+        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
         <el-table-column fixed="right" prop="createTime" label="说明" width="100">
           <template  #default="{ row }">
             {{row.productImpType==1?'团长':'团员'}}
           </template>
+          
         </el-table-column>
       </el-table>
     </template>        
@@ -292,12 +315,16 @@
         <!-- 拼团编号-->
         <el-table-column prop="orderNo" label="拼团编号" width="170px"></el-table-column>
         <!--      用户手机号-->
-        <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
+        <el-table-column prop="userPhone" label="用户手机号">
+          <template  #default="{ row }">           
+            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+          </template>
+        </el-table-column>
         <!--      开团信息-->
         <el-table-column prop="teamLeader" label="开团信息" width="200">
           <template  #default="{ row }">
             <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone || row.userHelpPhone">手机号：{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
+            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
           </template>
         </el-table-column>
         <!--      助力信息-->
