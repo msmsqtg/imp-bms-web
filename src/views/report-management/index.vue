@@ -824,11 +824,12 @@ const handleExport = () => {
     searchForm.endTime = ""
   }
   if(searchForm.orgIds.length>0){
-     let org = orgOptions.value.filter(item => searchForm.orgIds.includes(item.orgId)).map(item => item.orgName);
-     searchForm.agentNames = org.join(',')
+     let org = searchForm.orgIds.map(path => findPathNames(orgOptions.value, path)) // 获取每条路径的 name 数组
+    .flat(); 
+     searchForm.agentNames = [...new Set(org)].join(',')
   }else{
     searchForm.agentNames="";
-  }
+  } 
   let impId = 0;
   filteredActivities.value.map(item=>{
     if(item.roleImpId==reportForm.roleImpId) impId = item.impId
