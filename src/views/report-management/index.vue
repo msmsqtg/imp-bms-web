@@ -637,8 +637,7 @@ const fetchTableData = () => {
   if (!reportForm.reportId) {
     ElMessage.warning('请先选择报表类型')
     return
-  }
-  console.log('dateRange.value',dateRange.value,dateRange.value[0],dateRange.value[1])
+  } 
   if(dateRange.value && dateRange.value.length>0){
     searchForm.startTime = dateRange.value[0];
     searchForm.endTime = dateRange.value[1]
