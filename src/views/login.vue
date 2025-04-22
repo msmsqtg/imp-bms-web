@@ -2,7 +2,7 @@
   <div class="rr-login">
     <div class="rr-login-wrap">
       <div class="rr-login-left hidden-sm-and-down">
-        <p class="rr-login-left-title">报表权限系统</p>
+        <p class="rr-login-left-title">鼎翰数智报表</p>
       </div>
 
       <div class="rr-login-right">

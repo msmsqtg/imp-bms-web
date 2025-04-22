@@ -1,7 +1,7 @@
 <template>
   <el-card shadow="never" class="aui-card--fill">
     <div class="mod-home">
-      <h3>欢迎登录报表权限系统</h3>
+      <h3>欢迎登录鼎翰数智报表</h3>
       <!-- <ul>
         <li>renren-security是一个轻量级的，前后端分离的Java快速开发平台，能快速开发项目并交付【接私活利器】</li>
         <li>采用SpringBoot、Shiro、MyBatis-Plus框架，开发的一套权限系统，极低门槛，拿来即用。设计之初，就非常注重安全性，为企业系统保驾护航，让一切都变得如此简单</li>

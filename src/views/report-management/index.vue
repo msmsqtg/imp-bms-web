@@ -50,7 +50,7 @@
     <el-card class="search-box">
       <el-form :inline="true" :model="searchForm">
         <el-form-item label="机构" key="orgIds">
-          <el-select
+          <!-- <el-select
             v-model="searchForm.orgIds"
             placeholder="请选择机构"
             clearable
@@ -66,7 +66,13 @@
               :label="item.orgName"
               :value="item.orgId"
             />
-          </el-select>
+          </el-select> -->
+          <el-cascader
+            v-model="searchForm.orgIds"          
+            :options="orgOptions"
+            :props="props"
+            collapse-tags
+            clearable></el-cascader>
         </el-form-item>
         
         <el-form-item label="用户手机号" key="phone">
@@ -172,7 +178,7 @@
         <el-table-column prop="teamLeader" label="开团信息">
           <template  #default="{ row }">
               <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-              <div v-if="row.userNickname">手机号：{{row.userPhone}}</div>
+              <div v-if="row.userPhone || row.userHelpPhone">手机号：{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
           </template>
         </el-table-column>
         <el-table-column prop="userPhone" label="代理人" width="200">
@@ -224,7 +230,7 @@
         <el-table-column prop="teamLeader" label="开团信息">
           <template  #default="{ row }">
             <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
+            <div v-if="row.userPhone || row.userHelpPhone">手机号：{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
           </template>
         </el-table-column>
         <!-- 助力信息 -->
@@ -291,7 +297,7 @@
         <el-table-column prop="teamLeader" label="开团信息" width="200">
           <template  #default="{ row }">
             <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
+            <div v-if="row.userPhone || row.userHelpPhone">手机号：{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
           </template>
         </el-table-column>
         <!--      助力信息-->
@@ -397,7 +403,7 @@
 
 <script setup>
 import { ref, reactive, computed,onMounted} from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage,ElCascader  } from 'element-plus'
 ///imp/activity/leader/list?impId=32&pageIndex=1&pageSize=10
 import { CacheToken } from "@/constants/cacheKey";
 import baseService from "@/service/baseService";
@@ -407,6 +413,13 @@ import { getToken } from "@/utils/cache";
 import app from "@/constants/app";
 import axios from "axios";
 const store = useAppStore();
+const props =  reactive({
+  label: 'name', // 指定显示的字段为 name
+  value: 'id',   // 指定绑定值的字段为 id
+  children: 'children', // 子选项字段为 children
+  multiple: true
+})
+
 
 const state = reactive({
   loading: false
@@ -446,12 +459,12 @@ const searchForm = reactive({
 // 机构选项
 const orgOptions = ref([])
 const filteredOrgs = ref([])
-const filterOrg = (query) => {
-  const searchText = query?.toLowerCase() || '';
-  filteredOrgs.value = orgOptions.value.filter(item =>
-    item.orgName && item.orgName.toLowerCase().includes(searchText)
-  );
-};
+// const filterOrg = (query) => {
+//   const searchText = query?.toLowerCase() || '';
+//   filteredOrgs.value = orgOptions.value.filter(item =>
+//     item.orgName && item.orgName.toLowerCase().includes(searchText)
+//   );
+// };
 // 状态选项
 const statusOptions = ref([
   { value: 0, label: '全部' },
@@ -504,8 +517,8 @@ const handleImpIdChange = (e) =>{
       state.loading = false;
       console.log("resres",res)
       if (res.code == 200) {      
-        orgOptions.value = res.data;
-        filteredOrgs.value = [...res.data]       
+       orgOptions.value = [res.data];
+        // filteredOrgs.value = [...res.data]       
       } else {
         ElMessage.error(res.msg);
       }
@@ -600,7 +613,25 @@ const resetSearch = () => {
   dateRange.value = [];
   handleSearch();
 }
+const findPathNames = (options, path)=> {
+  const names = [];
+  let currentOptions = options;
+  console.log("options",options);
+  for (const id of path) {
+    if (!Array.isArray(currentOptions)) {
+      break; // 如果当前层级不是数组，停止查找
+    }
 
+    const found = currentOptions.find(option => option.id === id);
+    if (found) {
+      names.push(found.name);
+      currentOptions = found.children || []; // 确保 children 是数组
+    } else {
+      break; // 如果找不到对应的 id，停止查找
+    }
+  }
+  return names;
+}
 // 获取表格数据
 const fetchTableData = () => {
   if (!reportForm.reportId) {
@@ -615,9 +646,11 @@ const fetchTableData = () => {
     searchForm.startTime = ""
     searchForm.endTime = ""
   }
+  console.log('searchForm.orgIds',searchForm.orgIds);
   if(searchForm.orgIds.length>0){
-     let org = orgOptions.value.filter(item => searchForm.orgIds.includes(item.orgId)).map(item => item.orgName);
-     searchForm.agentNames = org.join(',')
+     let org = searchForm.orgIds.map(path => findPathNames(orgOptions.value, path)) // 获取每条路径的 name 数组
+    .flat(); 
+     searchForm.agentNames = [...new Set(org)].join(',')
   }else{
     searchForm.agentNames="";
   } 
