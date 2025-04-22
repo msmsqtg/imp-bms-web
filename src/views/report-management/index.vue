@@ -328,6 +328,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
+        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
       </el-table>
     </template>      
     <!-- 分页 -->
