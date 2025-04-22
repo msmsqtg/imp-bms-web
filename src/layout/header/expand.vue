@@ -59,7 +59,7 @@ export default defineComponent({
 </script>
 <template>
   <div class="rr-header-right-items">
-    <div>
+    <!-- <div>
       <a href="https://www.renren.io/community" target="_blank">
         <svg-icon name="icon-earth"></svg-icon>
       </a>
@@ -68,7 +68,7 @@ export default defineComponent({
       <a href="https://gitee.com/renrenio/renren-security" target="_blank">
         <svg-icon name="icon-gitee"></svg-icon>
       </a>
-    </div>
+    </div> -->
     <div @click="toggle" class="hidden-xs-only">
       <span>
         <svg-icon :name="isFullscreen ? 'tuichuquanping' : 'fullscreen2'"></svg-icon>

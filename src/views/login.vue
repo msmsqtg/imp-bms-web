@@ -2,7 +2,7 @@
   <div class="rr-login">
     <div class="rr-login-wrap">
       <div class="rr-login-left hidden-sm-and-down">
-        <p class="rr-login-left-title">人人权限系统</p>
+        <p class="rr-login-left-title">鼎翰数智报表</p>
       </div>
 
       <div class="rr-login-right">
@@ -28,10 +28,10 @@
         </div>
       </div>
     </div>
-    <div class="login-footer">
+    <!-- <div class="login-footer">
       <p><a href="https://www.renren.io/enterprise" target="_blank">企业版</a> | <a href="https://www.renren.io/cloud" target="_blank">微服务版</a></p>
       <p><a href="https://www.renren.io/" target="_blank">人人开源</a>{{ state.year }} © renren.io</p>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -88,7 +88,7 @@ const onLogin = () => {
         .post("/login", login)
         .then((res) => {
           state.loading = false;
-          if (res.code === 0) {
+          if (res.code === 200) {
             setCache(CacheToken, res.data, true);
             ElMessage.success("登录成功");
             router.push("/");

@@ -41,7 +41,7 @@ const beforeUploadHandle = (file: IObject) => {
 
 // 上传成功
 const successHandle = (res: IObject, file: IObject, list: IObject[]) => {
-  if (res.code !== 0) {
+  if (res.code !== 200) {
     return ElMessage.error(res.msg);
   }
 
