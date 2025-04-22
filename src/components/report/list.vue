@@ -186,7 +186,8 @@ const formData = reactive({
 // 表单验证规则
 const rules = {
   impType: [{ required: true, message: '请选择活动类型', trigger: 'change' }],
-  impId: [{ required: true, message: '请选择活动名称', trigger: 'change' }]  
+  impId: [{ required: true, message: '请选择活动名称', trigger: 'change' }],
+  reportId: [{ required: true, message: '请选择报表权限', trigger: 'change' }]    
 }
 
 // 活动名称下拉选项
