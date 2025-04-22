@@ -144,10 +144,8 @@
             range-separator="至"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
-            :default-time="[
-              new Date(2000, 0, 1, 0, 0, 0), 
-              new Date(2000, 0, 1, 23, 59, 59)
-            ]"            
+            value-format="YYYY-MM-DD HH:mm:ss" 
+            :default-time="defaultTime"          
         ></el-date-picker>
         </el-form-item>        
         <el-form-item>
@@ -527,6 +525,10 @@ const filterActivity = (query) => {
 const tableData = ref([])
 const loading = ref(false)
 const dateRange = ref([])
+const defaultTime = [
+    new Date(2000, 1, 1, 0, 0, 0),
+    new Date(2000, 2, 1, 23, 59, 59),
+  ]
 // 分页
 const pagination = reactive({
   pageIndex: 1,
@@ -604,7 +606,8 @@ const fetchTableData = () => {
     ElMessage.warning('请先选择报表类型')
     return
   }
-  if(dateRange.value.length>0){
+  console.log('dateRange.value',dateRange.value,dateRange.value[0],dateRange.value[1])
+  if(dateRange.value && dateRange.value.length>0){
     searchForm.startTime = dateRange.value[0];
     searchForm.endTime = dateRange.value[1]
   }else{

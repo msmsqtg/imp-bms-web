@@ -45,9 +45,9 @@
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button type="text" size="small" @click="handleEdit(row)">编辑</el-button>
-            <!-- <el-button type="text" size="small" @click="handleDelete(row)" style="color: #f56c6c">
+            <el-button type="text" size="small" @click="handleDelete(row)" style="color: #f56c6c">
               删除
-            </el-button> -->
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -298,13 +298,29 @@ const handleDelete = (row) => {
     type: 'warning'
   }).then(() => {
     // 这里应该是API调用
-    ElMessage.success('删除成功')
-    fetchTableData()
+    baseService
+    .post("/imp/activity/org/report/delete", {
+      roleId:props.roleId,
+      impId:row.impId,
+      roleImpId:row.id
+    })
+    .then((res) => {      
+      if (res.code === 200) {
+        ElMessage.success('删除成功');
+        if(pagination.pageIndex!=1 && (Math.ceil((pagination.total-1)/pagination.pageSize))<pagination.pageIndex){
+          pagination.pageIndex= pagination.pageIndex-1;
+        }
+         fetchTableData()                  
+      } else {
+        ElMessage.error(res.msg);
+      }
+    })
+    .catch(() => {       
+    });    
   }).catch(() => {
     ElMessage.info('已取消删除')
   })
 }
-
 // 重置表单
 const resetForm = () => {
   formData.roleImpId = ''
@@ -414,7 +430,7 @@ const handleIdChange = (impId)=>{
   .then((res) => {
     state.loading = false;
     if (res.code === 200) {
-      permissionTree.value = [res.data];   
+      permissionTree.value = res.data?[res.data]:[];   
       setTimeout(()=>{
         if(treeRef.value) {
           formData.orgId.forEach(item => treeRef.value.setChecked(item*1, true));
