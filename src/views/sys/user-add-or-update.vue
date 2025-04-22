@@ -26,7 +26,7 @@
         <el-input v-model="dataForm.mobile" placeholder="手机号"></el-input>
       </el-form-item>
       <el-form-item prop="roleIdList" label="角色配置" class="role-list">
-        <el-select v-model="dataForm.roleIdList" multiple placeholder="角色配置">
+        <el-select v-model="dataForm.roleIdList" placeholder="角色配置">
           <el-option v-for="role in roleList" :key="role.id" :label="role.name" :value="role.id"></el-option>
         </el-select>
       </el-form-item>
