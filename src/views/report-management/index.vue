@@ -209,6 +209,13 @@
         </el-table-column>
 
         <el-table-column prop="createTime" label="订单时间"></el-table-column>
+        <el-table-column prop="writeOffStatus" label="核销状态">
+          <template  #default="{ row }">
+            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
+        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
         <el-table-column fixed="right" label="操作" width="100">
           <template  #default="{ row }">
             <el-button @click="handleClick(row)" type="text" >拼团记录</el-button>
@@ -267,10 +274,18 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="订单时间"></el-table-column>
+        <el-table-column prop="writeOffStatus" label="核销状态">
+          <template  #default="{ row }">
+            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
+        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
         <el-table-column fixed="right" prop="createTime" label="说明" width="100">
           <template  #default="{ row }">
             {{row.productImpType==1?'团长':'团员'}}
           </template>
+          
         </el-table-column>
       </el-table>
     </template>        
