@@ -78,7 +78,7 @@ const init = (id?: number) => {
 // 获取部门列表
 const getDeptList = () => {
   return baseService.get("/sys/dept/list").then((res) => {
-    if (res.code !== 0) {
+    if (res.code !== 200) {
       return ElMessage.error(res.msg);
     }
     deptList.value = res.data;

@@ -1,5 +1,6 @@
 <template>
   <div class="mod-sys__dept">
+    暂无内容
     <el-form :inline="true" :model="state.dataForm" @keyup.enter="state.getDataList()">
       <el-form-item>
         <el-button v-if="state.hasPermission('sys:dept:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
@@ -15,7 +16,7 @@
           <el-button v-if="state.hasPermission('sys:dept:delete')" type="primary" link @click="state.deleteHandle(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
-    </el-table>
+    </el-table> 
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update ref="addOrUpdateRef" @refreshDataList="state.getDataList"></add-or-update>
   </div>
