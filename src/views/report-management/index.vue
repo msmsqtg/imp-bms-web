@@ -49,24 +49,7 @@
     <!-- 搜索条件 -->
     <el-card class="search-box">
       <el-form :inline="true" :model="searchForm">
-        <el-form-item label="机构" key="orgIds">
-          <!-- <el-select
-            v-model="searchForm.orgIds"
-            placeholder="请选择机构"
-            clearable
-            filterable
-            multiple
-            collapse-tags
-            :filter-method="filterOrg"
-            style="width: 150px"
-          >
-            <el-option
-              v-for="item in filteredOrgs"
-              :key="item.orgId"
-              :label="item.orgName"
-              :value="item.orgId"
-            />
-          </el-select> -->
+        <el-form-item label="机构" key="orgIds">          
           <el-cascader
             v-model="searchForm.orgIds"          
             :options="orgOptions"
@@ -165,216 +148,53 @@
     <el-card class="table-box" v-if="reportForm.reportId">
     <!-- 表格区域 -->
     <template v-if="reportForm.reportId === 1">    
-      <el-table
-        :data="tableData"
-        border
-        style="width: 100%"
-        v-loading="loading"
-        key="table1"
-      >
-         <el-table-column prop="orderNo" label="拼团编号"></el-table-column>
-         <el-table-column prop="userPhone" label="用户手机号">
-          <template  #default="{ row }">           
-            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
-          </template>
-        </el-table-column>
-        <!--      开团信息-->
-        <el-table-column prop="teamLeader" label="开团信息" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="userPhone" label="代理人" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.agent">
-              <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
-              <div v-if="row.agent.agentName">姓名：{{row.agent.agentName}}</div>
-              <div v-if="row.agent.agentPhone">手机号：{{row.agent.agentPhone}}</div>
-              <div v-if="row.agent.agentOrg">机构：{{row.agent.agentOrg}}</div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="userNickname" label="用户昵称"></el-table-column>
-
-        <el-table-column prop="status" label="状态">
-          <template  #default="{ row }">
-            {{row.status==1?'进行中':row.status==2?'拼团失败 ':'拼团成功'}}
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="status" label="奖品类型">
-          <template  #default="{ row }">
-            {{row.productImpType === "1" ? '开团' : '助力'}}
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="productName" label="奖品名称">
-        </el-table-column>
-
-        <el-table-column prop="createTime" label="订单时间"></el-table-column>
-        <el-table-column prop="writeOffStatus" label="核销状态">
-          <template  #default="{ row }">
-            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
-        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
-        <el-table-column fixed="right" label="操作" width="100">
-          <template  #default="{ row }">
-            <el-button @click="handleClick(row)" type="text" >拼团记录</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <leader-list :table-data="tableData"
+        v-if="reportForm.reportId === 1"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></leader-list>
     </template>        
     <template v-else-if="reportForm.reportId === 2">
-      <el-table
-          :data="tableData"
-          border
-          style="width: 100%"
-          v-loading="loading"
-          key="table2"
-        >
-        <el-table-column prop="orderNo" label="拼团编号" width="170px"></el-table-column>
-         <el-table-column prop="userPhone" label="用户手机号">
-          <template  #default="{ row }">           
-            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
-          </template>
-        </el-table-column>
-        <!--      开团信息-->
-        <el-table-column prop="teamLeader" label="开团信息" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
-          </template>
-        </el-table-column>
-        <!-- 助力信息 -->
-        <el-table-column prop="teamMember" label="助力信息">
-          <template #default="{ row }">
-            <div v-if="row.userHelpName">姓名：{{row.userHelpName}}</div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="userPhone" label="代理人" width="200">
-          <template #default="{ row }">
-            <div v-if="row.agent">
-              <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
-              <div v-if="row.agent.agentName">姓名：{{row.agent.agentName}}</div>
-              <div v-if="row.agent.agentPhone">手机号：{{row.agent.agentPhone}}</div>
-              <div v-if="row.agent.agentOrg">机构：{{row.agent.agentOrg}}</div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="productName" label="拼团奖品名称"></el-table-column>
-        <el-table-column prop="price" label="拼团商品原价">
-          <template  #default="{ row }">
-            <div v-if="row.price"> {{(row.price / 100).toFixed(2)}}元</div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="teamPrice" label="拼团商品成团价">
-          <template  #default="{ row }">
-            <div v-if="row.teamPrice"> {{(row.teamPrice / 100).toFixed(2)}}元</div>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="status" label="状态">
-          <template  #default="{ row }">
-            {{row.status==1?'进行中':row.status==2?'拼团失败 ':'拼团成功'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="订单时间"></el-table-column>
-        <el-table-column prop="writeOffStatus" label="核销状态">
-          <template  #default="{ row }">
-            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
-        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
-        <el-table-column fixed="right" prop="createTime" label="说明" width="100">
-          <template  #default="{ row }">
-            {{row.productImpType==1?'团长':'团员'}}
-          </template>
-          
-        </el-table-column>
-      </el-table>
+      <member-list :table-data="tableData"
+         v-if="reportForm.reportId === 2"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></member-list>
     </template>        
     <template v-else-if="reportForm.reportId === 3">
-      <el-table
-        :data="tableData"
-        border
-        style="width: 100%"
-        v-loading="loading"
-          key="table3"
-      >
-        <el-table-column
-          type="index"
-          label="序号"
-          width="60"
-          align="center"
-        />
-        
-        <!-- 拼团编号-->
-        <el-table-column prop="orderNo" label="拼团编号" width="170px"></el-table-column>
-        <!--      用户手机号-->
-        <el-table-column prop="userPhone" label="用户手机号">
-          <template  #default="{ row }">           
-            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
-          </template>
-        </el-table-column>
-        <!--      开团信息-->
-        <el-table-column prop="teamLeader" label="开团信息" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
-          </template>
-        </el-table-column>
-        <!--      助力信息-->
-        <el-table-column prop="teamMember" label="助力信息">
-          <template  #default="{ row }">
-            <div v-if="row.userHelpName">姓名：{{row.userHelpName}}</div>
-          </template>
-        </el-table-column>
-        <!--      代理人-->
-        <el-table-column  label="代理人" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
-            <div v-if="row.agent.agentName">姓名：{{row.agent.agentName}}</div>
-            <div v-if="row.agent.agentPhone">手机号：{{row.agent.agentPhone}}</div>
-            <div v-if="row.agent.agentOrg">机构：{{row.agent.agentOrg}}</div>
-          </template>
-        </el-table-column>
-        <!--      状态-->
-        <el-table-column prop="status" label="状态">
-          <template  #default="{ row }">
-            {{row.status === 1 ? '进行中' : row.status === 2 ? '拼团失败' : '拼团成功'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="productImpType" label="奖品类型">
-          <template  #default="{ row }">
-            {{row.productImpType == "1" ? '开团' : '助力'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="productName" label="奖品名称"></el-table-column>
-        <el-table-column prop="createTime" label="订单时间"></el-table-column>
-        <el-table-column prop="writeOffStatus" label="核销状态">
-          <template  #default="{ row }">
-            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
-        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
-      </el-table>
-    </template>      
-    <!-- 分页 -->
-    <el-pagination
-      class="pagination"
-      v-model:current-page="pagination.pageIndex"
-      v-model:page-size="pagination.pageSize"
-      :total="pagination.total"
-      :page-sizes="[10, 20, 50, 100]"
-      layout="total, sizes, prev, pager, next, jumper"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    />
+       <product-list :table-data="tableData"
+         v-if="reportForm.reportId === 3"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></product-list>
+    </template>   
+   <template v-else-if="reportForm.reportId === 4">
+       <agent-detail :table-data="tableData"
+         v-if="reportForm.reportId === 4"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></agent-detail>
+    </template>   
+    <template v-else-if="reportForm.reportId === 5">
+       <xbox-detail :table-data="tableData"
+         v-if="reportForm.reportId === 5"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></xbox-detail>
+    </template>    
+    <template v-else-if="reportForm.reportId === 6">
+       <xbox-summary :table-data="tableData"
+         v-if="reportForm.reportId === 6"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></xbox-summary>
+    </template>     
     </el-card>
     <!-- 导出记录弹窗 -->
     <el-dialog
@@ -410,25 +230,17 @@
           </template>
         </el-table-column>
       </el-table>
-    </el-dialog>
-     <el-dialog title="拼团情况"  v-model="dialogVisible" >
-      <el-table :data="dialogTableData" style="width: 100%" :key="num">
-        <el-table-column type="index" label="序号"></el-table-column>
-        <el-table-column prop="orderNo" label="拼团编号"></el-table-column>
-        <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
-        <el-table-column prop="status" label="拼团结果">
-          <template #default="{ row }">
-            {{row.status==1?'进行中':row.status==2?'拼团失败 ':'拼团成功'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="创建时间">
-        </el-table-column>
-      </el-table>
-    </el-dialog>
+    </el-dialog>     
   </div>
 </template>
 
 <script setup>
+import leaderList from './components/groupBuy/leaderList.vue';
+import memberList from './components/groupBuy/memberList.vue';
+import productList from './components/groupBuy/productList.vue';
+import agentDetail from './components/xbox/agentDetail.vue';
+import xboxDetail from './components/xbox/xboxDetail.vue';
+import xboxSummary from './components/xbox/xboxSummary.vue';
 import { ref, reactive, computed,onMounted} from 'vue'
 import { ElMessage,ElCascader  } from 'element-plus'
 ///imp/activity/leader/list?impId=32&pageIndex=1&pageSize=10
@@ -625,6 +437,12 @@ const handleSearch = () => {
   pagination.pageIndex = 1
   fetchTableData()
 }
+// 分页变化处理
+const handlePageChange = ({ page, pageSize }) => {
+  pagination.pageIndex = page;
+  pagination.pageSize = pageSize;
+  fetchTableData()
+};
 
 // 重置搜索
 const resetSearch = () => {
