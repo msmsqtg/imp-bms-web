@@ -13,20 +13,23 @@
           width="60"
           align="center"
         />
-        <el-table-column prop="userName" label="上级机构"></el-table-column>
-        <el-table-column prop="userName" label="支公司"></el-table-column>
-        <el-table-column prop="code" label="业务员姓名"></el-table-column>
-        <el-table-column prop="code" label="业务员工号"></el-table-column>
-        <el-table-column prop="code" label="领取人名称"></el-table-column>
-        <el-table-column prop="org" label="微信认证电话" ></el-table-column>
-        <el-table-column prop="phone" label="领取人电话"></el-table-column>
-        <el-table-column prop="islogin" label="是否开奖"></el-table-column>
-        <el-table-column prop="writeOffTime" label="自定义奖项名称"></el-table-column>
-        <el-table-column prop="writeOffTime" label="奖品名称"></el-table-column>
-        <el-table-column prop="writeOffTime" label="抽奖时间"></el-table-column>
-        <el-table-column prop="writeOffTime" label="签到核销状态"></el-table-column>
-        <el-table-column prop="writeOffTime" label="签到核销时间"></el-table-column>
-        <el-table-column prop="writeOffPhone" label="签到核销人"></el-table-column>
+        <el-table-column prop="parentOrg" label="上级机构"></el-table-column>
+        <el-table-column prop="orgName" label="支公司"></el-table-column>
+        <el-table-column prop="agentName" label="业务员姓名"></el-table-column>
+        <el-table-column prop="agentCode" label="业务员工号"></el-table-column>
+        <el-table-column prop="orderUserName" label="领取人名称"></el-table-column>
+        <el-table-column prop="userPhone" label="微信认证电话" ></el-table-column>
+        <el-table-column prop="orderUserPhone" label="领取人电话"></el-table-column>
+        <el-table-column prop="customerProductName" label="自定义奖项名称"></el-table-column>
+        <el-table-column prop="productName" label="奖品名称"></el-table-column>
+        <el-table-column prop="createTime" label="抽奖时间"></el-table-column>
+        <el-table-column prop="signStatus" label="签到核销状态">
+          <template  #default="{ row }">
+           {{row.signStatus == "0" ? '待核销' : row.signStatus == "1" ? '已核销' : row.signStatus == "3" ?'无需核销':''}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="signTime" label="签到核销时间"></el-table-column>
+        <el-table-column prop="signAdminName" label="签到核销人"></el-table-column>
       </el-table>
      <!-- 分页 -->
     <el-pagination

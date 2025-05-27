@@ -13,13 +13,17 @@
           width="60"
           align="center"
         />
-        <el-table-column prop="userName" label="姓名"></el-table-column>
-        <el-table-column prop="code" label="工号"></el-table-column>
-        <el-table-column prop="org" label="机构名称" ></el-table-column>
-        <el-table-column prop="phone" label="手机号码"></el-table-column>
-        <el-table-column prop="islogin" label="是否登录"></el-table-column>
-        <el-table-column prop="writeOffTime" label="分享成功次数"></el-table-column>
-        <el-table-column prop="writeOffPhone" label="邀约客户数量（开奖）"></el-table-column>
+        <el-table-column prop="name" label="姓名"></el-table-column>
+        <el-table-column prop="numericWord" label="工号"></el-table-column>
+        <el-table-column prop="organizationName" label="机构名称" ></el-table-column>
+        <el-table-column prop="phoneNo" label="手机号码"></el-table-column>
+        <el-table-column prop="loginStatus" label="是否登录">
+          <template  #default="{ row }">
+            {{row.loginStatus == true ? '已登录' : '未登录'}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="shareNum" label="分享成功次数"></el-table-column>
+        <el-table-column prop="invitationNum" label="邀约客户数量（开奖）"></el-table-column>
       </el-table>
      <!-- 分页 -->
     <el-pagination

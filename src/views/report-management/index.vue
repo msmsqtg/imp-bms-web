@@ -58,7 +58,7 @@
             clearable></el-cascader>
         </el-form-item>
         
-        <el-form-item label="用户手机号" key="phone">
+        <el-form-item label="用户手机号" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3">
           <el-input
             v-model="searchForm.phone"
             placeholder="请输入手机号"
@@ -67,7 +67,7 @@
           />
         </el-form-item>
         
-        <el-form-item label="代理人工号" key="agentCode">
+        <el-form-item label="代理人工号" key="agentCode" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3">
           <el-input
             v-model="searchForm.agentCode"
             placeholder="请输入工号"
@@ -115,7 +115,7 @@
             <el-option label="团员" :value="2"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="组团编号" key="orderNo">
+        <el-form-item label="组团编号" key="orderNo" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3">
           <el-input
             v-model="searchForm.orderNo"
             placeholder="请输入组团编号"
@@ -126,7 +126,7 @@
         <el-form-item label="奖品名称" v-if="reportForm.reportId==3" prop="productName" key="productName">
           <el-input v-model.trim="searchForm.productName" placeholder="请输入奖品名称"></el-input>
         </el-form-item>
-        <el-form-item label="订单时间">         
+        <el-form-item label="订单时间"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5">         
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -141,7 +141,7 @@
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="resetSearch">重置</el-button>
           <el-button type="success" @click="handleExport">导出</el-button>
-          <!-- <el-button type="info" @click="showExportRecords">导出记录</el-button> -->
+          <el-button type="info" @click="showExportRecords" v-if="reportForm.reportId === 4 || reportForm.reportId === 5 || reportForm.reportId === 6">导出记录</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -204,16 +204,16 @@
     >
       <el-table :data="exportRecords" border>
         <el-table-column prop="fileName" label="文件名" width="200" />
-        <el-table-column prop="reportId" label="报表类型" width="120">
+        <el-table-column prop="reportType" label="报表类型" width="120">
           <template #default="{ row }">
-            {{ getReportTypeLabel(row.reportId) }}
+            {{ getReportTypeLabel(row.reportType) }}
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="导出时间" width="180" />
+        <el-table-column prop="createdTime" label="导出时间" width="180" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'success' ? 'success' : 'danger'">
-              {{ row.status === 'success' ? '成功' : '失败' }}
+            <el-tag :type="row.status === 2 ? 'success' : 'danger'">
+              {{ row.status === 2 ? '成功' : '处理中' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -221,8 +221,7 @@
           <template #default="{ row }">
             <el-button
               type="text"
-              size="small"
-              :disabled="row.status !== 'success'"
+              size="small"             
               @click="downloadExportFile(row)"
             >
               下载
@@ -391,24 +390,7 @@ const pagination = reactive({
 
 // 导出记录相关
 const exportRecordVisible = ref(false)
-const exportRecords = ref([
-  {
-    id: '1',
-    fileName: '拼团列表_20231115.xlsx',
-    reportType: 'groupList',
-    createTime: '2023-11-15 14:30:22',
-    status: 'success',
-    filePath: '/exports/groupList_20231115.xlsx'
-  },
-  {
-    id: '2',
-    fileName: '奖品列表_20231110.xlsx',
-    reportType: 'prizeList',
-    createTime: '2023-11-10 10:15:33',
-    status: 'success',
-    filePath: '/exports/prizeList_20231110.xlsx'
-  }
-])
+const exportRecords = ref([])
 
 // 获取状态标签
 const getStatusLabel = (status) => {
@@ -417,8 +399,8 @@ const getStatusLabel = (status) => {
 }
 // 获取报表类型标签
 const getReportTypeLabel = (type) => {
-  const item = reportTypeOptions.value.find(item => item.value === type)
-  return item ? item.label : type
+  const item = reportTypeOptions.value.find(item => item.reportId == type)
+  return item ? item.reportName : type
 }
 
 // 报表类型变化
@@ -502,16 +484,37 @@ const fetchTableData = () => {
   filteredActivities.value.map(item=>{
     if(item.roleImpId==reportForm.roleImpId) impId = item.impId
   })
-  loading.value = true
-  if(reportForm.reportId==1){
-    //拼团记录
+  loading.value = true;
+  let link = "";
+  switch(reportForm.reportId){
+    case 1:
+      link ='/imp/activity/leader/list'
+    break;
+    case 2:
+      link ='/imp/activity/member/list'
+    break;
+    case 3:
+      link ='/imp/activity/product/list'
+    break;
+    case 4:
+      link ='/imp/xbox/agent/list'
+    break;
+    case 5:
+      link ='/imp/xbox/order/list'
+    break;
+    case 6:
+      link ='/imp/xbox/org/list'
+    break;
+  }
     baseService
-    .get("/imp/activity/leader/list", {
+    .get(link, {
       impId,
+      activityId:impId,
       roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
-      orgIds:''
+      orgIds:'',
+      export:false
     })
     .then((res) => {
       state.loading = false;
@@ -531,68 +534,7 @@ const fetchTableData = () => {
       })
       .catch(() => {
         state.loading = false;     
-      });
-  }
-  if(reportForm.reportId==2){
-    //拼团日志
-    baseService
-    .get("/imp/activity/member/list", {
-      impId,
-      roleImpId:reportForm.roleImpId,
-      ...pagination,
-      ...searchForm,
-      orgIds:''
-    })
-    .then((res) => {
-      state.loading = false;
-      console.log("resres",res)
-      if (res.code == 200) {
-        loading.value = false;
-        if(res.data.data){
-          tableData.value = res.data.data || [];
-          pagination.total = Number(res.data.total);
-        }else{
-          tableData.value = []
-          pagination.total = 0
-        }
-      } else {
-        ElMessage.error(res.msg);
-      }
-      })
-      .catch(() => {
-        state.loading = false;     
-      });
-  }
-  if(reportForm.reportId==3){
-    //拼团奖品
-    baseService
-    .get("/imp/activity/product/list", {
-      impId,
-      roleImpId:reportForm.roleImpId,
-      ...pagination,
-      ...searchForm,
-      orgIds:''
-    })
-    .then((res) => {
-      state.loading = false;
-      console.log("resres",res)
-      if (res.code == 200) {
-        loading.value = false;
-        if(res.data.data){
-          tableData.value = res.data.data || [];
-          pagination.total = Number(res.data.total);
-        }else{
-          tableData.value = []
-          pagination.total = 0
-        }
-      } else {
-        ElMessage.error(res.msg);
-      }
-      })
-      .catch(() => {
-        state.loading = false;     
-      });
-  }
+      }); 
 }
 
 // 分页大小变化
@@ -718,13 +660,49 @@ const handleExport = () => {
     },responseType: 'blob'})
     .then((res) => {
        const content = res.data
-       exportExcel(content,'奖品列表')  
-      
+       exportExcel(content,'奖品列表')        
       })
       .catch(() => {
         state.loading = false;     
       });
   }
+  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6){
+    let link = "";
+    switch(reportForm.reportId){   
+      case 4:
+        link ='/imp/xbox/agent/list'
+      break;
+      case 5:
+        link ='/imp/xbox/order/list'
+      break;
+      case 6:
+        link ='/imp/xbox/org/list'
+      break;
+    }
+    baseService
+    .get(link, {
+      impId,
+      activityId:impId,
+      roleImpId:reportForm.roleImpId,
+      ...pagination,      
+      ...searchForm,
+      orgIds:'',
+      export:true
+    })
+    .then((res) => {
+      state.loading = false;
+      console.log("resres",res)
+      if (res.code == 200) {
+        loading.value = false;
+        ElMessage.success('导出任务已提交，请稍后在导出记录中查看');
+      } else {
+        ElMessage.error(res.msg);
+      }
+    })
+    .catch(() => {
+      state.loading = false;     
+    });
+  } 
   // ElMessage.success('导出任务已提交，请稍后在导出记录中查看')
   
   // // 模拟添加到导出记录
@@ -766,18 +744,52 @@ const exportExcel = (content,fileName) =>{
 }
 // 显示导出记录
 const showExportRecords = () => {
-   if (!reportForm.reportType) {
+   if (!reportForm.reportId) {
     ElMessage.warning('请先选择报表类型')
     return
   }
-  exportRecordVisible.value = true
+  let impId =0;
+  filteredActivities.value.map(item=>{
+    if(item.roleImpId==reportForm.roleImpId) impId = item.impId
+  })
+  baseService
+  .get('/imp/xbox/download/list', {
+    fileType:4,
+    reportType:reportForm.reportId,
+    impId:impId,
+    pageIndex:1,
+    pageSize:50
+  })
+  .then((res) => {
+    state.loading = false;
+    console.log("resres",res)
+    if (res.code == 200) {
+      loading.value = false;
+      if(res.data.data){
+        exportRecordVisible.value = true
+        exportRecords.value = res.data.data || [];       
+      }else{
+        exportRecords.value = []
+        pagination.total = 0
+      }
+    } else {
+      ElMessage.error(res.msg);
+    }
+    })
+    .catch(() => {
+      state.loading = false;     
+    }); 
+  
 }
 
 // 下载导出文件
 const downloadExportFile = (record) => {
-  ElMessage.success(`开始下载: ${record.fileName}`)
-  // 实际项目中这里应该是文件下载逻辑
-  console.log('下载文件:', record.filePath)
+  let element = document.createElement('a');   
+  element.setAttribute('href',record.downloadUrl)
+  element.setAttribute('download', record.fileName) ;      
+  element.setAttribute('target', '_blank') ;         
+  element.style.display = 'none'
+  element.click();  
 }
 
 // 查看详情

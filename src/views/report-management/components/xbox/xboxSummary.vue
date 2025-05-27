@@ -13,14 +13,16 @@
           width="60"
           align="center"
         />
-        <el-table-column prop="userName" label="上级机构"></el-table-column>
-        <el-table-column prop="userName" label="支公司"></el-table-column>
-        <el-table-column prop="code" label="参与业务员数"></el-table-column>
-        <el-table-column prop="code" label="报名客户数"></el-table-column>
-        <el-table-column prop="code" label="谢谢惠顾"></el-table-column>
-        <el-table-column prop="org" label="奖项领奖数据" ></el-table-column>
-        <el-table-column prop="phone" label="签到核销数"></el-table-column>
-        <el-table-column prop="islogin" label="盲盒中奖数"></el-table-column>
+        <el-table-column prop="parentOrg" label="上级机构"></el-table-column>
+        <el-table-column prop="orgName" label="支公司"></el-table-column>
+        <el-table-column prop="agentNum" label="参与业务员数"></el-table-column>
+        <el-table-column prop="xboxUserNum" label="报名客户数"></el-table-column>
+        <el-table-column prop="productZero" label="谢谢惠顾"></el-table-column>
+        <el-table-column  v-for="item in productData" :key="item.value" :label="item.label" :prop="item.value">
+        </el-table-column>        
+        <el-table-column prop="successOrderNum" label="中奖且填写资料客户"></el-table-column>
+        <el-table-column prop="signNum" label="核销数"></el-table-column>       
+        <el-table-column prop="orderNum" label="盲盒中奖数"></el-table-column>
       </el-table>
      <!-- 分页 -->
     <el-pagination
@@ -37,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref, defineProps, defineEmits,onMounted } from 'vue';
 
 const props = defineProps({
   tableData: {
@@ -57,6 +59,11 @@ const props = defineProps({
     default: 0
   }
 });
+onMounted(()=>{
+  getList();
+})
+const productData = ref([])
+
 const emit = defineEmits(['page-change']);
 
 const currentPage = ref(1);
@@ -81,6 +88,11 @@ const emitPageChange = () => {
     pageSize: pageSize.value
   });
 };
+const getList = () =>{
+  setTimeout(()=>{
+      productData.value=[{label:'奖项一',value:'productOne'},{label:'奖项二',value:'productTwo'},{label:'奖项三',value:'productThree'},{label:'奖项四',value:'productFour'},{label:'奖项五',value:'productFive'},{label:'奖项六',value:'productSix'},{label:'奖项七',value:'productSeven'},{label:'奖项八',value:'productEight'},{label:'奖项九',value:'productNine'},{label:'奖项十',value:'productTen'}]
+  },1000)
+}
 </script>
 
 <style scoped>
