@@ -21,6 +21,8 @@
         <el-table-column prop="userPhone" label="微信认证电话" ></el-table-column>
         <el-table-column prop="orderUserPhone" label="领取人电话"></el-table-column>
         <el-table-column prop="customerProductName" label="自定义奖项名称"></el-table-column>
+        <el-table-column prop="birthday" label="生日"></el-table-column>
+        <el-table-column prop="ci ty" label="城市"></el-table-column>
         <el-table-column prop="productName" label="奖品名称"></el-table-column>
         <el-table-column prop="createTime" label="抽奖时间"></el-table-column>
         <el-table-column prop="signStatus" label="签到核销状态">
