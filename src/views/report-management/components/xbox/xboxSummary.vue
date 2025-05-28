@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div>  
      <el-table
         :data="tableData"
         border
@@ -17,7 +17,6 @@
         <el-table-column prop="orgName" label="支公司"></el-table-column>
         <el-table-column prop="agentNum" label="参与业务员数"></el-table-column>
         <el-table-column prop="xboxUserNum" label="报名客户数"></el-table-column>
-        <el-table-column prop="productZero" label="谢谢惠顾"></el-table-column>
         <el-table-column  v-for="item in productData" :key="item.value" :label="item.label" :prop="item.value">
         </el-table-column>        
         <el-table-column prop="successOrderNum" label="中奖且填写资料客户"></el-table-column>
@@ -57,12 +56,16 @@ const props = defineProps({
   total: {
     type: Number,
     default: 0
+  },
+  productData:{
+    type: Array,
+    default: () => []
   }
 });
 onMounted(()=>{
-  getList();
+  console.log(props.productData)
 })
-const productData = ref([])
+//const productData = ref([])
 
 const emit = defineEmits(['page-change']);
 
@@ -88,11 +91,11 @@ const emitPageChange = () => {
     pageSize: pageSize.value
   });
 };
-const getList = () =>{
-  setTimeout(()=>{
-      productData.value=[{label:'奖项一',value:'productOne'},{label:'奖项二',value:'productTwo'},{label:'奖项三',value:'productThree'},{label:'奖项四',value:'productFour'},{label:'奖项五',value:'productFive'},{label:'奖项六',value:'productSix'},{label:'奖项七',value:'productSeven'},{label:'奖项八',value:'productEight'},{label:'奖项九',value:'productNine'},{label:'奖项十',value:'productTen'}]
-  },1000)
-}
+// const getList = () =>{
+//   setTimeout(()=>{
+//       productData.value=[{label:'奖项一',value:'productOne'},{label:'奖项二',value:'productTwo'},{label:'奖项三',value:'productThree'},{label:'奖项四',value:'productFour'},{label:'奖项五',value:'productFive'},{label:'奖项六',value:'productSix'},{label:'奖项七',value:'productSeven'},{label:'奖项八',value:'productEight'},{label:'奖项九',value:'productNine'},{label:'奖项十',value:'productTen'}]
+//   },1000)
+// }
 </script>
 
 <style scoped>

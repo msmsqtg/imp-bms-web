@@ -192,6 +192,7 @@
          v-if="reportForm.reportId === 6"
         :loading="loading"
         :total="pagination.total"
+        :productData="productData"
         @page-change="handlePageChange"
       ></xbox-summary>
     </template>     
@@ -258,7 +259,7 @@ const props =  reactive({
   multiple: true
 })
 
-
+const productData = ref([])
 const state = reactive({
   loading: false
 });
@@ -506,6 +507,9 @@ const fetchTableData = () => {
       link ='/imp/xbox/org/list'
     break;
   }
+  if(reportForm.reportId==6){
+    getProductData(impId)
+  }
     baseService
     .get(link, {
       impId,
@@ -536,7 +540,23 @@ const fetchTableData = () => {
         state.loading = false;     
       }); 
 }
-
+const getProductData = (activityId) =>{
+  baseService
+    .get('/imp/xbox/list', {
+      activityId,      
+    })
+    .then((res) => {
+      if (res.code == 200) {
+        if(res.data){
+          productData.value = res.data || [];
+        }else{
+          productData.value = []
+        }
+      } else {
+        ElMessage.error(res.msg);
+      }
+  })
+}
 // 分页大小变化
 const handleSizeChange = (val) => {
   pagination.pageSize = val
