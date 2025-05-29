@@ -49,24 +49,7 @@
     <!-- 搜索条件 -->
     <el-card class="search-box">
       <el-form :inline="true" :model="searchForm">
-        <el-form-item label="机构" key="orgIds">
-          <!-- <el-select
-            v-model="searchForm.orgIds"
-            placeholder="请选择机构"
-            clearable
-            filterable
-            multiple
-            collapse-tags
-            :filter-method="filterOrg"
-            style="width: 150px"
-          >
-            <el-option
-              v-for="item in filteredOrgs"
-              :key="item.orgId"
-              :label="item.orgName"
-              :value="item.orgId"
-            />
-          </el-select> -->
+        <el-form-item label="机构" key="orgIds">          
           <el-cascader
             v-model="searchForm.orgIds"          
             :options="orgOptions"
@@ -75,7 +58,7 @@
             clearable></el-cascader>
         </el-form-item>
         
-        <el-form-item label="用户手机号" key="phone">
+        <el-form-item label="用户手机号" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3">
           <el-input
             v-model="searchForm.phone"
             placeholder="请输入手机号"
@@ -84,7 +67,7 @@
           />
         </el-form-item>
         
-        <el-form-item label="代理人工号" key="agentCode">
+        <el-form-item label="代理人工号" key="agentCode" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3">
           <el-input
             v-model="searchForm.agentCode"
             placeholder="请输入工号"
@@ -132,7 +115,7 @@
             <el-option label="团员" :value="2"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="组团编号" key="orderNo">
+        <el-form-item label="组团编号" key="orderNo" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3">
           <el-input
             v-model="searchForm.orderNo"
             placeholder="请输入组团编号"
@@ -143,7 +126,7 @@
         <el-form-item label="奖品名称" v-if="reportForm.reportId==3" prop="productName" key="productName">
           <el-input v-model.trim="searchForm.productName" placeholder="请输入奖品名称"></el-input>
         </el-form-item>
-        <el-form-item label="订单时间">         
+        <el-form-item label="订单时间"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5">         
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -158,223 +141,61 @@
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="resetSearch">重置</el-button>
           <el-button type="success" @click="handleExport">导出</el-button>
-          <!-- <el-button type="info" @click="showExportRecords">导出记录</el-button> -->
+          <el-button type="info" @click="showExportRecords" v-if="reportForm.reportId === 4 || reportForm.reportId === 5 || reportForm.reportId === 6">导出记录</el-button>
         </el-form-item>
       </el-form>
     </el-card>
     <el-card class="table-box" v-if="reportForm.reportId">
     <!-- 表格区域 -->
     <template v-if="reportForm.reportId === 1">    
-      <el-table
-        :data="tableData"
-        border
-        style="width: 100%"
-        v-loading="loading"
-        key="table1"
-      >
-         <el-table-column prop="orderNo" label="拼团编号"></el-table-column>
-         <el-table-column prop="userPhone" label="用户手机号">
-          <template  #default="{ row }">           
-            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
-          </template>
-        </el-table-column>
-        <!--      开团信息-->
-        <el-table-column prop="teamLeader" label="开团信息" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="userPhone" label="代理人" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.agent">
-              <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
-              <div v-if="row.agent.agentName">姓名：{{row.agent.agentName}}</div>
-              <div v-if="row.agent.agentPhone">手机号：{{row.agent.agentPhone}}</div>
-              <div v-if="row.agent.agentOrg">机构：{{row.agent.agentOrg}}</div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="userNickname" label="用户昵称"></el-table-column>
-
-        <el-table-column prop="status" label="状态">
-          <template  #default="{ row }">
-            {{row.status==1?'进行中':row.status==2?'拼团失败 ':'拼团成功'}}
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="status" label="奖品类型">
-          <template  #default="{ row }">
-            {{row.productImpType === "1" ? '开团' : '助力'}}
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="productName" label="奖品名称">
-        </el-table-column>
-
-        <el-table-column prop="createTime" label="订单时间"></el-table-column>
-        <el-table-column prop="writeOffStatus" label="核销状态">
-          <template  #default="{ row }">
-            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
-        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
-        <el-table-column fixed="right" label="操作" width="100">
-          <template  #default="{ row }">
-            <el-button @click="handleClick(row)" type="text" >拼团记录</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <leader-list :table-data="tableData"
+        v-if="reportForm.reportId === 1"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></leader-list>
     </template>        
     <template v-else-if="reportForm.reportId === 2">
-      <el-table
-          :data="tableData"
-          border
-          style="width: 100%"
-          v-loading="loading"
-          key="table2"
-        >
-        <el-table-column prop="orderNo" label="拼团编号" width="170px"></el-table-column>
-         <el-table-column prop="userPhone" label="用户手机号">
-          <template  #default="{ row }">           
-            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
-          </template>
-        </el-table-column>
-        <!--      开团信息-->
-        <el-table-column prop="teamLeader" label="开团信息" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
-          </template>
-        </el-table-column>
-        <!-- 助力信息 -->
-        <el-table-column prop="teamMember" label="助力信息">
-          <template #default="{ row }">
-            <div v-if="row.userHelpName">姓名：{{row.userHelpName}}</div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="userPhone" label="代理人" width="200">
-          <template #default="{ row }">
-            <div v-if="row.agent">
-              <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
-              <div v-if="row.agent.agentName">姓名：{{row.agent.agentName}}</div>
-              <div v-if="row.agent.agentPhone">手机号：{{row.agent.agentPhone}}</div>
-              <div v-if="row.agent.agentOrg">机构：{{row.agent.agentOrg}}</div>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="productName" label="拼团奖品名称"></el-table-column>
-        <el-table-column prop="price" label="拼团商品原价">
-          <template  #default="{ row }">
-            <div v-if="row.price"> {{(row.price / 100).toFixed(2)}}元</div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="teamPrice" label="拼团商品成团价">
-          <template  #default="{ row }">
-            <div v-if="row.teamPrice"> {{(row.teamPrice / 100).toFixed(2)}}元</div>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="status" label="状态">
-          <template  #default="{ row }">
-            {{row.status==1?'进行中':row.status==2?'拼团失败 ':'拼团成功'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="订单时间"></el-table-column>
-        <el-table-column prop="writeOffStatus" label="核销状态">
-          <template  #default="{ row }">
-            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
-        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
-        <el-table-column fixed="right" prop="createTime" label="说明" width="100">
-          <template  #default="{ row }">
-            {{row.productImpType==1?'团长':'团员'}}
-          </template>
-          
-        </el-table-column>
-      </el-table>
+      <member-list :table-data="tableData"
+         v-if="reportForm.reportId === 2"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></member-list>
     </template>        
     <template v-else-if="reportForm.reportId === 3">
-      <el-table
-        :data="tableData"
-        border
-        style="width: 100%"
-        v-loading="loading"
-          key="table3"
-      >
-        <el-table-column
-          type="index"
-          label="序号"
-          width="60"
-          align="center"
-        />
-        
-        <!-- 拼团编号-->
-        <el-table-column prop="orderNo" label="拼团编号" width="170px"></el-table-column>
-        <!--      用户手机号-->
-        <el-table-column prop="userPhone" label="用户手机号">
-          <template  #default="{ row }">           
-            <div v-if="row.userPhone || row.userHelpPhone">{{row.productImpType === "1"?row.userPhone:row.userHelpPhone}}</div>
-          </template>
-        </el-table-column>
-        <!--      开团信息-->
-        <el-table-column prop="teamLeader" label="开团信息" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.userNickname">姓名：{{row.userNickname}}</div>
-            <div v-if="row.userPhone">手机号：{{row.userPhone}}</div>
-          </template>
-        </el-table-column>
-        <!--      助力信息-->
-        <el-table-column prop="teamMember" label="助力信息">
-          <template  #default="{ row }">
-            <div v-if="row.userHelpName">姓名：{{row.userHelpName}}</div>
-          </template>
-        </el-table-column>
-        <!--      代理人-->
-        <el-table-column  label="代理人" width="200">
-          <template  #default="{ row }">
-            <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
-            <div v-if="row.agent.agentName">姓名：{{row.agent.agentName}}</div>
-            <div v-if="row.agent.agentPhone">手机号：{{row.agent.agentPhone}}</div>
-            <div v-if="row.agent.agentOrg">机构：{{row.agent.agentOrg}}</div>
-          </template>
-        </el-table-column>
-        <!--      状态-->
-        <el-table-column prop="status" label="状态">
-          <template  #default="{ row }">
-            {{row.status === 1 ? '进行中' : row.status === 2 ? '拼团失败' : '拼团成功'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="productImpType" label="奖品类型">
-          <template  #default="{ row }">
-            {{row.productImpType == "1" ? '开团' : '助力'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="productName" label="奖品名称"></el-table-column>
-        <el-table-column prop="createTime" label="订单时间"></el-table-column>
-        <el-table-column prop="writeOffStatus" label="核销状态">
-          <template  #default="{ row }">
-            {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
-        <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>
-      </el-table>
-    </template>      
-    <!-- 分页 -->
-    <el-pagination
-      class="pagination"
-      v-model:current-page="pagination.pageIndex"
-      v-model:page-size="pagination.pageSize"
-      :total="pagination.total"
-      :page-sizes="[10, 20, 50, 100]"
-      layout="total, sizes, prev, pager, next, jumper"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    />
+       <product-list :table-data="tableData"
+         v-if="reportForm.reportId === 3"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></product-list>
+    </template>   
+   <template v-else-if="reportForm.reportId === 4">
+       <agent-detail :table-data="tableData"
+         v-if="reportForm.reportId === 4"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></agent-detail>
+    </template>   
+    <template v-else-if="reportForm.reportId === 5">
+       <xbox-detail :table-data="tableData"
+         v-if="reportForm.reportId === 5"
+        :loading="loading"
+        :total="pagination.total"
+        @page-change="handlePageChange"
+      ></xbox-detail>
+    </template>    
+    <template v-else-if="reportForm.reportId === 6">
+       <xbox-summary :table-data="tableData"
+         v-if="reportForm.reportId === 6"
+        :loading="loading"
+        :total="pagination.total"
+        :productData="productData"
+        @page-change="handlePageChange"
+      ></xbox-summary>
+    </template>     
     </el-card>
     <!-- 导出记录弹窗 -->
     <el-dialog
@@ -384,16 +205,16 @@
     >
       <el-table :data="exportRecords" border>
         <el-table-column prop="fileName" label="文件名" width="200" />
-        <el-table-column prop="reportId" label="报表类型" width="120">
+        <el-table-column prop="reportType" label="报表类型" width="120">
           <template #default="{ row }">
-            {{ getReportTypeLabel(row.reportId) }}
+            {{ getReportTypeLabel(row.reportType) }}
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="导出时间" width="180" />
+        <el-table-column prop="createdTime" label="导出时间" width="180" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'success' ? 'success' : 'danger'">
-              {{ row.status === 'success' ? '成功' : '失败' }}
+            <el-tag :type="row.status === 2 ? 'success' : 'danger'">
+              {{ row.status === 2 ? '成功' : '处理中' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -401,8 +222,7 @@
           <template #default="{ row }">
             <el-button
               type="text"
-              size="small"
-              :disabled="row.status !== 'success'"
+              size="small"             
               @click="downloadExportFile(row)"
             >
               下载
@@ -410,25 +230,17 @@
           </template>
         </el-table-column>
       </el-table>
-    </el-dialog>
-     <el-dialog title="拼团情况"  v-model="dialogVisible" >
-      <el-table :data="dialogTableData" style="width: 100%" :key="num">
-        <el-table-column type="index" label="序号"></el-table-column>
-        <el-table-column prop="orderNo" label="拼团编号"></el-table-column>
-        <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
-        <el-table-column prop="status" label="拼团结果">
-          <template #default="{ row }">
-            {{row.status==1?'进行中':row.status==2?'拼团失败 ':'拼团成功'}}
-          </template>
-        </el-table-column>
-        <el-table-column prop="createTime" label="创建时间">
-        </el-table-column>
-      </el-table>
-    </el-dialog>
+    </el-dialog>     
   </div>
 </template>
 
 <script setup>
+import leaderList from './components/groupBuy/leaderList.vue';
+import memberList from './components/groupBuy/memberList.vue';
+import productList from './components/groupBuy/productList.vue';
+import agentDetail from './components/xbox/agentDetail.vue';
+import xboxDetail from './components/xbox/xboxDetail.vue';
+import xboxSummary from './components/xbox/xboxSummary.vue';
 import { ref, reactive, computed,onMounted} from 'vue'
 import { ElMessage,ElCascader  } from 'element-plus'
 ///imp/activity/leader/list?impId=32&pageIndex=1&pageSize=10
@@ -447,7 +259,7 @@ const props =  reactive({
   multiple: true
 })
 
-
+const productData = ref([])
 const state = reactive({
   loading: false
 });
@@ -579,24 +391,7 @@ const pagination = reactive({
 
 // 导出记录相关
 const exportRecordVisible = ref(false)
-const exportRecords = ref([
-  {
-    id: '1',
-    fileName: '拼团列表_20231115.xlsx',
-    reportType: 'groupList',
-    createTime: '2023-11-15 14:30:22',
-    status: 'success',
-    filePath: '/exports/groupList_20231115.xlsx'
-  },
-  {
-    id: '2',
-    fileName: '奖品列表_20231110.xlsx',
-    reportType: 'prizeList',
-    createTime: '2023-11-10 10:15:33',
-    status: 'success',
-    filePath: '/exports/prizeList_20231110.xlsx'
-  }
-])
+const exportRecords = ref([])
 
 // 获取状态标签
 const getStatusLabel = (status) => {
@@ -605,8 +400,8 @@ const getStatusLabel = (status) => {
 }
 // 获取报表类型标签
 const getReportTypeLabel = (type) => {
-  const item = reportTypeOptions.value.find(item => item.value === type)
-  return item ? item.label : type
+  const item = reportTypeOptions.value.find(item => item.reportId == type)
+  return item ? item.reportName : type
 }
 
 // 报表类型变化
@@ -625,6 +420,12 @@ const handleSearch = () => {
   pagination.pageIndex = 1
   fetchTableData()
 }
+// 分页变化处理
+const handlePageChange = ({ page, pageSize }) => {
+  pagination.pageIndex = page;
+  pagination.pageSize = pageSize;
+  fetchTableData()
+};
 
 // 重置搜索
 const resetSearch = () => {
@@ -684,16 +485,40 @@ const fetchTableData = () => {
   filteredActivities.value.map(item=>{
     if(item.roleImpId==reportForm.roleImpId) impId = item.impId
   })
-  loading.value = true
-  if(reportForm.reportId==1){
-    //拼团记录
+  loading.value = true;
+  let link = "";
+  switch(reportForm.reportId){
+    case 1:
+      link ='/imp/activity/leader/list'
+    break;
+    case 2:
+      link ='/imp/activity/member/list'
+    break;
+    case 3:
+      link ='/imp/activity/product/list'
+    break;
+    case 4:
+      link ='/imp/xbox/agent/list'
+    break;
+    case 5:
+      link ='/imp/xbox/order/list'
+    break;
+    case 6:
+      link ='/imp/xbox/org/list'
+    break;
+  }
+  if(reportForm.reportId==6){
+    getProductData(impId)
+  }
     baseService
-    .get("/imp/activity/leader/list", {
+    .get(link, {
       impId,
+      activityId:impId,
       roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
-      orgIds:''
+      orgIds:'',
+      export:false
     })
     .then((res) => {
       state.loading = false;
@@ -713,70 +538,25 @@ const fetchTableData = () => {
       })
       .catch(() => {
         state.loading = false;     
-      });
-  }
-  if(reportForm.reportId==2){
-    //拼团日志
-    baseService
-    .get("/imp/activity/member/list", {
-      impId,
-      roleImpId:reportForm.roleImpId,
-      ...pagination,
-      ...searchForm,
-      orgIds:''
-    })
-    .then((res) => {
-      state.loading = false;
-      console.log("resres",res)
-      if (res.code == 200) {
-        loading.value = false;
-        if(res.data.data){
-          tableData.value = res.data.data || [];
-          pagination.total = Number(res.data.total);
-        }else{
-          tableData.value = []
-          pagination.total = 0
-        }
-      } else {
-        ElMessage.error(res.msg);
-      }
-      })
-      .catch(() => {
-        state.loading = false;     
-      });
-  }
-  if(reportForm.reportId==3){
-    //拼团奖品
-    baseService
-    .get("/imp/activity/product/list", {
-      impId,
-      roleImpId:reportForm.roleImpId,
-      ...pagination,
-      ...searchForm,
-      orgIds:''
-    })
-    .then((res) => {
-      state.loading = false;
-      console.log("resres",res)
-      if (res.code == 200) {
-        loading.value = false;
-        if(res.data.data){
-          tableData.value = res.data.data || [];
-          pagination.total = Number(res.data.total);
-        }else{
-          tableData.value = []
-          pagination.total = 0
-        }
-      } else {
-        ElMessage.error(res.msg);
-      }
-      })
-      .catch(() => {
-        state.loading = false;     
-      });
-  }
+      }); 
 }
-
+const getProductData = (activityId) =>{
+  baseService
+    .get('/imp/xbox/list', {
+      activityId,      
+    })
+    .then((res) => {
+      if (res.code == 200) {
+        if(res.data){
+          productData.value = res.data || [];
+        }else{
+          productData.value = []
+        }
+      } else {
+        ElMessage.error(res.msg);
+      }
+  })
+}
 // 分页大小变化
 const handleSizeChange = (val) => {
   pagination.pageSize = val
@@ -900,13 +680,49 @@ const handleExport = () => {
     },responseType: 'blob'})
     .then((res) => {
        const content = res.data
-       exportExcel(content,'奖品列表')  
-      
+       exportExcel(content,'奖品列表')        
       })
       .catch(() => {
         state.loading = false;     
       });
   }
+  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6){
+    let link = "";
+    switch(reportForm.reportId){   
+      case 4:
+        link ='/imp/xbox/agent/list'
+      break;
+      case 5:
+        link ='/imp/xbox/order/list'
+      break;
+      case 6:
+        link ='/imp/xbox/org/list'
+      break;
+    }
+    baseService
+    .get(link, {
+      impId,
+      activityId:impId,
+      roleImpId:reportForm.roleImpId,
+      ...pagination,      
+      ...searchForm,
+      orgIds:'',
+      export:true
+    })
+    .then((res) => {
+      state.loading = false;
+      console.log("resres",res)
+      if (res.code == 200) {
+        loading.value = false;
+        ElMessage.success('导出任务已提交，请稍后在导出记录中查看');
+      } else {
+        ElMessage.error(res.msg);
+      }
+    })
+    .catch(() => {
+      state.loading = false;     
+    });
+  } 
   // ElMessage.success('导出任务已提交，请稍后在导出记录中查看')
   
   // // 模拟添加到导出记录
@@ -948,18 +764,52 @@ const exportExcel = (content,fileName) =>{
 }
 // 显示导出记录
 const showExportRecords = () => {
-   if (!reportForm.reportType) {
+   if (!reportForm.reportId) {
     ElMessage.warning('请先选择报表类型')
     return
   }
-  exportRecordVisible.value = true
+  let impId =0;
+  filteredActivities.value.map(item=>{
+    if(item.roleImpId==reportForm.roleImpId) impId = item.impId
+  })
+  baseService
+  .get('/imp/xbox/download/list', {
+    fileType:4,
+    reportType:reportForm.reportId,
+    impId:impId,
+    pageIndex:1,
+    pageSize:50
+  })
+  .then((res) => {
+    state.loading = false;
+    console.log("resres",res)
+    if (res.code == 200) {
+      loading.value = false;
+      if(res.data.data){
+        exportRecordVisible.value = true
+        exportRecords.value = res.data.data || [];       
+      }else{
+        exportRecords.value = []
+        pagination.total = 0
+      }
+    } else {
+      ElMessage.error(res.msg);
+    }
+    })
+    .catch(() => {
+      state.loading = false;     
+    }); 
+  
 }
 
 // 下载导出文件
 const downloadExportFile = (record) => {
-  ElMessage.success(`开始下载: ${record.fileName}`)
-  // 实际项目中这里应该是文件下载逻辑
-  console.log('下载文件:', record.filePath)
+  let element = document.createElement('a');   
+  element.setAttribute('href',record.downloadUrl)
+  element.setAttribute('download', record.fileName) ;      
+  element.setAttribute('target', '_blank') ;         
+  element.style.display = 'none'
+  element.click();  
 }
 
 // 查看详情
