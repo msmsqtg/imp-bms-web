@@ -20,7 +20,8 @@
         <el-table-column  v-for="item in productData" :key="item.value" :label="item.label" :prop="item.value">
         </el-table-column>        
         <el-table-column prop="successOrderNum" label="中奖且填写资料客户"></el-table-column>
-        <el-table-column prop="signNum" label="核销数"></el-table-column>       
+        <el-table-column prop="signNum" label="签到核销数" v-if="signSwitch==1" :key="signNum"></el-table-column>
+        <el-table-column prop="visitNum" label="拜访核销数" v-if="visitSwitch==1" :key="visitNum"></el-table-column>           
         <el-table-column prop="orderNum" label="盲盒中奖数"></el-table-column>
       </el-table>
      <!-- 分页 -->
@@ -60,6 +61,14 @@ const props = defineProps({
   productData:{
     type: Array,
     default: () => []
+  },
+  signSwitch:{
+    type: Number,
+    default: 0
+  },
+  visitSwitch:{
+    type: Number,
+    default: 0
   }
 });
 onMounted(()=>{

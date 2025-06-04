@@ -184,6 +184,8 @@
          v-if="reportForm.reportId === 5"
         :loading="loading"
         :total="pagination.total"
+        :signSwitch="signSwitch"
+        :visitSwitch="visitSwitch"
         @page-change="handlePageChange"
       ></xbox-detail>
     </template>    
@@ -193,6 +195,8 @@
         :loading="loading"
         :total="pagination.total"
         :productData="productData"
+        :signSwitch="signSwitch"
+        :visitSwitch="visitSwitch"
         @page-change="handlePageChange"
       ></xbox-summary>
     </template>     
@@ -258,7 +262,8 @@ const props =  reactive({
   children: 'children', // 子选项字段为 children
   multiple: true
 })
-
+const signSwitch = ref(0); //打开签到核销
+const visitSwitch = ref(0); //打开拜访核销
 const productData = ref([])
 const state = reactive({
   loading: false
@@ -528,6 +533,10 @@ const fetchTableData = () => {
         if(res.data.data){
           tableData.value = res.data.data || [];
           pagination.total = Number(res.data.total);
+          if(reportForm.reportId==6 || reportForm.reportId==5){
+            signSwitch.value = res.data.signSwitch;
+            visitSwitch.value = res.data.visitSwitch;
+          }
         }else{
           tableData.value = []
           pagination.total = 0
