@@ -30,14 +30,14 @@
         <el-table-column prop="parentPhone" label="推荐人手机号"></el-table-column>
         <el-table-column prop="signStatus" label="签到核销状态" v-if="signSwitch==1">
           <template  #default="{ row }">
-           {{row.signStatus == "0" ? '待核销' : row.signStatus == "1" ? '已核销' : row.signStatus == "3" ?'无需核销':''}}
+           {{row.signStatus == "0" ? '待核销' : row.signStatus == "1" ? '已核销' : row.signStatus == "3" ?'无需核销':'待核销'}}
           </template>
         </el-table-column>
         <el-table-column prop="signTime" label="签到核销时间" v-if="signSwitch==1"></el-table-column>
         <el-table-column prop="signAdminName" label="签到核销人" v-if="signSwitch==1"></el-table-column>
         <el-table-column prop="visitStatus" label="拜访状态" v-if="visitSwitch==1">
           <template  #default="{ row }">
-           {{row.visitStatus == "0" ? '待拜访' : row.visitStatus == "1" ? '已拜访' : row.visitStatus == "3" ?'无需核销':''}}
+           {{row.visitStatus == "1" ? '已拜访':'待拜访'}}
           </template>
         </el-table-column>
         <el-table-column prop="visitTime" label="拜访时间" v-if="visitSwitch==1"></el-table-column>
