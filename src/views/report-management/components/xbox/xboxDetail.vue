@@ -38,6 +38,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="visitTime" label="拜访时间" v-if="visitSwitch==1"></el-table-column>
+        <el-table-column prop="getTime" label="领取时间"></el-table-column>
       </el-table>
      <!-- 分页 -->
     <el-pagination
