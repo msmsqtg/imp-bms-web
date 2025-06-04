@@ -25,6 +25,9 @@
         <el-table-column prop="city" label="城市"></el-table-column>
         <el-table-column prop="productName" label="奖品名称"></el-table-column>
         <el-table-column prop="createTime" label="抽奖时间"></el-table-column>
+        <el-table-column prop="getTime" label="领取时间"></el-table-column>
+        <el-table-column prop="parentName" label="推荐人姓名"></el-table-column>
+        <el-table-column prop="parentPhone" label="推荐人手机号"></el-table-column>
         <el-table-column prop="signStatus" label="签到核销状态" v-if="signSwitch==1">
           <template  #default="{ row }">
            {{row.signStatus == "0" ? '待核销' : row.signStatus == "1" ? '已核销' : row.signStatus == "3" ?'无需核销':''}}
@@ -38,7 +41,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="visitTime" label="拜访时间" v-if="visitSwitch==1"></el-table-column>
-        <el-table-column prop="getTime" label="领取时间"></el-table-column>
+        
       </el-table>
      <!-- 分页 -->
     <el-pagination
