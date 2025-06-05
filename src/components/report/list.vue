@@ -37,7 +37,7 @@
         <el-table-column type="index" label="序号" width="60" align="center" />
         <el-table-column prop="impType" label="活动类型" width="120" align="center">
           <template #default="{ row }">
-            {{ row.impType==2?'拼团活动':'组团活动' }}
+            {{ state.getDictLabel("activity_type", row.impType) }}  
           </template>
         </el-table-column>
         <el-table-column prop="impName" label="活动名称" min-width="150" />
@@ -72,7 +72,7 @@
       width="50%"
       :close-on-click-modal="false"
     >
-      <el-form :model="formData" :rules="rules" ref="formRef" label-width="120px">
+      <el-form :model="formData" :rules="rules" ref="formRef" label-width="180px">
         <el-form-item label="活动类型" prop="impType">        
           <ren-select v-model="formData.impType" dict-type="activity_type" placeholder="请选择活动类型"  @change="dialogHandleTypeChange"></ren-select>
         </el-form-item>
@@ -107,8 +107,11 @@
             <el-checkbox :label="item.reportId" name="type"  v-for="(item,index) in activitySysOptions" :key="index">{{item.reportName}}</el-checkbox>
           </el-checkbox-group>          
         </el-form-item>
-      </el-form>
-      
+        <el-form-item label="H5用户手机号是否脱敏" prop="maskStatus">          
+          <el-radio v-model="formData.maskStatus" :label="1">否</el-radio>
+          <el-radio v-model="formData.maskStatus" :label="2">是</el-radio>
+        </el-form-item>
+      </el-form>      
       <template #footer>
         <el-button @click="innerDialogVisible = false">取消</el-button>
         <el-button type="primary" @click="submitForm">确定</el-button>
@@ -129,7 +132,8 @@ import useView from "@/hooks/useView";
 const store = useAppStore();
 
 const state = reactive({
-  loading: false
+  loading: false,
+   ...useView({})
 });
 const props = defineProps({
   modelValue: Boolean,
@@ -180,7 +184,8 @@ const formData = reactive({
   impType: '',
   impId: '',
   orgId: [],
-  reportId:[]
+  reportId:[],
+  maskStatus:1
 })
 
 // 表单验证规则
@@ -328,6 +333,7 @@ const resetForm = () => {
   formData.impId = ''
   formData.orgId =  []
   formData.impType = ""
+  formData.maskStatus = 1
   formData.reportId = []
    nextTick(() => {
     if(treeRef.value) {
