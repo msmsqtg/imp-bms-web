@@ -515,7 +515,7 @@ const fetchTableData = () => {
       ...pagination,      
       ...searchForm,
       orgIds:'',
-      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==7)?4:0,
+      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:0,
       export:false
     })
     .then((res) => {
