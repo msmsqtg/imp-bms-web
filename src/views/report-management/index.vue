@@ -684,7 +684,7 @@ const handleExport = () => {
         state.loading = false;     
       });
   }
-  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6){
+  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9){
     let link = "";
     switch(reportForm.reportId){   
       case 4:
