@@ -558,7 +558,7 @@ const fetchTableData = () => {
         state.loading = false;     
       }); 
 }
-const getProductData = (activityId) =>{
+const getProductData = (activityId) =>{  
   baseService
     .get('/imp/xbox/list', {
       activityId,      
@@ -760,7 +760,7 @@ const showExportRecords = () => {
   } 
   baseService
   .get('/imp/xbox/download/list', {
-    fileType:4,
+    fileType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?5:4,
     reportType:reportForm.reportId,
     impId:impId.value,
     pageIndex:1,
