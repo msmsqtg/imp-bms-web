@@ -75,7 +75,7 @@
             style="width: 150px"
           />
         </el-form-item>
-         <el-form-item label="核销状态" v-if="reportForm.reportId==3 || reportForm.reportId==9" key="status">
+         <el-form-item label="核销状态" v-if="reportForm.reportId==3" key="status">
           <el-select
             v-model="searchForm.status"
             placeholder="请选择状态"
