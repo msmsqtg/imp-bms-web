@@ -9,7 +9,7 @@
     >
         <el-table-column label="序号" align="center" type="index" width="50"></el-table-column>
         <el-table-column prop="orderNo" label="订单编号"></el-table-column>
-        <el-table-column prop="phone" label="用户手机号"></el-table-column>
+        <el-table-column prop="userPhone" label="用户手机号"></el-table-column>
       <!-- 开团信息-->
       <el-table-column prop="userNickname" label="用户信息" width="200">
         <template  #default="{ row }">
