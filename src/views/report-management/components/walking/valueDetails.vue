@@ -127,7 +127,7 @@ const emitPageChange = () => {
 const  handleClick=(row) =>{
   num.value++;
   baseService
-  .get("/imp/activity/user/account/info/list", {
+  .get("/imp/activity/user/sign/in/list", {
     impId:Number(props.impId),
     accountId: Number(row.accountId), pageIndex: 1, pageSize: 100 
   })
