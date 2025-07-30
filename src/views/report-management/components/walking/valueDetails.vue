@@ -58,10 +58,9 @@
           </template>
         </el-table-column>
         <el-table-column prop="qty" label="活力值"></el-table-column>
-        <el-table-column prop="createTime" label="创建时间">
+        <el-table-column prop="createTime" label="创建时间"></el-table-column>
         <el-table-column prop="helpUserPhone" label="好友手机号"></el-table-column>
-         <el-table-column prop="helpUserName" label="好友姓名"></el-table-column>              
-        </el-table-column>
+        <el-table-column prop="helpUserName" label="好友姓名"></el-table-column>              
       </el-table>
     </el-dialog>
   </div>
@@ -70,7 +69,7 @@
 <script setup>
 import { ref, defineProps, defineEmits,reactive} from 'vue';
 import { ElMessage,ElCascader  } from 'element-plus'
-
+import baseService from "@/service/baseService";
 const props = defineProps({
   tableData: {
     type: Array,
@@ -128,9 +127,9 @@ const emitPageChange = () => {
 const  handleClick=(row) =>{
   num.value++;
   baseService
-  .get("/imp-rms/imp/activity/user/account/info/list", {
+  .get("/imp/activity/user/account/info/list", {
     impId:Number(props.impId),
-    accountId: Number(row.id), pageIndex: 1, pageSize: 100 
+    accountId: Number(row.accountId), pageIndex: 1, pageSize: 100 
   })
   .then((res) => {
     state.loading = false;

@@ -152,9 +152,12 @@
       v-if="componentMap[reportForm.reportId]"
       :table-data="tableData"
       :loading="loading"
+      :impId="impId"
       :total="pagination.total"
+      :signSwitch="signSwitch"
+      :visitSwitch="visitSwitch"
+      :productData="productData"
       @page-change="handlePageChange"
-      v-bind="componentMap[reportForm.reportId]?.props"
     ></component>
     </el-card>
     <!-- 导出记录弹窗 -->
@@ -202,6 +205,8 @@ import agentDetail from './components/xbox/agentDetail.vue';
 import xboxDetail from './components/xbox/xboxDetail.vue';
 import xboxSummary from './components/xbox/xboxSummary.vue';
 import signInList from './components/walking/signInList.vue';
+import valueDetails from './components/walking/valueDetails.vue';
+import signPrizeDetails from './components/walking/prizeDetails.vue';
 import { ref, reactive, computed,onMounted} from 'vue'
 import { ElMessage,ElCascader  } from 'element-plus'
 ///imp/activity/leader/list?impId=32&pageIndex=1&pageSize=10
@@ -231,19 +236,11 @@ const componentMap = reactive({
   2: { component: memberList },
   3: { component: productList },
   4: { component: agentDetail },
-  5: { 
-    component: xboxDetail,
-    props: { signSwitch, visitSwitch }
-  },
-  6: { 
-    component: xboxSummary,
-    props: { productData, signSwitch, visitSwitch }
-  },
-  7: {component:signInList,
-  props:{
-    impId
-  }},
-  
+  5: {component: xboxDetail},
+  6: {component: xboxSummary},
+  7: {component:signInList},
+  8: {component:valueDetails},
+  9: {component:signPrizeDetails}
 });
 // 报表表单
 const reportForm = reactive({
@@ -313,7 +310,10 @@ const getActivityList = ()=>{
 //活动列表数据修改
 const handleImpIdChange = (e) =>{
   if(e){
-    impId.value = e;
+    //impId.value = e;
+     filteredActivities.value.map(item=>{
+        if(item.roleImpId==e) impId.value = item.impId
+      })
     clearChoice();
      baseService
     .get("/imp/activity/user/imp/report/list", {
@@ -495,13 +495,13 @@ const fetchTableData = () => {
       link ='/imp/xbox/org/list'
     break;
     case 7:
-      link ='/imp-rms/imp/activity/user/sign/in/list'
+      link ='/imp/activity/user/sign/in/list'
     break;
     case 8:
-      link ='/imp-rms/imp/activity/user/account/info/list'
+      link ='/imp/activity/user/account/info/list'
     break;
     case 9:
-      link = '/imp-rms/imp/activity/order/list/jbz'
+      link = '/imp/activity/order/list/jbz'
     break;
   }
   if(reportForm.reportId==6){
@@ -515,6 +515,7 @@ const fetchTableData = () => {
       ...pagination,      
       ...searchForm,
       orgIds:'',
+      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==7)?4:0,
       export:false
     })
     .then((res) => {
@@ -696,13 +697,13 @@ const handleExport = () => {
         link ='/imp/xbox/org/list'
       break;
       case 7:
-        link ='/imp-rms/imp/activity/user/sign/in/list'
+        link ='/imp/activity/user/sign/in/list'
       break;
       case 8:
-        link ='/imp-rms/imp/activity/user/account/info/list'
+        link ='/imp/activity/user/account/info/list'
       break;
       case 9:
-        link = '/imp-rms/imp/activity/order/list/jbz'
+        link = '/imp/activity/order/list/jbz'
       break;
     }
     baseService
