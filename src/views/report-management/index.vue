@@ -141,7 +141,7 @@
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="resetSearch">重置</el-button>
           <el-button type="success" @click="handleExport">导出</el-button>
-          <el-button type="info" @click="showExportRecords" v-if="reportForm.reportId === 4 || reportForm.reportId === 5 || reportForm.reportId === 6">导出记录</el-button>
+          <el-button type="info" @click="showExportRecords" v-if="(reportForm.reportId!=1 && reportForm.reportId!=2 && reportForm.reportId!=3)">导出记录</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -613,11 +613,24 @@ const handleExport = () => {
     searchForm.agentNames="";
   }   
   const token = getToken();
-  if(reportForm.reportId==1){
+  if(reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3){
+    let link = "";
+    switch(reportForm.reportId){   
+      case 1:
+        link ='/imp/xbox/agent/list'
+      break;
+      case 2:
+        link ='/imp/xbox/order/list'
+      break;
+      case 3:
+        link ='/imp/xbox/org/list'
+      break;      
+    }
     //拼团记录
     axios
-    .get(app.api+"/imp/activity/leader/list", {params:{
+    .get(app.api+link, {params:{
      impId:impId.value,
+     activityId:impId.value,
      roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
@@ -629,56 +642,8 @@ const handleExport = () => {
       'token': token          
     },responseType: 'blob'})
     .then((res) => {
-       const content = res.data
-       exportExcel(content,'拼团列表')  
-      
-      })
-      .catch(() => {
-        state.loading = false;     
-      });
-  }
-  if(reportForm.reportId==2){
-    //拼团日志
-     axios
-    .get(app.api+"/imp/activity/member/list", {params:{
-     impId:impId.value,
-     roleImpId:reportForm.roleImpId,
-      ...pagination,      
-      ...searchForm,
-      orgIds:'',
-      export:true     
-    }, 
-    headers: {
-      'Content-Type': 'application/json',
-      'token': token          
-    },responseType: 'blob'})
-    .then((res) => {
-       const content = res.data
-       exportExcel(content,'拼团日志') 
-      })
-      .catch(() => {
-        state.loading = false;     
-      });
-     
-  }
-  if(reportForm.reportId==3){
-    //拼团奖品
-     axios
-    .get(app.api+"/imp/activity/product/list", {params:{
-     impId:impId.value,
-      roleImpId:reportForm.roleImpId,
-      ...pagination,      
-      ...searchForm,
-      orgIds:'',
-      export:true     
-    }, 
-    headers: {
-      'Content-Type': 'application/json',
-      'token': token          
-    },responseType: 'blob'})
-    .then((res) => {
-       const content = res.data
-       exportExcel(content,'奖品列表')        
+        const content = res.data
+        exportExcel(content,reportForm.reportId==1?'拼团列表':reportForm.reportId==2?'拼团日志':'奖品列表')           
       })
       .catch(() => {
         state.loading = false;     
@@ -709,10 +674,11 @@ const handleExport = () => {
     baseService
     .get(link, {
       impId:impId.value,
-      activityId:impId,
+      activityId:impId.value,
       roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
+      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:0,
       orgIds:'',
       export:true
     })
@@ -723,6 +689,7 @@ const handleExport = () => {
         loading.value = false;
         ElMessage.success('导出任务已提交，请稍后在导出记录中查看');
       } else {
+       
         ElMessage.error(res.msg);
       }
     })
