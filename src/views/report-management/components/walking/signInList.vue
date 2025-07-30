@@ -28,7 +28,18 @@
       </el-table-column>
       <el-table-column prop="qty" label="打卡步数"></el-table-column>
       <el-table-column prop="createTime" label="打卡时间"></el-table-column>      
-    </el-table>    
+    </el-table> 
+     <!-- 分页 -->
+    <el-pagination
+      class="pagination"
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
+      :total="total"
+      :page-sizes="[10, 20, 50, 100]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />   
   </div>
 </template>
 

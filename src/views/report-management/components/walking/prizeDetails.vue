@@ -41,7 +41,18 @@
       </el-table-column>
       <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
       <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>      
-    </el-table>    
+    </el-table>  
+     <!-- 分页 -->
+    <el-pagination
+      class="pagination"
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
+      :total="total"
+      :page-sizes="[10, 20, 50, 100]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />  
   </div>
 </template>
 
