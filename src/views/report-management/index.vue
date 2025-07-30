@@ -284,6 +284,7 @@ const searchForm = reactive({
   endTime:'',
   status: '',
   writeOffStatus:'',
+  productName:'',
   impType:0
 })
 
@@ -443,6 +444,8 @@ const resetSearch = () => {
   searchForm.endTime = ""
   searchForm.status = '';
   searchForm.impType = 0
+  searchForm.writeOffStatus = "";
+  searchForm.productName=""
   dateRange.value = [];
   handleSearch();
 }
