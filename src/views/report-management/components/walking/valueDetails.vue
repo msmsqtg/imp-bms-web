@@ -90,6 +90,10 @@ const props = defineProps({
   impId:{
     type: Number,
     default: 0
+  },
+  roleImpId:{
+    type: Number,
+    default: 0
   }
 });
 const num = ref(0);
@@ -129,6 +133,7 @@ const  handleClick=(row) =>{
   baseService
   .get("/imp/activity/user/sign/in/list", {
     impId:Number(props.impId),
+    roleImpId:props.roleImpId,
     accountId: Number(row.accountId), pageIndex: 1, pageSize: 100 
   })
   .then((res) => {

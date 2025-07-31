@@ -169,6 +169,7 @@
       :signSwitch="signSwitch"
       :visitSwitch="visitSwitch"
       :productData="productData"
+      :roleImpId="reportForm.roleImpId"
       @page-change="handlePageChange"
     ></component>
     </el-card>
