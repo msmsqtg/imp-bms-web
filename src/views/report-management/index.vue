@@ -58,7 +58,7 @@
             clearable></el-cascader>
         </el-form-item>
         
-        <el-form-item label="用户手机号" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3">
+        <el-form-item label="用户手机号" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9">
           <el-input
             v-model="searchForm.phone"
             placeholder="请输入手机号"
@@ -67,7 +67,7 @@
           />
         </el-form-item>
         
-        <el-form-item label="代理人工号" key="agentCode" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3">
+        <el-form-item label="代理人工号" key="agentCode" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9">
           <el-input
             v-model="searchForm.agentCode"
             placeholder="请输入工号"
@@ -88,6 +88,18 @@
             <el-option label="已核销" :value="2"></el-option>
           </el-select>
         </el-form-item>
+         <el-form-item label="核销状态" v-if="reportForm.reportId==9" key="writeOffStatus">
+          <el-select
+            v-model="searchForm.writeOffStatus"
+            placeholder="请选择状态"
+            clearable
+            style="width: 120px"
+          >          
+            <el-option label="全部" :value="0"></el-option>
+            <el-option label="待核销" :value="1"></el-option>
+            <el-option label="已核销" :value="2"></el-option>
+          </el-select>
+        </el-form-item>
          <el-form-item label="状态" v-if="reportForm.reportId==2" key="status">
           <el-select
             v-model="searchForm.status"
@@ -101,6 +113,18 @@
               :label="item.label"
               :value="item.value"
             />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="类型" v-if="reportForm.reportId==8" key="writeOffStatus">
+          <el-select
+            v-model="searchForm.type"
+            placeholder="请选择状态"
+            clearable
+            style="width: 120px"
+          >          
+            <el-option label="全部" :value="0"></el-option>
+            <el-option label="团长" :value="1"></el-option>
+            <el-option label="团员" :value="2"></el-option>
           </el-select>
         </el-form-item>
          <el-form-item label="拼团用户" v-if="reportForm.reportId==2" key="impType">
@@ -123,10 +147,10 @@
             style="width: 150px"
           />
         </el-form-item>
-        <el-form-item label="奖品名称" v-if="reportForm.reportId==3" prop="productName" key="productName">
+        <el-form-item label="奖品名称" v-if="reportForm.reportId==3 || reportForm.reportId==9" prop="productName" key="productName">
           <el-input v-model.trim="searchForm.productName" placeholder="请输入奖品名称"></el-input>
         </el-form-item>
-        <el-form-item label="订单时间"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5">         
+        <el-form-item :label="reportForm.reportId==7?'打卡时间':'订单时间'"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5 || reportForm.reportId==7 || reportForm.reportId==9">         
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -141,65 +165,25 @@
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="resetSearch">重置</el-button>
           <el-button type="success" @click="handleExport">导出</el-button>
-          <el-button type="info" @click="showExportRecords" v-if="reportForm.reportId === 4 || reportForm.reportId === 5 || reportForm.reportId === 6">导出记录</el-button>
+          <el-button type="info" @click="showExportRecords" v-if="(reportForm.reportId!=1 && reportForm.reportId!=2 && reportForm.reportId!=3)">导出记录</el-button>
         </el-form-item>
       </el-form>
     </el-card>
     <el-card class="table-box" v-if="reportForm.reportId">
     <!-- 表格区域 -->
-    <template v-if="reportForm.reportId === 1">    
-      <leader-list :table-data="tableData"
-        v-if="reportForm.reportId === 1"
-        :loading="loading"
-        :total="pagination.total"
-        @page-change="handlePageChange"
-      ></leader-list>
-    </template>        
-    <template v-else-if="reportForm.reportId === 2">
-      <member-list :table-data="tableData"
-         v-if="reportForm.reportId === 2"
-        :loading="loading"
-        :total="pagination.total"
-        @page-change="handlePageChange"
-      ></member-list>
-    </template>        
-    <template v-else-if="reportForm.reportId === 3">
-       <product-list :table-data="tableData"
-         v-if="reportForm.reportId === 3"
-        :loading="loading"
-        :total="pagination.total"
-        @page-change="handlePageChange"
-      ></product-list>
-    </template>   
-   <template v-else-if="reportForm.reportId === 4">
-       <agent-detail :table-data="tableData"
-         v-if="reportForm.reportId === 4"
-        :loading="loading"
-        :total="pagination.total"
-        @page-change="handlePageChange"
-      ></agent-detail>
-    </template>   
-    <template v-else-if="reportForm.reportId === 5">
-       <xbox-detail :table-data="tableData"
-         v-if="reportForm.reportId === 5"
-        :loading="loading"
-        :total="pagination.total"
-        :signSwitch="signSwitch"
-        :visitSwitch="visitSwitch"
-        @page-change="handlePageChange"
-      ></xbox-detail>
-    </template>    
-    <template v-else-if="reportForm.reportId === 6">
-       <xbox-summary :table-data="tableData"
-         v-if="reportForm.reportId === 6"
-        :loading="loading"
-        :total="pagination.total"
-        :productData="productData"
-        :signSwitch="signSwitch"
-        :visitSwitch="visitSwitch"
-        @page-change="handlePageChange"
-      ></xbox-summary>
-    </template>     
+    <component
+      :is="componentMap[reportForm.reportId]?.component"
+      v-if="componentMap[reportForm.reportId]"
+      :table-data="tableData"
+      :loading="loading"
+      :impId="impId"
+      :total="pagination.total"
+      :signSwitch="signSwitch"
+      :visitSwitch="visitSwitch"
+      :productData="productData"
+      :roleImpId="reportForm.roleImpId"
+      @page-change="handlePageChange"
+    ></component>
     </el-card>
     <!-- 导出记录弹窗 -->
     <el-dialog
@@ -245,6 +229,9 @@ import productList from './components/groupBuy/productList.vue';
 import agentDetail from './components/xbox/agentDetail.vue';
 import xboxDetail from './components/xbox/xboxDetail.vue';
 import xboxSummary from './components/xbox/xboxSummary.vue';
+import signInList from './components/walking/signInList.vue';
+import valueDetails from './components/walking/valueDetails.vue';
+import signPrizeDetails from './components/walking/prizeDetails.vue';
 import { ref, reactive, computed,onMounted} from 'vue'
 import { ElMessage,ElCascader  } from 'element-plus'
 ///imp/activity/leader/list?impId=32&pageIndex=1&pageSize=10
@@ -267,6 +254,18 @@ const visitSwitch = ref(0); //打开拜访核销
 const productData = ref([])
 const state = reactive({
   loading: false
+});
+const impId = ref(0)
+const componentMap = reactive({
+  1: { component: leaderList },
+  2: { component: memberList },
+  3: { component: productList },
+  4: { component: agentDetail },
+  5: {component: xboxDetail},
+  6: {component: xboxSummary},
+  7: {component:signInList},
+  8: {component:valueDetails},
+  9: {component:signPrizeDetails}
 });
 // 报表表单
 const reportForm = reactive({
@@ -297,7 +296,10 @@ const searchForm = reactive({
   startTime: '',
   endTime:'',
   status: '',
-  impType:0
+  writeOffStatus:'',
+  productName:'',
+  impType:0,
+  type:0
 })
 
 // 机构选项
@@ -336,9 +338,11 @@ const getActivityList = ()=>{
 //活动列表数据修改
 const handleImpIdChange = (e) =>{
   if(e){
-    reportForm.reportId = "";
-    searchForm.orgIds = []
-    searchForm.agentNames = ""
+    //impId.value = e;
+     filteredActivities.value.map(item=>{
+        if(item.roleImpId==e) impId.value = item.impId
+      })
+    clearChoice();
      baseService
     .get("/imp/activity/user/imp/report/list", {
       roleImpId:e
@@ -371,7 +375,17 @@ const handleImpIdChange = (e) =>{
         state.loading = false;     
       });
     //imp/activity/user/imp/org/list
+  }else{
+    impId.value = 0;
+    clearChoice();
   }
+}
+const clearChoice = () =>{
+  reportForm.reportId = "";
+  searchForm.orgIds = []
+  searchForm.agentNames = ""
+  orgOptions.value = [];
+  reportTypeOptions.value = []
 }
 const filterActivity = (query) => {
   const searchText = query?.toLowerCase() || '';
@@ -411,7 +425,8 @@ const getReportTypeLabel = (type) => {
 
 // 报表类型变化
 const handleReportChange = (val) => {
-  if (val) {
+  console.log('val',val)
+  if (val) {   
     resetSearch()
   } else {
     tableData.value = []
@@ -443,6 +458,9 @@ const resetSearch = () => {
   searchForm.endTime = ""
   searchForm.status = '';
   searchForm.impType = 0
+  searchForm.writeOffStatus = "";
+  searchForm.productName=""
+  searchForm.type = 0;
   dateRange.value = [];
   handleSearch();
 }
@@ -485,11 +503,7 @@ const fetchTableData = () => {
      searchForm.agentNames = [...new Set(org)].join(',')
   }else{
     searchForm.agentNames="";
-  } 
-  let impId =0;
-  filteredActivities.value.map(item=>{
-    if(item.roleImpId==reportForm.roleImpId) impId = item.impId
-  })
+  }   
   loading.value = true;
   let link = "";
   switch(reportForm.reportId){
@@ -511,18 +525,28 @@ const fetchTableData = () => {
     case 6:
       link ='/imp/xbox/org/list'
     break;
+    case 7:
+      link ='/imp/activity/user/sign/in/list'
+    break;
+    case 8:
+      link ='/imp/activity/user/account/info/list'
+    break;
+    case 9:
+      link = '/imp/activity/order/list/jbz'
+    break;
   }
   if(reportForm.reportId==6){
     getProductData(impId)
   }
     baseService
     .get(link, {
-      impId,
-      activityId:impId,
+      impId:impId.value,
+      activityId:impId.value,
       roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
       orgIds:'',
+      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:0,
       export:false
     })
     .then((res) => {
@@ -549,7 +573,7 @@ const fetchTableData = () => {
         state.loading = false;     
       }); 
 }
-const getProductData = (activityId) =>{
+const getProductData = (activityId) =>{  
   baseService
     .get('/imp/xbox/list', {
       activityId,      
@@ -618,17 +642,26 @@ const handleExport = () => {
      searchForm.agentNames = [...new Set(org)].join(',')
   }else{
     searchForm.agentNames="";
-  } 
-  let impId = 0;
-  filteredActivities.value.map(item=>{
-    if(item.roleImpId==reportForm.roleImpId) impId = item.impId
-  }) 
+  }   
   const token = getToken();
-  if(reportForm.reportId==1){
+  if(reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3){
+    let link = "";
+    switch(reportForm.reportId){   
+      case 1:
+        link ='/imp/xbox/agent/list'
+      break;
+      case 2:
+        link ='/imp/xbox/order/list'
+      break;
+      case 3:
+        link ='/imp/xbox/org/list'
+      break;      
+    }
     //拼团记录
     axios
-    .get(app.api+"/imp/activity/leader/list", {params:{
-     impId,
+    .get(app.api+link, {params:{
+     impId:impId.value,
+     activityId:impId.value,
      roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
@@ -640,62 +673,14 @@ const handleExport = () => {
       'token': token          
     },responseType: 'blob'})
     .then((res) => {
-       const content = res.data
-       exportExcel(content,'拼团列表')  
-      
+        const content = res.data
+        exportExcel(content,reportForm.reportId==1?'拼团列表':reportForm.reportId==2?'拼团日志':'奖品列表')           
       })
       .catch(() => {
         state.loading = false;     
       });
   }
-  if(reportForm.reportId==2){
-    //拼团日志
-     axios
-    .get(app.api+"/imp/activity/member/list", {params:{
-     impId,
-     roleImpId:reportForm.roleImpId,
-      ...pagination,      
-      ...searchForm,
-      orgIds:'',
-      export:true     
-    }, 
-    headers: {
-      'Content-Type': 'application/json',
-      'token': token          
-    },responseType: 'blob'})
-    .then((res) => {
-       const content = res.data
-       exportExcel(content,'拼团日志') 
-      })
-      .catch(() => {
-        state.loading = false;     
-      });
-     
-  }
-  if(reportForm.reportId==3){
-    //拼团奖品
-     axios
-    .get(app.api+"/imp/activity/product/list", {params:{
-     impId,
-      roleImpId:reportForm.roleImpId,
-      ...pagination,      
-      ...searchForm,
-      orgIds:'',
-      export:true     
-    }, 
-    headers: {
-      'Content-Type': 'application/json',
-      'token': token          
-    },responseType: 'blob'})
-    .then((res) => {
-       const content = res.data
-       exportExcel(content,'奖品列表')        
-      })
-      .catch(() => {
-        state.loading = false;     
-      });
-  }
-  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6){
+  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9){
     let link = "";
     switch(reportForm.reportId){   
       case 4:
@@ -707,14 +692,24 @@ const handleExport = () => {
       case 6:
         link ='/imp/xbox/org/list'
       break;
+      case 7:
+        link ='/imp/activity/user/sign/in/list'
+      break;
+      case 8:
+        link ='/imp/activity/user/account/info/list'
+      break;
+      case 9:
+        link = '/imp/activity/order/list/jbz'
+      break;
     }
     baseService
     .get(link, {
-      impId,
-      activityId:impId,
+      impId:impId.value,
+      activityId:impId.value,
       roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
+      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:0,
       orgIds:'',
       export:true
     })
@@ -725,6 +720,7 @@ const handleExport = () => {
         loading.value = false;
         ElMessage.success('导出任务已提交，请稍后在导出记录中查看');
       } else {
+       
         ElMessage.error(res.msg);
       }
     })
@@ -776,16 +772,12 @@ const showExportRecords = () => {
    if (!reportForm.reportId) {
     ElMessage.warning('请先选择报表类型')
     return
-  }
-  let impId =0;
-  filteredActivities.value.map(item=>{
-    if(item.roleImpId==reportForm.roleImpId) impId = item.impId
-  })
+  } 
   baseService
   .get('/imp/xbox/download/list', {
-    fileType:4,
+    fileType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?5:4,
     reportType:reportForm.reportId,
-    impId:impId,
+    impId:impId.value,
     pageIndex:1,
     pageSize:50
   })
