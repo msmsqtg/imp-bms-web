@@ -115,6 +115,18 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="类型" v-if="reportForm.reportId==8" key="writeOffStatus">
+          <el-select
+            v-model="searchForm.type"
+            placeholder="请选择状态"
+            clearable
+            style="width: 120px"
+          >          
+            <el-option label="全部" :value="0"></el-option>
+            <el-option label="团长" :value="1"></el-option>
+            <el-option label="团员" :value="2"></el-option>
+          </el-select>
+        </el-form-item>
          <el-form-item label="拼团用户" v-if="reportForm.reportId==2" key="impType">
           <el-select
             v-model="searchForm.impType"
@@ -286,7 +298,8 @@ const searchForm = reactive({
   status: '',
   writeOffStatus:'',
   productName:'',
-  impType:0
+  impType:0,
+  type:0
 })
 
 // 机构选项
@@ -447,6 +460,7 @@ const resetSearch = () => {
   searchForm.impType = 0
   searchForm.writeOffStatus = "";
   searchForm.productName=""
+  searchForm.type = 0;
   dateRange.value = [];
   handleSearch();
 }

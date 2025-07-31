@@ -18,11 +18,11 @@
       </el-table-column>
       <el-table-column prop="agentCode" label="代理人" width="200">
         <template  #default="{ row }">
-          <div v-if="row.agent">
-            <div v-if="row.agent.agentCode">工号：{{row.agent.agentCode}}</div>
-            <div v-if="row.agent.agentName">姓名：{{row.agent.agentName}}</div>
-            <div v-if="row.agent.agentPhone">手机号：{{row.agent.agentPhone}}</div>
-            <div v-if="row.agent.agentOrg">机构：{{row.agent.agentOrg}}</div>
+          <div>
+            <div v-if="row.agentCode">工号：{{row.agentCode}}</div>
+            <div v-if="row.agentName">姓名：{{row.agentName}}</div>
+            <div v-if="row.agentPhone">手机号：{{row.agentPhone}}</div>
+            <div v-if="row.agentOrg">机构：{{row.agentOrg}}</div>
           </div>
         </template>
       </el-table-column>
