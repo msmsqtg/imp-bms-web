@@ -116,9 +116,6 @@
               <el-option label="无需兑换" :value="3"></el-option>  
             </el-select>
           </el-form-item>  
-          <el-form-item key="exchangeNo" label="供应链订单编号" prop="exchangeNo" v-if="reportForm.reportId==9">
-            <el-input v-model.trim="searchForm.exchangeNo" placeholder="请输入供应链订单编号"></el-input>
-          </el-form-item> 
          <el-form-item label="状态" v-if="reportForm.reportId==2" key="status">
           <el-select
             v-model="searchForm.status"
@@ -320,8 +317,7 @@ const searchForm = reactive({
   impType:0,
   type:0,
   exchangeStatus:0,
-  productType:0,
-  exchangeNo:''
+  productType:0
 })
 
 // 机构选项
