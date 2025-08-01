@@ -98,8 +98,27 @@
             <el-option label="全部" :value="0"></el-option>
             <el-option label="待核销" :value="1"></el-option>
             <el-option label="已核销" :value="2"></el-option>
+            <el-option label="无需核销" :value="3"></el-option>
           </el-select>
         </el-form-item>
+         <el-form-item key="productType" label="商品类型" prop="productType" v-if="reportForm.reportId==9">
+          <el-select v-model="searchForm.productType" placeholder="请选择状态">
+            <el-option label="全部" :value="0"></el-option>
+            <el-option label="实物" :value="1"></el-option>                    
+            <el-option label="虚拟" :value="2"></el-option>
+          </el-select>
+        </el-form-item>    
+          <el-form-item key="exchangeStatus" label="兑换状态" prop="exchangeStatus" v-if="reportForm.reportId==9">
+            <el-select v-model="searchForm.exchangeStatus" placeholder="请选择状态">
+              <el-option label="全部" :value="0"></el-option>
+              <el-option label="未兑换" :value="1"></el-option>                    
+              <el-option label="已兑换" :value="2"></el-option>
+              <el-option label="无需兑换" :value="3"></el-option>  
+            </el-select>
+          </el-form-item>  
+          <el-form-item key="exchangeNo" label="供应链订单编号" prop="exchangeNo" v-if="reportForm.reportId==9">
+            <el-input v-model.trim="searchForm.exchangeNo" placeholder="请输入供应链订单编号"></el-input>
+          </el-form-item> 
          <el-form-item label="状态" v-if="reportForm.reportId==2" key="status">
           <el-select
             v-model="searchForm.status"
@@ -299,7 +318,10 @@ const searchForm = reactive({
   writeOffStatus:'',
   productName:'',
   impType:0,
-  type:0
+  type:0,
+  exchangeStatus:0,
+  productType:0,
+  exchangeNo:''
 })
 
 // 机构选项
@@ -461,6 +483,9 @@ const resetSearch = () => {
   searchForm.writeOffStatus = "";
   searchForm.productName=""
   searchForm.type = 0;
+  searchForm.exchangeNo = "";
+  searchForm.exchangeStauts = 0;
+  searchForm.productType = 0;
   dateRange.value = [];
   handleSearch();
 }

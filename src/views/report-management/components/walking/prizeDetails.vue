@@ -34,6 +34,12 @@
           </template>
       </el-table-column>
       <el-table-column prop="productName" label="奖品名称"></el-table-column> 
+       <el-table-column prop="productType" label="商品类型">
+        <template  #default="{ row }">
+          {{row.productType == "1" ? '实物' : row.productType == "2" ? '虚拟':''}}
+        </template>
+      </el-table-column>
+       <el-table-column prop="supplyChainOrderNo" label="供应链spuId"></el-table-column>
        <el-table-column prop="writeOffStatus" label="核销状态">
         <template  #default="{ row }">
           {{row.writeOffStatus == "1" ? '待核销' : row.writeOffStatus == "2" ? '已核销' : '无需核销'}}
@@ -41,6 +47,15 @@
       </el-table-column>
       <el-table-column prop="writeOffTime" label="核销时间"></el-table-column>
       <el-table-column prop="writeOffPhone" label="核销人手机号"></el-table-column>      
+      <el-table-column prop="exchangeStatus" label="兑换状态"> 
+        <template  #default="{ row }">
+          {{row.exchangeStatus==1?'未兑换':row.exchangeStatus==2?'已兑换 ':''}}
+        </template>             
+      </el-table-column>   
+      <el-table-column prop="supplyChainOrderNo" label="供应链订单编号">               
+      </el-table-column>    
+      <el-table-column prop="exchangeTime" label="兑换时间">               
+      </el-table-column>
     </el-table>  
      <!-- 分页 -->
     <el-pagination
