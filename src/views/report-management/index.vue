@@ -480,7 +480,7 @@ const resetSearch = () => {
   searchForm.productName=""
   searchForm.type = 0;
   searchForm.exchangeNo = "";
-  searchForm.exchangeStauts = 0;
+  searchForm.exchangeStatus = 0;
   searchForm.productType = 0;
   dateRange.value = [];
   handleSearch();
