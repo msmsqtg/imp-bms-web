@@ -92,7 +92,7 @@
 <script setup>
 import { ref, defineProps, defineEmits,reactive} from 'vue';
 import { ElMessage,ElCascader  } from 'element-plus'
-
+import baseService from "@/service/baseService";
 const props = defineProps({
   tableData: {
     type: Array,
