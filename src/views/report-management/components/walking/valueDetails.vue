@@ -32,8 +32,8 @@
           {{row.type == "1" ? '团长' : '团员'}}
         </template>
       </el-table-column> 
-      <el-table-column prop="leaderName" label="团长姓名"></el-table-column>
-      <el-table-column prop="leaderPhone" label="团长手机号"></el-table-column>  
+      <el-table-column prop="leaderName" label="关联团长姓名"></el-table-column>
+      <el-table-column prop="leaderPhone" label="关联团长手机"></el-table-column>  
       <el-table-column fixed="right" label="操作" width="100">
         <template  #default="{ row }">
           <el-button @click="handleClick(row)" type="text" >活力值记录</el-button>
