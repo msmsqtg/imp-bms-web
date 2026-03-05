@@ -57,8 +57,15 @@
             collapse-tags
             clearable></el-cascader>
         </el-form-item>
-        
-        <el-form-item label="用户手机号" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9">
+        <el-form-item label="业务员姓名" key="agentName" v-if="reportForm.reportId==10 || reportForm.reportId==11">
+          <el-input
+            v-model="searchForm.agentName"
+            placeholder="请输入业务员姓名"
+            clearable
+            style="width: 150px"
+          />
+        </el-form-item>
+        <el-form-item :label="reportForm.reportId==10?'客户电话':'用户手机号'" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9 || reportForm.reportId==10">
           <el-input
             v-model="searchForm.phone"
             placeholder="请输入手机号"
@@ -166,7 +173,7 @@
         <el-form-item label="奖品名称" v-if="reportForm.reportId==3 || reportForm.reportId==9" prop="productName" key="productName">
           <el-input v-model.trim="searchForm.productName" placeholder="请输入奖品名称"></el-input>
         </el-form-item>
-        <el-form-item :label="reportForm.reportId==7?'打卡时间':'订单时间'"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5 || reportForm.reportId==7 || reportForm.reportId==9">         
+        <el-form-item :label="reportForm.reportId==7?'打卡时间':reportForm.reportId==10?'拜访时间':'订单时间'"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5 || reportForm.reportId==7 || reportForm.reportId==9 || reportForm.reportId==10">         
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -248,6 +255,8 @@ import xboxSummary from './components/xbox/xboxSummary.vue';
 import signInList from './components/walking/signInList.vue';
 import valueDetails from './components/walking/valueDetails.vue';
 import signPrizeDetails from './components/walking/prizeDetails.vue';
+import agentVisitDetails from './components/agent/visitDetails.vue';
+import agentIntergalDetails from './components/agent/intergalDetails.vue';
 import { ref, reactive, computed,onMounted} from 'vue'
 import { ElMessage,ElCascader  } from 'element-plus'
 ///imp/activity/leader/list?impId=32&pageIndex=1&pageSize=10
@@ -281,7 +290,9 @@ const componentMap = reactive({
   6: {component: xboxSummary},
   7: {component:signInList},
   8: {component:valueDetails},
-  9: {component:signPrizeDetails}
+  9: {component:signPrizeDetails},
+  10: {component:agentVisitDetails},
+  11: {component:agentIntergalDetails}
 });
 // 报表表单
 const reportForm = reactive({
@@ -317,7 +328,8 @@ const searchForm = reactive({
   impType:0,
   type:0,
   exchangeStatus:0,
-  productType:0
+  productType:0,
+  agentName:''
 })
 
 // 机构选项
@@ -401,7 +413,7 @@ const handleImpIdChange = (e) =>{
 const clearChoice = () =>{
   reportForm.reportId = "";
   searchForm.orgIds = []
-  searchForm.agentNames = ""
+  searchForm.agentNames = ""  
   orgOptions.value = [];
   reportTypeOptions.value = []
 }
@@ -482,6 +494,7 @@ const resetSearch = () => {
   searchForm.exchangeNo = "";
   searchForm.exchangeStatus = 0;
   searchForm.productType = 0;
+  searchForm.agentName = ""
   dateRange.value = [];
   handleSearch();
 }
