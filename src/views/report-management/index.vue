@@ -57,15 +57,15 @@
             collapse-tags
             clearable></el-cascader>
         </el-form-item>
-        <el-form-item label="业务员姓名" key="agentName" v-if="reportForm.reportId==10 || reportForm.reportId==11">
+        <el-form-item label="业务员姓名" key="salesmanName" v-if="reportForm.reportId==10 || reportForm.reportId==11">
           <el-input
-            v-model="searchForm.agentName"
+            v-model="searchForm.salesmanName"
             placeholder="请输入业务员姓名"
             clearable
             style="width: 150px"
           />
         </el-form-item>
-        <el-form-item :label="reportForm.reportId==10?'客户电话':'用户手机号'" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9 || reportForm.reportId==10">
+        <el-form-item label="用户手机号" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9 ">
           <el-input
             v-model="searchForm.phone"
             placeholder="请输入手机号"
@@ -73,7 +73,14 @@
             style="width: 180px"
           />
         </el-form-item>
-        
+        <el-form-item label="客户电话" key="customerMobile" v-if="reportForm.reportId==10 ">
+          <el-input
+            v-model="searchForm.customerMobile"
+            placeholder="请输入客户手机号"
+            clearable
+            style="width: 180px"
+          />
+        </el-form-item>
         <el-form-item label="代理人工号" key="agentCode" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9">
           <el-input
             v-model="searchForm.agentCode"
@@ -329,7 +336,8 @@ const searchForm = reactive({
   type:0,
   exchangeStatus:0,
   productType:0,
-  agentName:''
+  salesmanName:'',
+  customerMobile:''
 })
 
 // 机构选项
@@ -355,8 +363,40 @@ const getActivityList = ()=>{
     .then((res) => {
       state.loading = false;      
       if (res.code == 200) {
-       activityOptions.value = res.data || [];
-       filteredActivities.value = [...res.data]
+       // activityOptions.value = res.data || [];
+      // filteredActivities.value = [...res.data]
+      activityOptions.value =     [
+        {
+          "impType": 2,
+          "maskStatus": 1,
+          "impName": "790拼团活动",
+          "impId": 44,
+          "roleImpId": 55
+        },
+        {
+          "impType": 5,
+          "maskStatus": 1,
+          "impId": 745,
+          "impName": "测试",
+          "roleImpId": 56
+        }
+      ]
+       filteredActivities.value =     [
+        {
+          "impType": 2,
+          "maskStatus": 1,
+          "impName": "790拼团活动",
+          "impId": 44,
+          "roleImpId": 55
+        },
+        {
+          "impType": 5,
+          "maskStatus": 1,
+          "impId": 745,
+          "impName": "测试",
+          "roleImpId": 56
+        }
+      ]
       } else {
         ElMessage.error(res.msg);
       }
@@ -494,7 +534,8 @@ const resetSearch = () => {
   searchForm.exchangeNo = "";
   searchForm.exchangeStatus = 0;
   searchForm.productType = 0;
-  searchForm.agentName = ""
+  searchForm.salesmanName = "";
+  searchForm.customerMobile = ""
   dateRange.value = [];
   handleSearch();
 }
@@ -567,6 +608,12 @@ const fetchTableData = () => {
     break;
     case 9:
       link = '/imp/activity/order/list/jbz'
+    break;
+    case 10:
+      link = '/imp/xbox/visit/record/report'
+    break;
+    case 11:
+      link = '/imp/xbox/agent/integral/report'
     break;
   }
   if(reportForm.reportId==6){

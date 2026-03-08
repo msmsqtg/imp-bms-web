@@ -5,16 +5,16 @@
       border
       style="width: 100%"
       v-loading="loading"
-      key="table2"
+      key="11"
     >
-      <el-table-column prop="orderNo" label="编号" width="170px"></el-table-column>
-      <el-table-column prop="productName" label="市级机构"></el-table-column>
-      <el-table-column prop="productName" label="县级机构"></el-table-column>
-      <el-table-column prop="agentName" label="业务员姓名"></el-table-column>
-      <el-table-column prop="agentCode" label="业务员工号"></el-table-column>
-      <el-table-column prop="agentCode" label="身份"></el-table-column>
-      <el-table-column prop="agentCode" label="剩余可用积分"></el-table-column>
-      <el-table-column prop="agentCode" label="积分挡位"></el-table-column>       
+      <el-table-column  type="index" label="序号" width="70px"></el-table-column>
+      <el-table-column prop="orgLevel1" label="市级机构"></el-table-column>
+      <el-table-column prop="orgLevel2" label="县级机构"></el-table-column>
+      <el-table-column prop="salesmanName" label="业务员姓名"></el-table-column>
+      <el-table-column prop="salesmanCode" label="业务员工号"></el-table-column>
+      <el-table-column prop="identityName" label="身份"></el-table-column>
+      <el-table-column prop="availableBalance" label="剩余可用积分"></el-table-column>
+      <el-table-column prop="integralLevel" label="积分挡位"></el-table-column>       
     </el-table>
      <!-- 分页 -->
     <el-pagination
