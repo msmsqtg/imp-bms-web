@@ -363,40 +363,40 @@ const getActivityList = ()=>{
     .then((res) => {
       state.loading = false;      
       if (res.code == 200) {
-       // activityOptions.value = res.data || [];
-      // filteredActivities.value = [...res.data]
-      activityOptions.value =     [
-        {
-          "impType": 2,
-          "maskStatus": 1,
-          "impName": "790拼团活动",
-          "impId": 44,
-          "roleImpId": 55
-        },
-        {
-          "impType": 5,
-          "maskStatus": 1,
-          "impId": 745,
-          "impName": "测试",
-          "roleImpId": 56
-        }
-      ]
-       filteredActivities.value =     [
-        {
-          "impType": 2,
-          "maskStatus": 1,
-          "impName": "790拼团活动",
-          "impId": 44,
-          "roleImpId": 55
-        },
-        {
-          "impType": 5,
-          "maskStatus": 1,
-          "impId": 745,
-          "impName": "测试",
-          "roleImpId": 56
-        }
-      ]
+       activityOptions.value = res.data || [];
+      filteredActivities.value = [...res.data]
+      // activityOptions.value =     [
+      //   {
+      //     "impType": 2,
+      //     "maskStatus": 1,
+      //     "impName": "790拼团活动",
+      //     "impId": 44,
+      //     "roleImpId": 55
+      //   },
+      //   {
+      //     "impType": 5,
+      //     "maskStatus": 1,
+      //     "impId": 745,
+      //     "impName": "测试",
+      //     "roleImpId": 56
+      //   }
+      // ]
+      //  filteredActivities.value =     [
+      //   {
+      //     "impType": 2,
+      //     "maskStatus": 1,
+      //     "impName": "790拼团活动",
+      //     "impId": 44,
+      //     "roleImpId": 55
+      //   },
+      //   {
+      //     "impType": 5,
+      //     "maskStatus": 1,
+      //     "impId": 745,
+      //     "impName": "测试",
+      //     "roleImpId": 56
+      //   }
+      // ]
       } else {
         ElMessage.error(res.msg);
       }
