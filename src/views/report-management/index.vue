@@ -796,7 +796,7 @@ const handleExport = () => {
       roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
-      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:0,
+      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:(reportForm.reportId==10 || reportForm.reportId==11)?5:0,
       orgIds:'',
       export:true
     })
@@ -862,7 +862,7 @@ const showExportRecords = () => {
   } 
   baseService
   .get('/imp/xbox/download/list', {
-    fileType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?5:4,
+    //fileType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?5:4,
     reportType:reportForm.reportId,
     impId:impId.value,
     pageIndex:1,
