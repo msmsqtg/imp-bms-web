@@ -503,6 +503,7 @@ const handleReportChange = (val) => {
   }
 }
 	onMounted(() => {
+    console.log('zzz,这是最新版本')
     getActivityList();
   })
 // 搜索
