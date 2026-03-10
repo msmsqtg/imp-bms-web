@@ -13,7 +13,7 @@
       <el-table-column prop="orgLevel3" label="县级机构"></el-table-column>
       <el-table-column prop="salesmanName" label="业务员姓名"></el-table-column>
       <el-table-column prop="salesmanCode" label="业务员工号"></el-table-column>
-      <el-table-column prop="identityName" label="身份"></el-table-column>
+      <el-table-column prop="userType" label="身份"></el-table-column>
       <el-table-column prop="availableBalance" label="剩余可用积分"></el-table-column>
       <el-table-column prop="identityName" label="积分挡位"></el-table-column>       
     </el-table>
