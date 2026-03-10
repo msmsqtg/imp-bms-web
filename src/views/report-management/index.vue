@@ -736,7 +736,7 @@ const handleExport = () => {
       break;
       case 3:
         link ='/imp/xbox/org/list'
-      break;      
+      break;       
     }
     //拼团记录
     axios
@@ -761,7 +761,7 @@ const handleExport = () => {
         state.loading = false;     
       });
   }
-  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9){
+  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9 || reportForm.reportId==10 || reportForm.reportId==11){
     let link = "";
     switch(reportForm.reportId){   
       case 4:
@@ -781,6 +781,12 @@ const handleExport = () => {
       break;
       case 9:
         link = '/imp/activity/order/list/jbz'
+      break;
+      case 10:
+        link ='/imp/xbox/visit/record/report'
+      break; 
+      case 11:
+        link ='/imp/xbox/agent/integral/report'
       break;
     }
     baseService
