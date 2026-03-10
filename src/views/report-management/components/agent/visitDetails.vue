@@ -18,6 +18,7 @@
       <el-table-column prop="customerMobile" label="客户电话"></el-table-column>
       <el-table-column prop="createTime" label="拜访时间"></el-table-column>
       <el-table-column prop="address" width="470px" label="打卡位置信息"></el-table-column>   
+      <el-table-column prop="remark" label="拜访说明"></el-table-column>
     </el-table>
      <!-- 分页 -->
     <el-pagination
