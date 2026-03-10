@@ -8,8 +8,9 @@
       key="11"
     >
       <el-table-column  type="index" label="序号" width="70px"></el-table-column>
-      <el-table-column prop="orgLevel1" label="市级机构"></el-table-column>
-      <el-table-column prop="orgLevel2" label="县级机构"></el-table-column>
+      <el-table-column prop="orgLevel1" label="省级机构"></el-table-column>
+      <el-table-column prop="orgLevel2" label="市级机构"></el-table-column>
+      <el-table-column prop="orgLevel3" label="县级机构"></el-table-column>
       <el-table-column prop="salesmanName" label="业务员姓名"></el-table-column>
       <el-table-column prop="salesmanCode" label="业务员工号"></el-table-column>
       <el-table-column prop="identityName" label="身份"></el-table-column>
