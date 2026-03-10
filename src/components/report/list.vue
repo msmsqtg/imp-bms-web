@@ -157,6 +157,7 @@ const searchForm = reactive({
   impType: "",
   impId:''
 })
+const impType = ref(0)
 const tableActivityOptions = ref([])
 const activitySysOptions = ref([])
 // 表格数据
@@ -224,6 +225,7 @@ const handleSearch = () => {
 const resetSearch = () => {
   searchForm.impType = ''
   searchForm.impId = ''
+  impType.value = 0
   handleSearch()
 }
 
@@ -401,6 +403,7 @@ const handleTypeChange = (type) =>{
  
 const dialogHandleTypeChange  = (type,isCheck=true) =>{
   //
+  impType.value = type  
    baseService
   .get("/imp/activity/report", {type})
   .then((res) => {
@@ -432,8 +435,9 @@ const dialogHandleTypeChange  = (type,isCheck=true) =>{
 }
 const handleIdChange = (impId)=>{
   console.log('idid',impId);
+  console.log('searchForm.impType',searchForm)
    baseService
-  .get("/imp/activity/org/list", {impId:Number(impId)})
+  .get("/imp/activity/org/list", {impId:Number(impId),impType:Number(impType.value)})
   .then((res) => {
     state.loading = false;
     if (res.code === 200) {
