@@ -57,7 +57,7 @@
             collapse-tags
             clearable></el-cascader>
         </el-form-item>
-        <el-form-item label="业务员姓名" key="salesmanName" v-if="reportForm.reportId==10 || reportForm.reportId==11">
+        <el-form-item label="业务员姓名" key="salesmanName" v-if="reportForm.reportId==13 || reportForm.reportId==14">
           <el-input
             v-model="searchForm.salesmanName"
             placeholder="请输入业务员姓名"
@@ -73,7 +73,7 @@
             style="width: 180px"
           />
         </el-form-item>
-        <el-form-item label="客户电话" key="customerMobile" v-if="reportForm.reportId==10 ">
+        <el-form-item label="客户电话" key="customerMobile" v-if="reportForm.reportId==13 ">
           <el-input
             v-model="searchForm.customerMobile"
             placeholder="请输入客户手机号"
@@ -180,7 +180,7 @@
         <el-form-item label="奖品名称" v-if="reportForm.reportId==3 || reportForm.reportId==9" prop="productName" key="productName">
           <el-input v-model.trim="searchForm.productName" placeholder="请输入奖品名称"></el-input>
         </el-form-item>
-        <el-form-item :label="reportForm.reportId==7?'打卡时间':reportForm.reportId==10?'拜访时间':'订单时间'"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5 || reportForm.reportId==7 || reportForm.reportId==9 || reportForm.reportId==10">         
+        <el-form-item :label="reportForm.reportId==7?'打卡时间':reportForm.reportId==13?'拜访时间':'订单时间'"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5 || reportForm.reportId==7 || reportForm.reportId==9 || reportForm.reportId==13">         
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -298,8 +298,8 @@ const componentMap = reactive({
   7: {component:signInList},
   8: {component:valueDetails},
   9: {component:signPrizeDetails},
-  10: {component:agentVisitDetails},
-  11: {component:agentIntergalDetails}
+  13: {component:agentVisitDetails},
+  14: {component:agentIntergalDetails}
 });
 // 报表表单
 const reportForm = reactive({
@@ -503,7 +503,6 @@ const handleReportChange = (val) => {
   }
 }
 	onMounted(() => {
-    console.log('zzz,这是最新版本')
     getActivityList();
   })
 // 搜索
@@ -610,10 +609,10 @@ const fetchTableData = () => {
     case 9:
       link = '/imp/activity/order/list/jbz'
     break;
-    case 10:
+    case 13:
       link = '/imp/xbox/visit/record/report'
     break;
-    case 11:
+    case 14:
       link = '/imp/xbox/agent/integral/report'
     break;
   }
@@ -762,7 +761,7 @@ const handleExport = () => {
         state.loading = false;     
       });
   }
-  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9 || reportForm.reportId==10 || reportForm.reportId==11){
+  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9 || reportForm.reportId==13 || reportForm.reportId==14){
     let link = "";
     switch(reportForm.reportId){   
       case 4:
@@ -783,10 +782,10 @@ const handleExport = () => {
       case 9:
         link = '/imp/activity/order/list/jbz'
       break;
-      case 10:
+      case 13:
         link ='/imp/xbox/visit/record/report'
       break; 
-      case 11:
+      case 14:
         link ='/imp/xbox/agent/integral/report'
       break;
     }
@@ -797,7 +796,7 @@ const handleExport = () => {
       roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
-      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:(reportForm.reportId==10 || reportForm.reportId==11)?5:0,
+      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:(reportForm.reportId==13 || reportForm.reportId==14)?5:0,
       orgIds:'',
       export:true
     })
