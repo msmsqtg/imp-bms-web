@@ -8,11 +8,12 @@
       key="table10"
     >
       <el-table-column  type="index" label="序号" width="70px"></el-table-column>
-      <el-table-column prop="orgLevel1" label="市级机构"></el-table-column>
-      <el-table-column prop="orgLevel2" label="县级机构"></el-table-column>
-      <el-table-column prop="agentName" label="业务员姓名"></el-table-column>
+      <el-table-column prop="orgLevel1" label="省级机构"></el-table-column>
+      <el-table-column prop="orgLevel2" label="市级机构"></el-table-column>
+      <el-table-column prop="orgLevel3" label="县级机构"></el-table-column>
+      <el-table-column prop="salesmanName" label="业务员姓名"></el-table-column>
       <el-table-column prop="salesmanCode" label="业务员工号"></el-table-column>
-      <el-table-column prop="identityName" label="身份"></el-table-column>
+      <el-table-column prop="userType" label="身份"></el-table-column>
       <el-table-column prop="customerName" label="客户姓名"></el-table-column>
       <el-table-column prop="customerMobile" label="客户电话"></el-table-column>
       <el-table-column prop="createTime" label="拜访时间"></el-table-column>
