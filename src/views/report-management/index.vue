@@ -57,8 +57,15 @@
             collapse-tags
             clearable></el-cascader>
         </el-form-item>
-        
-        <el-form-item label="用户手机号" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9">
+        <el-form-item label="业务员姓名" key="salesmanName" v-if="reportForm.reportId==13 || reportForm.reportId==14">
+          <el-input
+            v-model="searchForm.salesmanName"
+            placeholder="请输入业务员姓名"
+            clearable
+            style="width: 150px"
+          />
+        </el-form-item>
+        <el-form-item label="用户手机号" key="phone" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9 ">
           <el-input
             v-model="searchForm.phone"
             placeholder="请输入手机号"
@@ -66,7 +73,14 @@
             style="width: 180px"
           />
         </el-form-item>
-        
+        <el-form-item label="客户电话" key="customerMobile" v-if="reportForm.reportId==13 ">
+          <el-input
+            v-model="searchForm.customerMobile"
+            placeholder="请输入客户手机号"
+            clearable
+            style="width: 180px"
+          />
+        </el-form-item>
         <el-form-item label="代理人工号" key="agentCode" v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9">
           <el-input
             v-model="searchForm.agentCode"
@@ -166,7 +180,7 @@
         <el-form-item label="奖品名称" v-if="reportForm.reportId==3 || reportForm.reportId==9" prop="productName" key="productName">
           <el-input v-model.trim="searchForm.productName" placeholder="请输入奖品名称"></el-input>
         </el-form-item>
-        <el-form-item :label="reportForm.reportId==7?'打卡时间':'订单时间'"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5 || reportForm.reportId==7 || reportForm.reportId==9">         
+        <el-form-item :label="reportForm.reportId==7?'打卡时间':reportForm.reportId==13?'拜访时间':'订单时间'"  v-if="reportForm.reportId==1 || reportForm.reportId==2 || reportForm.reportId==3 || reportForm.reportId==5 || reportForm.reportId==7 || reportForm.reportId==9 || reportForm.reportId==13">         
           <el-date-picker
             v-model="dateRange"
             type="datetimerange"
@@ -248,6 +262,8 @@ import xboxSummary from './components/xbox/xboxSummary.vue';
 import signInList from './components/walking/signInList.vue';
 import valueDetails from './components/walking/valueDetails.vue';
 import signPrizeDetails from './components/walking/prizeDetails.vue';
+import agentVisitDetails from './components/agent/visitDetails.vue';
+import agentIntergalDetails from './components/agent/intergalDetails.vue';
 import { ref, reactive, computed,onMounted} from 'vue'
 import { ElMessage,ElCascader  } from 'element-plus'
 ///imp/activity/leader/list?impId=32&pageIndex=1&pageSize=10
@@ -281,7 +297,9 @@ const componentMap = reactive({
   6: {component: xboxSummary},
   7: {component:signInList},
   8: {component:valueDetails},
-  9: {component:signPrizeDetails}
+  9: {component:signPrizeDetails},
+  13: {component:agentVisitDetails},
+  14: {component:agentIntergalDetails}
 });
 // 报表表单
 const reportForm = reactive({
@@ -317,7 +335,9 @@ const searchForm = reactive({
   impType:0,
   type:0,
   exchangeStatus:0,
-  productType:0
+  productType:0,
+  salesmanName:'',
+  customerMobile:''
 })
 
 // 机构选项
@@ -344,7 +364,39 @@ const getActivityList = ()=>{
       state.loading = false;      
       if (res.code == 200) {
        activityOptions.value = res.data || [];
-       filteredActivities.value = [...res.data]
+      filteredActivities.value = [...res.data]
+      // activityOptions.value =     [
+      //   {
+      //     "impType": 2,
+      //     "maskStatus": 1,
+      //     "impName": "790拼团活动",
+      //     "impId": 44,
+      //     "roleImpId": 55
+      //   },
+      //   {
+      //     "impType": 5,
+      //     "maskStatus": 1,
+      //     "impId": 745,
+      //     "impName": "测试",
+      //     "roleImpId": 56
+      //   }
+      // ]
+      //  filteredActivities.value =     [
+      //   {
+      //     "impType": 2,
+      //     "maskStatus": 1,
+      //     "impName": "790拼团活动",
+      //     "impId": 44,
+      //     "roleImpId": 55
+      //   },
+      //   {
+      //     "impType": 5,
+      //     "maskStatus": 1,
+      //     "impId": 745,
+      //     "impName": "测试",
+      //     "roleImpId": 56
+      //   }
+      // ]
       } else {
         ElMessage.error(res.msg);
       }
@@ -401,7 +453,7 @@ const handleImpIdChange = (e) =>{
 const clearChoice = () =>{
   reportForm.reportId = "";
   searchForm.orgIds = []
-  searchForm.agentNames = ""
+  searchForm.agentNames = ""  
   orgOptions.value = [];
   reportTypeOptions.value = []
 }
@@ -482,6 +534,8 @@ const resetSearch = () => {
   searchForm.exchangeNo = "";
   searchForm.exchangeStatus = 0;
   searchForm.productType = 0;
+  searchForm.salesmanName = "";
+  searchForm.customerMobile = ""
   dateRange.value = [];
   handleSearch();
 }
@@ -554,6 +608,12 @@ const fetchTableData = () => {
     break;
     case 9:
       link = '/imp/activity/order/list/jbz'
+    break;
+    case 13:
+      link = '/imp/xbox/visit/record/report'
+    break;
+    case 14:
+      link = '/imp/xbox/agent/integral/report'
     break;
   }
   if(reportForm.reportId==6){
@@ -676,7 +736,7 @@ const handleExport = () => {
       break;
       case 3:
         link ='/imp/xbox/org/list'
-      break;      
+      break;       
     }
     //拼团记录
     axios
@@ -701,7 +761,7 @@ const handleExport = () => {
         state.loading = false;     
       });
   }
-  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9){
+  if(reportForm.reportId==4 || reportForm.reportId==5 || reportForm.reportId==6 || reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9 || reportForm.reportId==13 || reportForm.reportId==14){
     let link = "";
     switch(reportForm.reportId){   
       case 4:
@@ -722,6 +782,12 @@ const handleExport = () => {
       case 9:
         link = '/imp/activity/order/list/jbz'
       break;
+      case 13:
+        link ='/imp/xbox/visit/record/report'
+      break; 
+      case 14:
+        link ='/imp/xbox/agent/integral/report'
+      break;
     }
     baseService
     .get(link, {
@@ -730,7 +796,7 @@ const handleExport = () => {
       roleImpId:reportForm.roleImpId,
       ...pagination,      
       ...searchForm,
-      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:0,
+      impType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?4:(reportForm.reportId==13 || reportForm.reportId==14)?5:0,
       orgIds:'',
       export:true
     })
@@ -796,7 +862,7 @@ const showExportRecords = () => {
   } 
   baseService
   .get('/imp/xbox/download/list', {
-    fileType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?5:4,
+    //fileType:(reportForm.reportId==7 || reportForm.reportId==8 || reportForm.reportId==9)?5:4,
     reportType:reportForm.reportId,
     impId:impId.value,
     pageIndex:1,
