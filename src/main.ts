@@ -16,6 +16,14 @@ import * as ElementPlusIcons from "@element-plus/icons-vue";
 import axios from "axios";
 import "virtual:svg-icons-register";
 
+
+// 在文件顶部添加
+console.log('========== 构建环境 ==========');
+console.log('MODE:', import.meta.env.MODE);
+console.log('API:', import.meta.env.VITE_APP_API);
+console.log('TITLE:', import.meta.env.VITE_APP_TITLE);
+console.log('==============================');
+
 const app = createApp(App);
 Object.keys(ElementPlusIcons).forEach((iconName) => {
   app.component(iconName, ElementPlusIcons[iconName as keyof typeof ElementPlusIcons]);

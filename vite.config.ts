@@ -7,6 +7,16 @@ import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 
 export default (config: UserConfig): UserConfigExport => {
   const mode = config.mode as string;
+
+  // 加载环境变量
+    const env = loadEnv(mode, process.cwd());
+
+    console.log('========== Vite构建配置test ==========');
+    console.log('当前模式:', mode);
+    console.log('API地址:', env.VITE_APP_API);
+    console.log('标题:', env.VITE_APP_TITLE);
+    console.log('==================================');
+
   return defineConfig({
     base: "./",
     plugins: [
