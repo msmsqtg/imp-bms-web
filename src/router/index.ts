@@ -54,8 +54,10 @@ router.beforeEach((to, from, next) => {
       } else {
         if (!to.query.pop) {
           const routeMeta: IObject = store.state.routeToMeta[to.path];
+          // 优先使用 to.meta.title，然后是 routeMeta.title，最后是路径
+          const title = to.query._mt || to.meta.title || (routeMeta ? routeMeta.title : '') || to.path;
           emits.emit(EMitt.OnPushMenuToTabs, {
-            label: to.query._mt || routeMeta.title || to.path,
+            label: title,
             value: to.fullPath,
             mete: routeMeta
           });
@@ -139,14 +141,37 @@ const autoRegisterDynamicToRouterAndNext = (to: RouteLocationNormalized): boolea
     const path = to.redirectedFrom.path;
     const component = matchedSysRouteComponent(path);
     if (component) {
+      let title = path;
+      if (path.includes("group-buy/create")) {
+        title = "拼团活动配置";
+      } else if (path.includes("group-buy")) {
+        title = "拼团活动";
+      } else if (path.includes("activity-management")) {
+        title = "活动管理";
+      }
       registerToRouter(router, [
         {
           path: path,
           name: path,
           component,
-          redirect: ""
+          redirect: "",
+          meta: {
+            title: title
+          }
         }
       ]);
+      // 更新 store 中的 routeToMeta
+      const localStore = useAppStore();
+      if (localStore) {
+        localStore.updateState({
+          routeToMeta: {
+            ...localStore.state.routeToMeta,
+            [path]: {
+              title: title
+            }
+          }
+        });
+      }
       router.push(to.redirectedFrom);
       return true;
     }
@@ -174,13 +199,36 @@ const matchedSysRouteComponent = (path: string): any => {
  */
 export const registerDynamicToRouterAndNext = (route: dynamicRouteParams): void => {
   const component = matchedSysRouteComponent(route.path);
+  let title = route.path;
+  if (route.path.includes("group-buy/create")) {
+    title = "新建拼团活动";
+  } else if (route.path.includes("group-buy")) {
+    title = "拼团活动";
+  } else if (route.path.includes("activity-management")) {
+    title = "活动管理";
+  }
   const newRoute: RouteRecordRaw = {
     path: route.path,
     name: route.path,
     component,
-    redirect: !component ? { path: "/error", query: { to: 404 }, replace: true } : ""
+    redirect: !component ? { path: "/error", query: { to: 404 }, replace: true } : "",
+    meta: {
+      title: title
+    }
   };
   registerToRouter(router, [newRoute]);
+  // 更新 store 中的 routeToMeta
+  const localStore = useAppStore();
+  if (localStore) {
+    localStore.updateState({
+      routeToMeta: {
+        ...localStore.state.routeToMeta,
+        [route.path]: {
+          title: title
+        }
+      }
+    });
+  }
   router.push(route);
 };
 

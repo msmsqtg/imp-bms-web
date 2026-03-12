@@ -6,6 +6,7 @@
     "noImplicitThis": true,
     "jsx": "preserve",
     "allowJs": true,
+    "noEmit": true, // 添加这一行，禁止编译输出
     "importHelpers": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
@@ -15,12 +16,9 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "types": ["vite/client"],
+    "types": ["vite/client", "vite-plugin-svg-icons/client"],
     "paths": {
       "@/*": ["src/*"]
-    },
-    "compilerOptions": {
-      "types": ["vite-plugin-svg-icons/client"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
