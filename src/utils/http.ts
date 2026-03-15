@@ -20,6 +20,9 @@ http.interceptors.request.use(
     if (token) {
       config.headers["token"] = token;
     }
+    // 添加createUserId请求头
+    const createUserId = localStorage.getItem('createUserId') || '4440';
+    config.headers["createUserId"] = createUserId;
     if (config.method?.toUpperCase() === "GET") {
       config.params = { ...config.params, _t: new Date().getTime() };
     }

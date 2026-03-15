@@ -67,8 +67,8 @@
         </el-table-column>
         <el-table-column label="操作" width="300">
           <template #default="scope">
-            <el-button type="text" size="small" @click="handleView(scope.row)">查看</el-button>
-            <el-button type="text" size="small" @click="handleEdit(scope.row)" v-if="scope.row.status !== '已删除'">编辑</el-button>
+            <el-button type="text" size="small" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button type="text" size="small" @click="handleView(scope.row)" v-if="scope.row.status !== '已删除'">查看</el-button>
             <el-button type="text" size="small" @click="handlePageConfig(scope.row)">页面配置</el-button>
             <el-button type="text" size="small" @click="handleGroupData(scope.row)">拼团数据</el-button>
             <el-button type="text" size="small" @click="handleEnable(scope.row)" v-if="scope.row.status === '已暂停'">开启</el-button>
@@ -94,9 +94,33 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
 import baseService from "@/service/baseService";
 
-export default {
+interface ActivityItem {
+  id: number | string;
+  title: string;
+  name: string;
+  no: string;
+  startTime: string;
+  endTime: string;
+  status: number | string;
+  impUrl?: string;
+}
+
+interface TableRow {
+  index: number;
+  activityTitle: string;
+  activityName: string;
+  activityCode: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  activityLink: string;
+  id: number | string;
+}
+
+export default defineComponent({
   name: "GroupBuyManagement",
   data() {
     return {
@@ -104,9 +128,9 @@ export default {
         title: '',
         startTime: '',
         endTime: '',
-        status: ''
+        status: '' as string | number
       },
-      tableData: [],
+      tableData: [] as TableRow[],
       pagination: {
         currentPage: 1,
         pageSize: 10,
@@ -115,38 +139,52 @@ export default {
     };
   },
   created() {
-    // 初始化加载数据
     this.loadData();
   },
   methods: {
     loadData() {
-      // 构建请求参数
-      const params = {
+      const requestTime = new Date().toLocaleString('zh-CN', { hour12: false });
+      const userId = 4440;
+      const requestUrl = `${import.meta.env.VITE_APP_API}/team/up/list`;
+
+      const params: any = {
         pageIndex: this.pagination.currentPage,
         pageSize: this.pagination.pageSize,
         type: 2,
         title: this.searchForm.title,
         startTime: this.searchForm.startTime,
-        endTime: this.searchForm.endTime
+        endTime: this.searchForm.endTime,
+        status: this.searchForm.status
       };
-      
-      // 只有当 searchForm.status 不为空时，才添加 status 参数
-      if (this.searchForm.status !== '') {
-        params.status = this.searchForm.status;
+
+      if (this.searchForm.status === '') {
+        delete params.status;
       }
 
-      // 构建请求头
-      const headers = {
-        createUserId: 4440
-      };
+      const headers = { createUserId: userId };
 
-      // 发送请求
-      baseService.get('http://10.10.10.156:9002/imp-bms/team/up/list', params, headers)
-        .then(res => {
+      console.log('=== 接口调用开始 ===');
+      console.log('请求时间:', requestTime);
+      console.log('用户ID:', userId);
+      console.log('请求URL:', requestUrl);
+      console.log('请求参数:', JSON.stringify(params, null, 2));
+      console.log('请求头:', JSON.stringify(headers, null, 2));
+
+      const startTime = Date.now();
+
+      baseService.get(requestUrl, params, headers)
+        .then((res: any) => {
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+
+          console.log('=== 接口调用成功 ===');
+          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+          console.log('请求耗时:', duration + 'ms');
+          console.log('响应数据:', JSON.stringify(res, null, 2));
+
           if (res.code === '00000') {
-            // 处理返回数据
             this.pagination.total = res.total;
-            this.tableData = res.data.map((item, index) => ({
+            this.tableData = res.data.map((item: ActivityItem, index: number): TableRow => ({
               index: (this.pagination.currentPage - 1) * this.pagination.pageSize + index + 1,
               activityTitle: item.title,
               activityName: item.name,
@@ -154,20 +192,27 @@ export default {
               startTime: item.startTime,
               endTime: item.endTime,
               status: this.getStatusText(item.status),
-              activityLink: item.impUrl,
+              activityLink: item.impUrl ? item.impUrl.trim() : '',
               id: item.id
             }));
+            console.log('数据处理完成，共', this.tableData.length, '条记录');
           } else {
             console.error('获取活动列表失败:', res.msg);
           }
         })
         .catch(error => {
-          console.error('获取活动列表失败:', error);
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+
+          console.log('=== 接口调用失败 ===');
+          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+          console.log('请求耗时:', duration + 'ms');
+          console.error('错误信息:', error);
         });
     },
-    getStatusText(status) {
-      // 将数字状态转换为文字状态
-      const statusMap = {
+
+    getStatusText(status: number | string): string {
+      const statusMap: Record<number, string> = {
         1: '未开始',
         2: '进行中',
         3: '非暂停',
@@ -175,15 +220,15 @@ export default {
         5: '已暂停',
         6: '已删除'
       };
-      return statusMap[status] || status;
+      return statusMap[Number(status)] || String(status);
     },
+
     handleSearch() {
-      // 搜索逻辑
       this.pagination.currentPage = 1;
       this.loadData();
     },
+
     handleReset() {
-      // 重置逻辑
       this.searchForm = {
         title: '',
         startTime: '',
@@ -193,44 +238,61 @@ export default {
       this.pagination.currentPage = 1;
       this.loadData();
     },
+
     handleCreate() {
-      // 跳转到新建活动页面
       this.$router.push('/activity-management/group-buy/create');
     },
-    handleView(row) {
-      // 查看活动逻辑
-      console.log('查看活动', row);
+
+    handleEdit(row: TableRow) {
+      // 跳转到create.vue页面的基础设置tab
+      this.$router.push({
+        path: '/activity-management/group-buy/create',
+        query: {
+          impId: row.id,
+          tab: 'basic'
+        }
+      });
     },
-    handleEdit(row) {
-      // 编辑活动逻辑
-      console.log('编辑活动', row);
+
+    handleView(row: TableRow) {
+      // 跳转到create.vue页面的基础设置tab，设置为查看模式
+      this.$router.push({
+        path: '/activity-management/group-buy/create',
+        query: {
+          impId: row.id,
+          tab: 'basic',
+          mode: 'view'
+        }
+      });
     },
-    handlePageConfig(row) {
-      // 页面配置逻辑
-      console.log('页面配置', row);
+
+    handlePageConfig(row: TableRow) {
+      console.log('页面配置', row.id);
     },
-    handleGroupData(row) {
-      // 拼团数据逻辑
-      console.log('拼团数据', row);
+
+    handleGroupData(row: TableRow) {
+      console.log('拼团数据', row.id);
     },
-    handleEnable(row) {
-      // 开启活动逻辑
-      console.log('开启活动', row);
+
+    handleEnable(row: TableRow) {
+      console.log('开启活动', row.id);
     },
-    handleDelete(row) {
-      // 删除活动逻辑
-      console.log('删除活动', row);
+
+    handleDelete(row: TableRow) {
+      console.log('删除活动', row.id);
     },
-    handleSizeChange(size) {
+
+    handleSizeChange(size: number) {
       this.pagination.pageSize = size;
       this.loadData();
     },
-    handleCurrentChange(current) {
+
+    handleCurrentChange(current: number) {
       this.pagination.currentPage = current;
       this.loadData();
     }
   }
-};
+});
 </script>
 
 <style scoped>
