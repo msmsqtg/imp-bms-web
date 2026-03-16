@@ -267,7 +267,13 @@ export default defineComponent({
     },
 
     handlePageConfig(row: TableRow) {
-      console.log('页面配置', row.id);
+      // 跳转到页面配置
+      this.$router.push({
+        path: '/activity-management/group-buy/page-config',
+        query: {
+          impId: row.id
+        }
+      });
     },
 
     handleGroupData(row: TableRow) {

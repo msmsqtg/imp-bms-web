@@ -142,7 +142,9 @@ const autoRegisterDynamicToRouterAndNext = (to: RouteLocationNormalized): boolea
     const component = matchedSysRouteComponent(path);
     if (component) {
       let title = path;
-      if (path.includes("group-buy/create")) {
+      if (path.includes("group-buy/page-config")) {
+        title = "页面配置";
+      } else if (path.includes("group-buy/create")) {
         title = "拼团活动配置";
       } else if (path.includes("group-buy")) {
         title = "拼团活动";
@@ -200,7 +202,9 @@ const matchedSysRouteComponent = (path: string): any => {
 export const registerDynamicToRouterAndNext = (route: dynamicRouteParams): void => {
   const component = matchedSysRouteComponent(route.path);
   let title = route.path;
-  if (route.path.includes("group-buy/create")) {
+  if (route.path.includes("group-buy/page-config")) {
+    title = "页面配置";
+  } else if (route.path.includes("group-buy/create")) {
     title = "新建拼团活动";
   } else if (route.path.includes("group-buy")) {
     title = "拼团活动";
