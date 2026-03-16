@@ -129,6 +129,9 @@ export default defineComponent({
       activityTimeRange: [] as string[],
       createdImpId: null as number | null, // 存储创建成功的活动ID
       isViewMode: false, // 是否为查看模式
+      groupSettingsLoaded: false, // 拼团设置数据是否已加载
+      productsLoaded: false, // 开团商品数据是否已加载
+      prizesLoaded: false, // 助力商品数据是否已加载
       form: {
         title: '',
         startTime: '',
@@ -192,16 +195,22 @@ export default defineComponent({
             overLimit: 'allow',
             limit: '',
             specStock: '',
-            detail: ''
+            detail: '',
+            descrImage: '',
+            thumb: ''
           }
         ],
-        prizeSettings: {
-          enable: 'yes',
-          name: '',
-          price: '',
-          stock: '',
-          detail: ''
-        }
+        prizeSettings: [
+          {
+            enable: 'no',
+            name: '',
+            price: '',
+            stock: '',
+            detail: '',
+            descrImage: '',
+            thumb: ''
+          }
+        ]
       }
     };
   },
@@ -209,13 +218,32 @@ export default defineComponent({
     // 页面初始化逻辑
     this.initPage();
   },
+  watch: {
+    activeTab(newVal, oldVal) {
+      console.log('activeTab 变化:', oldVal, '->', newVal);
+      // 如果切换到拼团设置 tab，并且有 impId，则获取拼团设置数据
+      if (newVal === 'group' && this.createdImpId && !this.groupSettingsLoaded) {
+        this.getGroupSettingsDetail(this.createdImpId);
+      }
+      // 如果切换到开团商品设置 tab，并且有 impId，则获取开团商品数据
+      if (newVal === 'product' && this.createdImpId) {
+        this.getProductsDetail(this.createdImpId);
+      }
+      // 如果切换到助力奖品设置 tab，并且有 impId，则获取助力商品数据
+      if (newVal === 'prize' && this.createdImpId) {
+        this.getPrizesDetail(this.createdImpId);
+      }
+    }
+  },
   methods: {
     initPage() {
       // 获取 URL 参数
       const impId = this.$route.query.impId;
       const tab = this.$route.query.tab;
       const mode = this.$route.query.mode;
-      
+      console.log('impId:', impId);
+      console.log('tab:', tab);
+      console.log('mode:', mode);
       // 切换到指定的 tab
       if (tab) {
         const tabValue = Array.isArray(tab) ? tab[0] : tab;
@@ -259,6 +287,7 @@ export default defineComponent({
 
       const startTime = Date.now();
 
+      // 获取基础设置数据
       baseService.get(requestUrl, params, headers)
         .then((res: any) => {
           const endTime = Date.now();
@@ -272,6 +301,15 @@ export default defineComponent({
           if (res.code === '00000') {
             this.createdImpId = res.data.id;
             this.fillFormData(res.data);
+            
+            // 如果当前 tab 是助力奖品设置，则获取助力商品数据
+            if (this.activeTab === 'prize' && this.createdImpId) {
+              this.getPrizesDetail(this.createdImpId);
+            }
+            // 如果当前 tab 是开团商品设置，则获取开团商品数据
+            if (this.activeTab === 'product' && this.createdImpId) {
+              this.getProductsDetail(this.createdImpId);
+            }
           } else {
             (this as any).$message.error('获取活动详情失败：' + res.msg);
           }
@@ -285,6 +323,51 @@ export default defineComponent({
           console.log('请求耗时:', duration + 'ms');
           console.error('错误信息:', error);
           (this as any).$message.error('获取活动详情失败，请重试');
+        });
+    },
+    
+    // 获取拼团设置数据
+    getGroupSettingsDetail(impId: number) {
+      const userId = 4440;
+      const requestUrl = `${import.meta.env.VITE_APP_API}/team/up/detail/info`;
+      const params = { impId };
+      const headers = { createUserId: userId };
+
+      console.log('=== 获取拼团设置接口调用开始 ===');
+      console.log('请求时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+      console.log('用户ID:', userId);
+      console.log('请求URL:', requestUrl);
+      console.log('请求参数:', JSON.stringify(params, null, 2));
+      console.log('请求头:', JSON.stringify(headers, null, 2));
+
+      const startTime = Date.now();
+
+      baseService.get(requestUrl, params, headers)
+        .then((res: any) => {
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+
+          console.log('=== 获取拼团设置接口调用成功 ===');
+          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+          console.log('请求耗时:', duration + 'ms');
+          console.log('响应数据:', JSON.stringify(res, null, 2));
+
+          if (res.code === '00000') {
+            this.fillGroupSettingsData(res.data);
+            this.groupSettingsLoaded = true;
+          } else {
+            (this as any).$message.error('获取拼团设置失败：' + res.msg);
+          }
+        })
+        .catch(error => {
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+
+          console.log('=== 获取拼团设置接口调用失败 ===');
+          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+          console.log('请求耗时:', duration + 'ms');
+          console.error('错误信息:', error);
+          (this as any).$message.error('获取拼团设置失败，请重试');
         });
     },
     
@@ -307,6 +390,234 @@ export default defineComponent({
       }
       
       console.log('表单数据填充完成');
+    },
+    
+    // 获取开团商品数据
+    getProductsDetail(impId: number) {
+      const userId = 4440;
+      const requestUrl = `${import.meta.env.VITE_APP_API}/team/buy/detail/prize/list`;
+      const params = { impId };
+      const headers = { createUserId: userId };
+
+      console.log('=== 获取开团商品接口调用开始 ===');
+      console.log('请求时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+      console.log('用户ID:', userId);
+      console.log('请求URL:', requestUrl);
+      console.log('请求参数:', JSON.stringify(params, null, 2));
+      console.log('请求头:', JSON.stringify(headers, null, 2));
+
+      const startTime = Date.now();
+
+      baseService.get(requestUrl, params, headers)
+        .then((res: any) => {
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+
+          console.log('=== 获取开团商品接口调用成功 ===');
+          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+          console.log('请求耗时:', duration + 'ms');
+          console.log('响应数据:', JSON.stringify(res, null, 2));
+
+          if (res.code === '00000') {
+            this.fillProductsData(res.data.data);
+            // 移除 productsLoaded 标记，确保每次切换到开团商品设置 tab 时都会重新获取数据
+          } else {
+            (this as any).$message.error('获取开团商品失败：' + res.msg);
+          }
+        })
+        .catch(error => {
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+
+          console.log('=== 获取开团商品接口调用失败 ===');
+          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+          console.log('请求耗时:', duration + 'ms');
+          console.error('错误信息:', error);
+          (this as any).$message.error('获取开团商品失败，请重试');
+        });
+    },
+    
+    // 获取助力商品数据
+    getPrizesDetail(impId: number) {
+      const userId = 4440;
+      const requestUrl = `${import.meta.env.VITE_APP_API}/team/buy/detail/prize/list`;
+      const params = { impId };
+      const headers = { createUserId: userId };
+
+      console.log('=== 获取助力商品接口调用开始 ===');
+      console.log('请求时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+      console.log('用户ID:', userId);
+      console.log('请求URL:', requestUrl);
+      console.log('请求参数:', JSON.stringify(params, null, 2));
+      console.log('请求头:', JSON.stringify(headers, null, 2));
+
+      const startTime = Date.now();
+
+      baseService.get(requestUrl, params, headers)
+        .then((res: any) => {
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+
+          console.log('=== 获取助力商品接口调用成功 ===');
+          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+          console.log('请求耗时:', duration + 'ms');
+          console.log('响应数据:', JSON.stringify(res, null, 2));
+
+          if (res.code === '00000') {
+            this.fillPrizesData(res.data.data);
+          } else {
+            (this as any).$message.error('获取助力商品失败：' + res.msg);
+          }
+        })
+        .catch(error => {
+          const endTime = Date.now();
+          const duration = endTime - startTime;
+
+          console.log('=== 获取助力商品接口调用失败 ===');
+          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+          console.log('请求耗时:', duration + 'ms');
+          console.error('错误信息:', error);
+          (this as any).$message.error('获取助力商品失败，请重试');
+        });
+    },
+    
+    // 填充助力商品数据
+    fillPrizesData(data: any[]) {
+      // 清空现有奖品数据
+      this.form.prizeSettings = [];
+      
+      console.log('原始助力商品数据数量：', data.length);
+      console.log('原始助力商品数据：', data);
+      
+      // 填充助力商品数据，只保留助力商品（prizeType: 2）
+      data.forEach(item => {
+        console.log('处理商品：', item.name, 'prizeType：', item.prizeType);
+        if (item.prizeType === 2) {
+          console.log('添加助力商品：', item.name);
+          this.form.prizeSettings.push({
+            enable: 'yes',
+            name: item.name,
+            price: String(item.price),
+            stock: String(item.stock),
+            detail: item.descr,
+            descrImage: item.descrImage || '',
+            thumb: item.thumb || ''
+          });
+        }
+      });
+      
+      // 如果没有找到助力商品，添加一个默认的
+      if (this.form.prizeSettings.length === 0) {
+        console.log('未找到助力商品，添加默认数据');
+        this.form.prizeSettings.push({
+          enable: 'no',
+          name: '',
+          price: '',
+          stock: '',
+          detail: '',
+          descrImage: '',
+          thumb: ''
+        });
+      }
+      
+      console.log('助力商品数据填充完成，奖品数量：', this.form.prizeSettings.length);
+      console.log('助力商品数据：', this.form.prizeSettings);
+    },
+    
+    // 填充开团商品数据
+    fillProductsData(data: any[]) {
+      // 清空现有商品数据
+      this.form.products = [];
+      
+      console.log('原始商品数据数量：', data.length);
+      console.log('原始商品数据：', data);
+      
+      // 填充商品数据，只保留开团商品（prizeType: 1）
+      data.forEach(item => {
+        console.log('处理商品：', item.name, 'prizeType：', item.prizeType);
+        if (item.prizeType === 1) {
+          console.log('添加开团商品：', item.name);
+          this.form.products.push({
+            type: 'physical',
+            name: item.name,
+            price: String(item.price),
+            stock: String(item.stock),
+            groupPrice: String(item.teamPrice),
+            groupSize: String(item.teamNum),
+            overLimit: item.isQuota === 1 ? 'forbid' : 'allow',
+            limit: String(item.quotaNum),
+            specStock: '',
+            detail: item.descr,
+            descrImage: item.descrImage || '',
+            thumb: item.thumb || ''
+          });
+        }
+      });
+      
+      console.log('开团商品数据填充完成，商品数量：', this.form.products.length);
+      console.log('开团商品数据：', this.form.products);
+    },
+    
+    // 填充拼团设置数据
+    fillGroupSettingsData(data: any) {
+      // 填充拼团设置
+      if (data.teamType) {
+        this.form.groupSettings.teamType = String(data.teamType);
+      }
+      if (data.whitelistType) {
+        this.form.groupSettings.whitelistType = String(data.whitelistType);
+      }
+      if (data.nonDesignateCustomerMsg) {
+        this.form.groupSettings.nonDesignateCustomerMsg = data.nonDesignateCustomerMsg;
+      }
+      if (data.multipleTimesSwitch) {
+        this.form.groupSettings.multipleTimesSwitch = String(data.multipleTimesSwitch);
+      }
+      if (data.multipleTimesMsg) {
+        this.form.groupSettings.multipleTimesMsg = data.multipleTimesMsg;
+      }
+      if (data.multipleHelpSwitch) {
+        this.form.groupSettings.multipleHelpSwitch = String(data.multipleHelpSwitch);
+      }
+      if (data.multipleHelpMsg) {
+        this.form.groupSettings.multipleHelpMsg = data.multipleHelpMsg;
+      }
+      
+      // 解析并填充 rules 字段
+      if (data.rules) {
+        try {
+          const rules = typeof data.rules === 'string' ? JSON.parse(data.rules) : data.rules;
+          if (rules.up) {
+            this.form.groupSettings.rules.needGroupInfo = rules.up.nendInfo === 1 ? 'true' : 'false';
+            this.form.groupSettings.rules.formTitle = rules.up.title;
+            this.form.groupSettings.rules.formDesc = rules.up.content;
+            if (rules.up.formData && rules.up.formData.length > 0) {
+              this.form.groupSettings.rules.formItems = rules.up.formData.map((item: any) => ({
+                type: item.type,
+                title: item.title,
+                required: item.selected === 1
+              }));
+            }
+          }
+          if (rules.help) {
+            this.form.groupSettings.rules.needHelpInfo = rules.help.nendInfo === 1 ? 'true' : 'false';
+            this.form.groupSettings.rules.helpFormTitle = rules.help.title;
+            this.form.groupSettings.rules.helpFormDesc = rules.help.content;
+            if (rules.help.formData && rules.help.formData.length > 0) {
+              this.form.groupSettings.rules.helpFormItems = rules.help.formData.map((item: any) => ({
+                type: item.type,
+                title: item.title,
+                required: item.selected === 1
+              }));
+            }
+            this.form.groupSettings.rules.checkName = rules.help.checkName === 1 ? 'true' : 'false';
+          }
+        } catch (error) {
+          console.error('解析 rules 字段失败:', error);
+        }
+      }
+      
+      console.log('拼团设置数据填充完成');
     },
     
     handleTimeChange(value: any) {
@@ -538,8 +849,8 @@ export default defineComponent({
         isQuota: product.overLimit === 'forbid' ? 1 : 0,
         quotaNum: parseInt(product.limit) || 0,
         quoMsg: '您已达到该商品购买上限！',
-        thumb: '', // 需要上传图片后填充
-        descrImage: '', // 需要上传图片后填充
+        thumb: product.thumb || '',
+        descrImage: product.descrImage || '',
         descr: product.detail
       }));
 
