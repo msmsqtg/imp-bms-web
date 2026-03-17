@@ -77,14 +77,16 @@
           </div>
         </el-form-item>
         <el-form-item label="商品详情" required>
-          <el-input
-            v-model="currentPrize.detail"
-            type="textarea"
-            placeholder="请输入商品详情"
-            :rows="10"
-            :disabled="isViewMode"
-            @input="handleFormChange"
-          ></el-input>
+          <div v-if="isViewMode" class="rich-text-view">
+            <div v-html="currentPrize.detail"></div>
+          </div>
+          <div v-else class="editor-container">
+            <wang-editor
+              v-model="currentPrize.detail"
+              :default-content="currentPrize.detail"
+              @change="handleFormChange"
+            />
+          </div>
         </el-form-item>
       </el-form>
     </div>
@@ -93,8 +95,12 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref, watch, computed } from 'vue';
+import WangEditor from '@/components/wang-editor/index.vue';
 
 export default defineComponent({
+  components: {
+    WangEditor
+  },
   name: "PrizeSettings",
   props: {
     form: {
@@ -279,5 +285,20 @@ export default defineComponent({
   width: 100px;
   height: 100px;
   object-fit: cover;
+}
+.editor-container {
+  min-height: 300px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rich-text-view {
+  min-height: 300px;
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background-color: #f5f7fa;
+  overflow-y: auto;
 }
 </style>

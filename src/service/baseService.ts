@@ -52,11 +52,13 @@ export default {
    * @returns
    */
   post(path: string, body?: IObject, headers?: IObject): Promise<IHttpResponse> {
+    // 如果是 FormData，不设置 Content-Type，让浏览器自动处理
+    const isFormData = body instanceof FormData;
     return http({
       url: path,
       method: "post",
       headers: {
-        "Content-Type": "application/json;charset=UTF-8",
+        ...(isFormData ? {} : { "Content-Type": "application/json;charset=UTF-8" }),
         ...headers
       },
       data: body

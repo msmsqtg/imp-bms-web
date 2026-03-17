@@ -49,13 +49,17 @@ const editorConfig: Partial<IEditorConfig> = {
   readOnly: props.disabled,
   MENU_CONF: {
     uploadImage: {
-      server: `${app.api}/sys/oss/upload?token=${getToken()}`, // 上传地址
+      server: `${app.api}/common/upload/image`, // 统一上传地址
       fieldName: "file",
+      // 自定义请求头
+      headers: {
+        token: getToken()
+      },
       // 自定义插入图片
       customInsert(res: any, insertFn: InsertFnType) {
         // res 即服务端的返回结果
         // 从 res 中找到 url alt href ，然后插图图片
-        insertFn(res.data.src, "", "");
+        insertFn(res.data.url, "", "");
       }
     }
   }

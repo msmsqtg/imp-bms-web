@@ -169,10 +169,10 @@ export default defineComponent({
           const formData = new FormData();
           formData.append('file', file);
           try {
-            const uploadUrl = `${import.meta.env.VITE_APP_API}/file/upload`;
+            const uploadUrl = `${import.meta.env.VITE_APP_API}/common/upload/image`;
             const res: any = await baseService.post(uploadUrl, formData);
-            if (res.code === '00000' && res.data) {
-              (form.value as any)[field] = res.data;
+            if (res.code === '00000' && res.data?.url) {
+              (form.value as any)[field] = res.data.url;
               ElMessage.success('上传成功');
             }
           } catch (error) {

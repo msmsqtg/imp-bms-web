@@ -23,14 +23,16 @@
         ></el-date-picker>
       </el-form-item>
       <el-form-item label="活动规则" required>
-        <el-input
-          v-model="localForm.remark"
-          type="textarea"
-          placeholder="请输入活动规则"
-          :rows="10"
-          :disabled="isViewMode"
-          @input="handleFormChange"
-        ></el-input>
+        <div v-if="isViewMode" class="rich-text-view">
+          <div v-html="localForm.remark"></div>
+        </div>
+        <div v-else class="editor-container">
+          <wang-editor
+            v-model="localForm.remark"
+            :default-content="localForm.remark"
+            @change="handleFormChange"
+          />
+        </div>
       </el-form-item>
       <el-form-item label="活动载体">
         <el-radio-group v-model="localForm.style" :disabled="isViewMode" @change="handleFormChange">
@@ -50,8 +52,12 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref, watch } from 'vue';
+import WangEditor from '@/components/wang-editor/index.vue';
 
 export default defineComponent({
+  components: {
+    WangEditor
+  },
   name: "BasicSettings",
   props: {
     form: {
@@ -119,5 +125,21 @@ export default defineComponent({
 <style scoped>
 .basic-settings {
   padding: 20px 0;
+}
+
+.editor-container {
+  min-height: 300px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rich-text-view {
+  min-height: 300px;
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background-color: #f5f7fa;
+  overflow-y: auto;
 }
 </style>

@@ -65,14 +65,15 @@
             <a :href="scope.row.activityLink" target="_blank">{{ scope.row.activityLink }}</a>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="300">
+        <el-table-column label="操作" width="400">
           <template #default="scope">
-            <el-button type="text" size="small" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button type="text" size="small" @click="handleView(scope.row)" v-if="scope.row.status !== '已删除'">查看</el-button>
-            <el-button type="text" size="small" @click="handlePageConfig(scope.row)">页面配置</el-button>
-            <el-button type="text" size="small" @click="handleGroupData(scope.row)">拼团数据</el-button>
-            <el-button type="text" size="small" @click="handleEnable(scope.row)" v-if="scope.row.status === '已暂停'">开启</el-button>
-            <el-button type="text" size="small" @click="handleDelete(scope.row)" v-if="scope.row.status !== '已删除'" style="color: #F56C6C;">删除</el-button>
+            <el-button style="padding: 0;" type="text" size="small" @click="handleEdit(scope.row)" v-if="scope.row.status !== '已删除'">编辑</el-button>
+            <el-button style="padding: 0;" type="text" size="small" @click="handleView(scope.row)" v-if="scope.row.status !== '已删除'">查看</el-button>
+            <el-button style="padding: 0;" type="text" size="small" @click="handlePageConfig(scope.row)">页面配置</el-button>
+            <el-button style="padding: 0;" type="text" size="small" @click="handleGroupData(scope.row)">拼团数据</el-button>  
+            <el-button style="padding: 0;" type="text" size="small" @click="handlePause(scope.row)" v-if="scope.row.status === '进行中'">暂停</el-button>
+            <el-button style="padding: 0;" type="text" size="small" @click="handleEnable(scope.row)" v-if="scope.row.status === '已暂停'">开启</el-button>
+            <el-button style="padding: 0;color: #F56C6C;" type="text" size="small" @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -96,6 +97,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import baseService from "@/service/baseService";
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 interface ActivityItem {
   id: number | string;
@@ -280,12 +282,97 @@ export default defineComponent({
       console.log('拼团数据', row.id);
     },
 
+    handlePause(row: TableRow) {
+      ElMessageBox.confirm('确定要暂停该活动吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const requestUrl = `${import.meta.env.VITE_APP_API}/team/up/main/update/status`;
+        const params = {
+          id: row.id,
+          type: 1 // 1 暂停
+        };
+        const headers = { createUserId: 4440 };
+
+        baseService.post(requestUrl, params, headers)
+          .then((res: any) => {
+            if (res.code === '00000') {
+              ElMessage.success('暂停成功');
+              this.loadData();
+            } else {
+              ElMessage.error(res.msg || '暂停失败');
+            }
+          })
+          .catch(error => {
+            console.error('暂停失败:', error);
+            ElMessage.error('暂停失败');
+          });
+      }).catch(() => {
+        // 取消操作
+      });
+    },
+
     handleEnable(row: TableRow) {
-      console.log('开启活动', row.id);
+      ElMessageBox.confirm('确定要开启该活动吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'success'
+      }).then(() => {
+        const requestUrl = `${import.meta.env.VITE_APP_API}/team/up/main/update/status`;
+        const params = {
+          id: row.id,
+          type: 2 // 2 取消暂停
+        };
+        const headers = { createUserId: 4440 };
+
+        baseService.post(requestUrl, params, headers)
+          .then((res: any) => {
+            if (res.code === '00000') {
+              ElMessage.success('开启成功');
+              this.loadData();
+            } else {
+              ElMessage.error(res.msg || '开启失败');
+            }
+          })
+          .catch(error => {
+            console.error('开启失败:', error);
+            ElMessage.error('开启失败');
+          });
+      }).catch(() => {
+        // 取消操作
+      });
     },
 
     handleDelete(row: TableRow) {
-      console.log('删除活动', row.id);
+      ElMessageBox.confirm('确定要删除该活动吗？', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'error'
+      }).then(() => {
+        const requestUrl = `${import.meta.env.VITE_APP_API}/team/up/main/update/status`;
+        const params = {
+          id: row.id,
+          type: 3 // 3 删除
+        };
+        const headers = { createUserId: 4440 };
+
+        baseService.post(requestUrl, params, headers)
+          .then((res: any) => {
+            if (res.code === '00000') {
+              ElMessage.success('删除成功');
+              this.loadData();
+            } else {
+              ElMessage.error(res.msg || '删除失败');
+            }
+          })
+          .catch(error => {
+            console.error('删除失败:', error);
+            ElMessage.error('删除失败');
+          });
+      }).catch(() => {
+        // 取消操作
+      });
     },
 
     handleSizeChange(size: number) {
@@ -350,5 +437,11 @@ export default defineComponent({
 
 .status-normal {
   color: #67C23A;
+}
+
+/* 操作按钮样式 */
+:deep(.el-table-column__content .el-button) {
+  margin-right: 5px;
+  padding: 0;
 }
 </style>

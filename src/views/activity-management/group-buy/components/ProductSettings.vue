@@ -72,7 +72,7 @@
               </div>
               <!-- 上传按钮，仅在非查看模式且没有缩略图时显示 -->
               <div v-if="!isViewMode && !currentProduct.thumb" class="upload-button">
-                <el-button type="primary" plain :disabled="isViewMode">+</el-button>
+                <el-button type="primary" plain :disabled="isViewMode" @click="uploadImage('thumb')">+</el-button>
               </div>
             </div>
             <div class="upload-tip">建议尺寸：宽750px 高750px，格式为jpg/png/gif</div>
@@ -93,7 +93,7 @@
               </div>
               <!-- 上传按钮，仅在非查看模式且详情图数量小于5张时显示 -->
               <div v-if="!isViewMode && (!currentProduct.descrImage || currentProduct.descrImage.split(',').length < 5)" class="upload-button">
-                <el-button type="primary" plain :disabled="isViewMode">+</el-button>
+                <el-button type="primary" plain :disabled="isViewMode" @click="uploadImage('descrImage')">+</el-button>
               </div>
             </div>
             <div class="upload-tip">建议尺寸：宽750px 高750px，格式为jpg/png/gif</div>
@@ -101,14 +101,16 @@
         </el-form-item>
 
         <el-form-item label="商品详情" required>
-          <el-input
-            v-model="currentProduct.detail"
-            type="textarea"
-            placeholder="请输入商品详情"
-            :rows="10"
-            :disabled="isViewMode"
-            @input="handleFormChange"
-          ></el-input>
+          <div v-if="isViewMode" class="rich-text-view">
+            <div v-html="currentProduct.detail"></div>
+          </div>
+          <div v-else class="editor-container">
+            <wang-editor
+              v-model="currentProduct.detail"
+              :default-content="currentProduct.detail"
+              @change="handleFormChange"
+            />
+          </div>
         </el-form-item>
       </el-form>
     </div>
@@ -117,8 +119,14 @@
 
 <script lang="ts">
 import { defineComponent, PropType, ref, watch, computed } from 'vue';
+import WangEditor from '@/components/wang-editor/index.vue';
+import { ElMessage } from 'element-plus';
+import baseService from "@/service/baseService";
 
 export default defineComponent({
+  components: {
+    WangEditor
+  },
   name: "ProductSettings",
   props: {
     form: {
@@ -211,6 +219,46 @@ export default defineComponent({
       // 切换 tab 时不需要触发数据更新
     };
 
+    // 图片上传函数
+    const uploadImage = (field: string) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e: Event) => {
+        const target = e.target as HTMLInputElement;
+        const file = target.files?.[0];
+        if (file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          try {
+            const uploadUrl = `${import.meta.env.VITE_APP_API}/common/upload/image`;
+            const res: any = await baseService.post(uploadUrl, formData);
+            if (res.code === '00000' && res.data?.url) {
+              const index = parseInt(activeProductIndex.value);
+              if (field === 'descrImage') {
+                // 处理详情图，支持多张
+                const existingImages = localForm.value[index].descrImage || '';
+                if (existingImages) {
+                  localForm.value[index].descrImage = existingImages + ',' + res.data.url;
+                } else {
+                  localForm.value[index].descrImage = res.data.url;
+                }
+              } else {
+                // 处理缩略图，只支持一张
+                localForm.value[index][field] = res.data.url;
+              }
+              handleFormChange();
+              ElMessage.success('上传成功');
+            }
+          } catch (error) {
+            console.error('上传失败:', error);
+            ElMessage.error('上传失败');
+          }
+        }
+      };
+      input.click();
+    };
+
     return {
       localForm,
       activeProductIndex,
@@ -218,7 +266,8 @@ export default defineComponent({
       addProduct,
       deleteProduct,
       handleFormChange,
-      handleTabClick
+      handleTabClick,
+      uploadImage
     };
   }
 });
@@ -319,5 +368,20 @@ export default defineComponent({
   width: 100px;
   height: 100px;
   object-fit: cover;
+}
+.editor-container {
+  min-height: 300px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rich-text-view {
+  min-height: 300px;
+  padding: 10px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background-color: #f5f7fa;
+  overflow-y: auto;
 }
 </style>
