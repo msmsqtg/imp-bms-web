@@ -25,12 +25,23 @@ export default defineComponent({
     };
   },
   created() {
-    const impId = this.$route.query.impId;
-    if (impId) {
-      this.impId = Number(impId);
+    this.updateImpId();
+  },
+  watch: {
+    '$route.query.impId': {
+      handler() {
+        this.updateImpId();
+      },
+      immediate: true
     }
   },
   methods: {
+    updateImpId() {
+      const impId = this.$route.query.impId;
+      if (impId) {
+        this.impId = Number(impId);
+      }
+    },
     handleBack() {
       this.$router.push('/activity-management/group-buy/index');
     }
@@ -41,6 +52,9 @@ export default defineComponent({
 <style scoped>
 .page-config-wrapper {
   padding: 20px;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .page-header {

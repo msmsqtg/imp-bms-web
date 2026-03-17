@@ -15,12 +15,7 @@
 
       <!-- 中间预览区域和右侧表单编辑区域 -->
       <div class="content-area">
-        <div class="form-header">
-          <h3>{{ currentTabLabel }}</h3>
-          <span class="form-subtitle">编辑图片</span>
-        </div>
-
-        <!-- 首页配置 -->
+        <!-- 内容区域 -->
         <HomeConfig v-if="activeTab === 'home'" :impId="impId" ref="homeConfigRef" />
 
         <!-- 拼团详情配置 -->
@@ -117,13 +112,14 @@ export default defineComponent({
 
 <style scoped>
 .page-config {
-  padding: 20px;
+  height: calc(100vh - 80px);
+  overflow: hidden;
 }
 
 .config-container {
   display: flex;
   gap: 20px;
-  min-height: 600px;
+  height: 100%;
 }
 
 /* 左侧 Tab 导航 */
@@ -132,6 +128,7 @@ export default defineComponent({
   background: #fff;
   border-radius: 4px;
   border: 1px solid #e4e7ed;
+  overflow-y: auto;
 }
 
 .tab-item {
@@ -161,6 +158,9 @@ export default defineComponent({
   border-radius: 4px;
   border: 1px solid #e4e7ed;
   overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-header {

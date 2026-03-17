@@ -1,56 +1,92 @@
 <template>
   <div class="share-config">
     <div class="preview-section">
-      <h4>预览</h4>
       <div class="preview-content">
         <div class="share-preview">
-          <div class="share-header">分享给好友</div>
-          <div class="share-content">
-            <div class="share-product">
-              <div class="share-image">
-                <img :src="previewProducts[0]?.thumb" v-if="previewProducts[0]?.thumb">
-                <div class="share-placeholder" v-else>商品图</div>
-              </div>
-              <div class="share-info">
-                <div class="share-title">{{ form.title || previewProducts[0]?.name || '商品标题' }}</div>
-                <div class="share-price">¥{{ previewProducts[0]?.teamPrice || '0.00' }}</div>
-              </div>
+          <!-- 微信分享卡片 -->
+        <div class="wechat-share-card">
+          <div class="share-card-header">
+            <div class="share-card-icon">📱</div>
+            <div class="share-card-title">微信分享预览</div>
+          </div>
+          <div class="share-card-content">
+            <div class="share-card-image" v-if="form.shareBackgroundImage">
+              <img :src="form.shareBackgroundImage" alt="分享图片">
             </div>
-            <div class="share-tip">{{ form.description || '快来帮我砍价吧！' }}</div>
-            <div class="share-platforms">
-              <div class="platform-item">微信好友</div>
-              <div class="platform-item">朋友圈</div>
+            <div class="share-card-image-placeholder" v-else>
+              <div class="placeholder-icon">🖼️</div>
+              <div class="placeholder-text">分享图片</div>
+            </div>
+            <div class="share-card-info">
+              <div class="share-card-text">{{ form.shareContent || '分享文案' }}</div>
+              <div class="share-card-desc">{{ form.shareDesc || '分享说明' }}</div>
             </div>
           </div>
+        </div>
+
+        <!-- 朋友圈分享预览 -->
+        <div class="moments-preview">
+          <div class="moments-header">
+            <div class="moments-avatar"></div>
+            <div class="moments-name">用户昵称</div>
+          </div>
+          <div class="moments-content">
+            <div class="moments-text">{{ form.shareContent || '分享文案' }}</div>
+            <div class="moments-image" v-if="form.shareBackgroundImage">
+              <img :src="form.shareBackgroundImage" alt="分享图片">
+            </div>
+            <div class="moments-image-placeholder" v-else>
+              <div class="placeholder-icon">🖼️</div>
+            </div>
+          </div>
+        </div>
         </div>
       </div>
     </div>
 
     <div class="form-section">
-      <el-form :model="form" label-width="100px">
-        <el-form-item label="分享标题:">
-          <el-input v-model="form.title" placeholder="请输入分享标题"></el-input>
-        </el-form-item>
-
-        <el-form-item label="分享描述:">
-          <el-input v-model="form.description" placeholder="请输入分享描述"></el-input>
-        </el-form-item>
-
-        <el-form-item label="分享图片:">
+      <el-form :model="form" label-width="100px" v-loading="loading">
+        <!-- 分享图片 -->
+        <el-form-item label="分享图片:" required>
           <div class="upload-wrapper">
-            <div class="image-preview" v-if="form.shareImage">
-              <img :src="form.shareImage" alt="分享图片">
+            <div class="image-preview share-preview-box" v-if="form.shareBackgroundImage">
+              <img :src="form.shareBackgroundImage" alt="分享图片">
               <div class="image-actions">
-                <el-button type="danger" size="small" circle @click="form.shareImage = ''">
+                <el-button type="danger" size="small" circle @click="form.shareBackgroundImage = ''">
                   <el-icon><Delete /></el-icon>
                 </el-button>
               </div>
             </div>
-            <div class="upload-box" v-else @click="uploadImage('shareImage')">
+            <div class="upload-box share-upload" v-else @click="uploadImage('shareBackgroundImage')">
               <el-icon><Plus /></el-icon>
             </div>
           </div>
-          <div class="upload-tip">建议尺寸：宽500px 高400px</div>
+          <div class="upload-tip">建议尺寸：宽400px 高400px，格式为jpg/bmp/png/gif</div>
+        </el-form-item>
+
+        <!-- 分享文案 -->
+        <el-form-item label="分享文案:" required>
+          <el-input
+            v-model="form.shareContent"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入分享文案"
+          ></el-input>
+        </el-form-item>
+
+        <!-- 分享说明 -->
+        <el-form-item label="分享说明:" required>
+          <el-input
+            v-model="form.shareDesc"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入分享说明"
+          ></el-input>
+        </el-form-item>
+
+        <!-- 提交按钮 -->
+        <el-form-item>
+          <el-button type="primary" @click="save" :loading="loading">保存</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -58,8 +94,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted, watch } from 'vue';
 import { Plus, Delete } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 import baseService from "@/service/baseService";
 
 export default defineComponent({
@@ -76,44 +113,145 @@ export default defineComponent({
   },
   setup(props) {
     const form = ref({
-      title: '',
-      description: '',
-      shareImage: ''
+      id: null as number | null,
+      impId: props.impId,
+      headerImage: '',
+      backgroundImage: '',
+      homeSwitch: 1,
+      homeIcon: '',
+      goodsBg: '',
+      teamUpInviteBtn: '',
+      backgroundImageOfButton: '',
+      bottomImage: '',
+      teamBuySuccessBtn: '',
+      teamBuyFailBtn: '',
+      friendEnterBg: '',
+      friendEnterBtn: '',
+      friendHelpBg: '',
+      friendHelpBtn: '',
+      friendHelpTextColor: '',
+      shareBackgroundImage: '',
+      shareContent: '',
+      shareDesc: ''
     });
 
-    const previewProducts = ref<any[]>([]);
+    const loading = ref(false);
 
-    const loadProducts = async () => {
+    const uploadImage = (field: string) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e: Event) => {
+        const target = e.target as HTMLInputElement;
+        const file = target.files?.[0];
+        if (file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          try {
+            const uploadUrl = `${import.meta.env.VITE_APP_API}/file/upload`;
+            const res: any = await baseService.post(uploadUrl, formData);
+            if (res.code === '00000' && res.data) {
+              (form.value as any)[field] = res.data;
+              ElMessage.success('上传成功');
+            }
+          } catch (error) {
+            console.error('上传失败:', error);
+            ElMessage.error('上传失败');
+          }
+        }
+      };
+      input.click();
+    };
+
+    const loadConfig = async () => {
       try {
-        const requestUrl = `${import.meta.env.VITE_APP_API}/team/buy/detail/prize/list`;
+        loading.value = true;
+        const requestUrl = `${import.meta.env.VITE_APP_API}/team/buy/h5/detail/info`;
         const params = { impId: props.impId };
-        const headers = { createUserId: 4440 };
-
-        const res: any = await baseService.get(requestUrl, params, headers);
-        if (res.code === '00000') {
-          previewProducts.value = res.data.data.filter((item: any) => item.prizeType === 1);
+        const res: any = await baseService.get(requestUrl, params);
+        if (res.code === '00000' && res.data) {
+          const data = res.data;
+          form.value.id = data.id || null;
+          form.value.headerImage = data.headerImage || '';
+          form.value.backgroundImage = data.backgroundImage || '';
+          form.value.homeSwitch = data.homeSwitch ?? 1;
+          form.value.homeIcon = data.homeIcon || '';
+          form.value.goodsBg = data.goodsBg || '';
+          form.value.teamUpInviteBtn = data.teamUpInviteBtn || '';
+          form.value.backgroundImageOfButton = data.backgroundImageOfButton || '';
+          form.value.bottomImage = data.bottomImage || '';
+          form.value.teamBuySuccessBtn = data.teamBuySuccessBtn || '';
+          form.value.teamBuyFailBtn = data.teamBuyFailBtn || '';
+          form.value.friendEnterBg = data.friendEnterBg || '';
+          form.value.friendEnterBtn = data.friendEnterBtn || '';
+          form.value.friendHelpBg = data.friendHelpBg || '';
+          form.value.friendHelpBtn = data.friendHelpBtn || '';
+          form.value.friendHelpTextColor = data.friendHelpTextColor || '';
+          form.value.shareBackgroundImage = data.shareBackgroundImage || '';
+          form.value.shareContent = data.shareContent || '';
+          form.value.shareDesc = data.shareDesc || '';
         }
       } catch (error) {
-        console.error('获取商品数据失败:', error);
+        console.error('获取配置数据失败:', error);
+      } finally {
+        loading.value = false;
       }
     };
 
-    const uploadImage = (field: string) => {
-      console.log(`上传图片 - field: ${field}`);
-    };
-
     const save = async () => {
-      console.log('保存分享效果配置', form.value);
-      // TODO: 调用分享效果配置保存接口
+      try {
+        loading.value = true;
+        const requestUrl = `${import.meta.env.VITE_APP_API}/team/buy/h5/detail/add`;
+        const params = {
+          impId: form.value.impId,
+          headerImage: form.value.headerImage,
+          backgroundImage: form.value.backgroundImage,
+          homeSwitch: form.value.homeSwitch,
+          homeIcon: form.value.homeIcon,
+          goodsBg: form.value.goodsBg,
+          teamUpInviteBtn: form.value.teamUpInviteBtn,
+          backgroundImageOfButton: form.value.backgroundImageOfButton,
+          bottomImage: form.value.bottomImage,
+          teamBuySuccessBtn: form.value.teamBuySuccessBtn,
+          teamBuyFailBtn: form.value.teamBuyFailBtn,
+          friendEnterBg: form.value.friendEnterBg,
+          friendEnterBtn: form.value.friendEnterBtn,
+          friendHelpBg: form.value.friendHelpBg,
+          friendHelpBtn: form.value.friendHelpBtn,
+          friendHelpTextColor: form.value.friendHelpTextColor,
+          shareBackgroundImage: form.value.shareBackgroundImage,
+          shareContent: form.value.shareContent,
+          shareDesc: form.value.shareDesc,
+          id: form.value.id
+        };
+        const res: any = await baseService.post(requestUrl, params);
+        if (res.code === '00000') {
+          ElMessage.success('保存成功');
+          loadConfig();
+        } else {
+          ElMessage.error(res.msg || '保存失败');
+        }
+      } catch (error) {
+        console.error('保存失败:', error);
+        ElMessage.error('保存失败');
+      } finally {
+        loading.value = false;
+      }
     };
 
     onMounted(() => {
-      loadProducts();
+      loadConfig();
+    });
+
+    // 监听 impId 变化，重新加载配置
+    watch(() => props.impId, (newImpId) => {
+      form.value.impId = newImpId;
+      loadConfig();
     });
 
     return {
       form,
-      previewProducts,
+      loading,
       uploadImage,
       save
     };
@@ -132,6 +270,9 @@ export default defineComponent({
   background: #f5f7fa;
   padding: 15px;
   border-radius: 4px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .preview-section h4 {
@@ -141,106 +282,181 @@ export default defineComponent({
 }
 
 .preview-content {
-  background: #e8f5e9;
+  background: #fff;
   border-radius: 10px;
-  overflow: hidden;
-  padding: 15px;
+  overflow: auto;
+  padding: 20px;
+  width: 375px;
+  height: 667px;
 }
 
 .share-preview {
-  background: #fff;
-  border-radius: 8px;
-  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.share-header {
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 15px;
-  color: #333;
-}
-
-.share-content {
+/* 微信分享卡片 */
+.wechat-share-card {
   background: #f9f9f9;
   border-radius: 8px;
-  padding: 10px;
+  padding: 15px;
+  border: 1px solid #e4e7ed;
 }
 
-.share-product {
+.share-card-header {
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
 }
 
-.share-image {
-  width: 70px;
-  height: 70px;
+.share-card-icon {
+  font-size: 20px;
+}
+
+.share-card-title {
+  font-size: 14px;
+  color: #333;
+  font-weight: bold;
+}
+
+.share-card-content {
+  display: flex;
+  gap: 12px;
+  background: #fff;
+  padding: 10px;
   border-radius: 6px;
-  overflow: hidden;
 }
 
-.share-image img {
+.share-card-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.share-card-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.share-placeholder {
-  width: 100%;
-  height: 100%;
+.share-card-image-placeholder {
+  width: 80px;
+  height: 80px;
   background: #f0f0f0;
+  border-radius: 4px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #999;
+  flex-shrink: 0;
+}
+
+.placeholder-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.placeholder-text {
   font-size: 11px;
+  color: #999;
 }
 
-.share-info {
+.share-card-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.share-title {
-  font-size: 13px;
+.share-card-text {
+  font-size: 14px;
   color: #333;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  line-height: 1.4;
 }
 
-.share-price {
-  color: #f56c6c;
-  font-size: 16px;
+.share-card-desc {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.4;
+}
+
+/* 朋友圈预览 */
+.moments-preview {
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  border: 1px solid #e4e7ed;
+}
+
+.moments-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.moments-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  background: #07c160;
+}
+
+.moments-name {
+  font-size: 14px;
+  color: #576b95;
   font-weight: bold;
 }
 
-.share-tip {
-  text-align: center;
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 15px;
+.moments-content {
+  padding-left: 50px;
 }
 
-.share-platforms {
-  display: flex;
-  gap: 10px;
+.moments-text {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 10px;
+  line-height: 1.5;
 }
 
-.platform-item {
-  flex: 1;
+.moments-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.moments-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.moments-image-placeholder {
+  width: 120px;
+  height: 120px;
   background: #f0f0f0;
-  padding: 8px;
-  border-radius: 5px;
-  text-align: center;
-  font-size: 11px;
-  color: #666;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .form-section {
-  width: 300px;
+  width: 350px;
   background: #fff;
   padding: 15px;
   border-radius: 4px;
   border: 1px solid #e4e7ed;
+  overflow-y: auto;
+  max-height: calc(100vh - 40px);
 }
 
 .upload-wrapper {
@@ -250,11 +466,14 @@ export default defineComponent({
 
 .image-preview {
   position: relative;
-  width: 120px;
-  height: 120px;
   border-radius: 4px;
   overflow: hidden;
   border: 1px solid #e4e7ed;
+}
+
+.share-preview-box {
+  width: 120px;
+  height: 120px;
 }
 
 .image-preview img {
@@ -270,8 +489,6 @@ export default defineComponent({
 }
 
 .upload-box {
-  width: 120px;
-  height: 120px;
   border: 2px dashed #d9d9d9;
   border-radius: 4px;
   display: flex;
@@ -279,6 +496,11 @@ export default defineComponent({
   justify-content: center;
   cursor: pointer;
   transition: border-color 0.3s;
+}
+
+.share-upload {
+  width: 120px;
+  height: 120px;
 }
 
 .upload-box:hover {
