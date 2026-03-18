@@ -1,124 +1,23 @@
 <template>
   <div class="page-config">
-    <!-- 左侧 Tab 导航 -->
+    <!-- 顶部 Tab 导航 -->
     <div class="config-tabs">
       <el-menu
         :default-active="activeTab"
-        class="el-menu-vertical-demo"
+        class="el-menu-demo"
+        mode="horizontal"
         @select="handleTabChange"
       >
         <el-menu-item index="basic">
           <span>基础设置</span>
         </el-menu-item>
-        <el-menu-item index="home">
-          <span>首页装修</span>
-        </el-menu-item>
         <el-menu-item index="login">
           <span>登录页面</span>
-        </el-menu-item>
-        <el-menu-item index="data">
-          <span>资料提交</span>
-        </el-menu-item>
-        <el-menu-item index="customer">
-          <span>我的客户</span>
-        </el-menu-item>
-        <el-menu-item index="sign-in">
-          <span>签到页面</span>
-        </el-menu-item>
-        <el-menu-item index="share">
-          <span>分享设置</span>
         </el-menu-item>
       </el-menu>
     </div>
 
-    <!-- 中间预览区域 -->
-    <div class="preview-area" v-if="activeTab !== 'basic'">
-      <div class="preview-container">
-        <div class="preview-content">
-          <!-- 预览内容 -->
-          <div v-if="activeTab === 'home'">
-            <h3>首页装修预览</h3>
-            <div class="mobile-content" :style="{ backgroundColor: uiConfig.module_bg_color || '#f5f5f5' }">
-              <div class="header" :style="{ background: uiConfig.theme_bg_pic ? `url(${uiConfig.theme_bg_pic}) no-repeat center center / cover` : '#ff6b6b' }">
-                <div class="brand-crown">品牌清仓</div>
-                <div class="promotion-banner">
-                  <div class="promotion-text" :style="{ color: uiConfig.text_color || '#fff' }">全场 99元封顶</div>
-                </div>
-              </div>
-              <div class="product-section">
-                <div class="product-item">
-                  <img src="https://via.placeholder.com/150x150?text=Product" alt="产品" class="product-image">
-                </div>
-                <div class="product-item">
-                  <img src="https://via.placeholder.com/150x150?text=Product" alt="产品" class="product-image">
-                </div>
-              </div>
-              <div class="action-buttons">
-                <div class="button customer-button">我的客户</div>
-                <div class="button rule-button">活动规则</div>
-              </div>
-              <div class="footer">
-                <div class="action-button" :style="{ backgroundColor: uiConfig.module_bg_color || '#ff6b6b', color: uiConfig.text_color || '#fff' }">立即领取</div>
-              </div>
-            </div>
-          </div>
-          <div v-else-if="activeTab === 'login'">
-            <h3>登录页面预览</h3>
-            <div class="preview-form">
-              <p>登录页面设置预览</p>
-            </div>
-          </div>
-          <div v-else-if="activeTab === 'data'">
-            <h3>资料提交预览</h3>
-            <div class="preview-form">
-              <p>资料提交页面设置预览</p>
-            </div>
-          </div>
-          <div v-else-if="activeTab === 'customer'">
-            <h3>我的客户预览</h3>
-            <div class="preview-customer">
-              <p>我的客户页面设置预览</p>
-            </div>
-          </div>
-          <div v-else-if="activeTab === 'sign-in'">
-            <h3>签到页面预览</h3>
-            <div class="preview-sign-in">
-              <p>签到页面设置预览</p>
-            </div>
-          </div>
-          <div v-else-if="activeTab === 'share'">
-            <h3>分享设置预览</h3>
-            <div v-if="uiConfig.share_poster_pic" class="preview-image">
-              <img :src="uiConfig.share_poster_pic" alt="分享海报图">
-            </div>
-            <div v-else class="preview-placeholder">
-              <span>分享海报图预览</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 基础设置专用区域 -->
-    <div class="basic-setting-area" v-else>
-      <div class="basic-content">
-        <div class="basic-tip">
-          <el-alert
-            title="基础设置"
-            type="info"
-            :closable="false"
-            show-icon
-          >
-            <template #default>
-              <p>请填写活动的基本信息，包括活动名称、活动编码、活动类型等。</p>
-              <p>填写完成后点击保存按钮，然后可以进行其他页面的装修配置。</p>
-            </template>
-          </el-alert>
-        </div>
-      </div>
-    </div>
-
-    <!-- 右侧配置区域 -->
+    <!-- 配置区域 -->
     <div class="config-area">
       <div class="config-content">
         <!-- 基础设置 -->
@@ -126,17 +25,8 @@
           v-if="activeTab === 'basic'" 
           :form="form" 
           :is-view-mode="isViewMode"
-          @update:form="(value) => form = value"
+          @update:form="(value: typeof form) => form = value"
           @save-success="handleSaveSuccess"
-        />
-
-        <!-- 首页装修 -->
-        <home-config 
-          v-if="activeTab === 'home'" 
-          :ui-config="uiConfig" 
-          :invitation-id="form.id"
-          :is-view-mode="isViewMode"
-          @update:ui-config="(value) => uiConfig = value"
         />
 
         <!-- 登录页面 -->
@@ -146,49 +36,13 @@
           :ui-config="uiConfig" 
           :invitation-id="form.id"
           :is-view-mode="isViewMode"
-          @update:form="(value) => form = value"
-          @update:ui-config="(value) => uiConfig = value"
-        />
-
-        <!-- 资料提交 -->
-        <data-config 
-          v-if="activeTab === 'data'" 
-          :form="form" 
-          :ui-config="uiConfig" 
-          :invitation-id="form.id"
-          :is-view-mode="isViewMode"
-          @update:form="(value) => form = value"
-          @update:ui-config="(value) => uiConfig = value"
-        />
-
-        <!-- 我的客户 -->
-        <customer-config 
-          v-if="activeTab === 'customer'" 
-          :ui-config="uiConfig" 
-          :invitation-id="form.id"
-          :is-view-mode="isViewMode"
-          @update:ui-config="(value) => uiConfig = value"
-        />
-
-        <!-- 签到页面 -->
-        <sign-in-config 
-          v-if="activeTab === 'sign-in'" 
-          :ui-config="uiConfig" 
-          :invitation-id="form.id"
-          :is-view-mode="isViewMode"
-          @update:ui-config="(value) => uiConfig = value"
-        />
-
-        <!-- 分享设置 -->
-        <share-config 
-          v-if="activeTab === 'share'" 
-          :ui-config="uiConfig" 
-          :invitation-id="form.id"
-          :is-view-mode="isViewMode"
-          @update:ui-config="(value) => uiConfig = value"
+          @update:form="(value: typeof form) => form = value"
+          @update:ui-config="(value: typeof uiConfig) => uiConfig = value"
         />
       </div>
     </div>
+
+
   </div>
 </template>
 
@@ -197,22 +51,12 @@ import { defineComponent, ref, computed, onMounted } from 'vue';
 import baseService from "@/service/baseService";
 import { ElMessage } from 'element-plus';
 import BasicConfig from './page-config/basic-config.vue';
-import HomeConfig from './page-config/home-config.vue';
 import LoginConfig from './page-config/login-config.vue';
-import DataConfig from './page-config/data-config.vue';
-import CustomerConfig from './page-config/customer-config.vue';
-import SignInConfig from './page-config/sign-in-config.vue';
-import ShareConfig from './page-config/share-config.vue';
 
 export default defineComponent({
   components: {
     BasicConfig,
-    HomeConfig,
-    LoginConfig,
-    DataConfig,
-    CustomerConfig,
-    SignInConfig,
-    ShareConfig
+    LoginConfig
   },
   name: "InvitationPageConfig",
   props: {
@@ -278,6 +122,8 @@ export default defineComponent({
   watch: {
     invitationId: {
       handler(newId) {
+        console.log('=== invitationId 变化 ===');
+        console.log('新的 invitationId:', newId);
         if (newId) {
           this.loadInvitationData(newId);
         }
@@ -310,18 +156,71 @@ export default defineComponent({
     async loadInvitationData(id: string) {
       this.isLoading = true;
       try {
-        // 加载基础活动数据
-        const baseUrl = `${import.meta.env.VITE_APP_API}/invitation/detail`;
-        const baseRes: any = await baseService.get(baseUrl, { id });
-        if (baseRes.code === '00000') {
-          this.form = baseRes.data;
-        }
-
-        // 加载UI配置数据
-        const uiUrl = `${import.meta.env.VITE_APP_API}/invitation/ui/detail`;
-        const uiRes: any = await baseService.get(uiUrl, { invitation_id: id });
-        if (uiRes.code === '00000') {
-          this.uiConfig = uiRes.data;
+        // 加载活动数据
+        const url = `${import.meta.env.VITE_APP_API}/api/invitation/activity/${id}`;
+        console.log('=== 查看/编辑活动接口调用开始 ===');
+        console.log('请求URL:', url);
+        
+        const startTime = Date.now();
+        const res: any = await baseService.get(url);
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+        
+        console.log('=== 查看/编辑活动接口调用成功 ===');
+        console.log('请求耗时:', duration + 'ms');
+        console.log('响应数据:', JSON.stringify(res, null, 2));
+        
+        if (res.code === '00000') {
+          const activityData = res.data.activity;
+          // 转换数据格式，适配表单结构
+          this.form = {
+            id: activityData.id,
+            store_id: activityData.storeId,
+            name: activityData.name,
+            activity_no: activityData.activityNo || '',
+            activity_type: activityData.activityType,
+            activity_id: activityData.activityId,
+            start_time: activityData.startTime,
+            end_time: activityData.endTime,
+            carrier_type: activityData.carrierType,
+            login_switch: activityData.loginSwitch,
+            login_whitelist_switch: activityData.loginWhitelistSwitch,
+            data_switch: activityData.dataSwitch,
+            c_data_switch: activityData.cdataSwitch || 2,
+            customer_switch: activityData.customerSwitch,
+            sign_in_status: activityData.signInStatus,
+            login_form: activityData.loginForm,
+            data_form: activityData.dataForm,
+            c_data_form: activityData.cdataForm,
+            share_mode: activityData.shareMode,
+            is_del: activityData.isDel,
+            tenant_id: activityData.tenantId
+          };
+          
+          // 转换UI配置数据
+          this.uiConfig = {
+            id: activityData.uiId,
+            store_id: activityData.uiStoreId,
+            invitation_id: activityData.invitationId,
+            theme_bg_pic: activityData.themeBgPic,
+            home_bg_pic: activityData.homeBgPic,
+            module_bg_color: activityData.moduleBgColor,
+            text_color: activityData.textColor,
+            share_poster_pic: activityData.sharePosterPic,
+            share_bg_setting: activityData.shareBgSetting,
+            poster_pic_text: activityData.posterPicText,
+            share_text: activityData.shareText,
+            login_setting: activityData.loginSetting,
+            data_setting: activityData.dataSetting,
+            c_data_setting: activityData.cdataSetting,
+            customer_setting: activityData.customerSetting,
+            sign_in_setting: activityData.signInSetting,
+            invitation_rule_setting: activityData.invitationRuleSetting,
+            third_link_address: activityData.thirdLinkAddress
+          };
+          
+          console.log('数据转换完成，表单数据:', JSON.stringify(this.form, null, 2));
+          console.log('UI配置数据:', JSON.stringify(this.uiConfig, null, 2));
         }
       } catch (error) {
         console.error('加载数据失败:', error);
@@ -342,18 +241,20 @@ export default defineComponent({
 <style scoped>
 .page-config {
   display: flex;
+  flex-direction: column;
   height: calc(100vh - 120px);
   overflow: hidden;
 }
 
 .config-tabs {
-  width: 180px;
-  border-right: 1px solid #e4e7ed;
+  width: 100%;
+  border-bottom: 1px solid #e4e7ed;
   background-color: #fff;
 }
 
-:deep(.el-menu-vertical-demo) {
+:deep(.el-menu-demo) {
   background-color: #fff;
+  border-bottom: none;
 }
 
 :deep(.el-menu-item) {
@@ -366,12 +267,12 @@ export default defineComponent({
   padding: 12px 20px;
 }
 
-:deep(.el-menu-vertical-demo .el-menu-item:not(.is-active)) {
+:deep(.el-menu-demo .el-menu-item:not(.is-active)) {
   color: #000;
   background-color: #f5f7fa;
 }
 
-:deep(.el-menu-vertical-demo .el-menu-item:not(.is-active):hover) {
+:deep(.el-menu-demo .el-menu-item:not(.is-active):hover) {
   color: #409eff;
   background-color: #ecf5ff;
 }
@@ -563,13 +464,14 @@ export default defineComponent({
 .config-area {
   flex: 1;
   min-width: 400px;
-  border-left: 1px solid #e4e7ed;
+  border-left: none;
   background-color: #f5f7fa;
   overflow-y: auto;
 }
 
 .config-content {
   padding: 20px;
+  padding-bottom: 40px;
 }
 
 .config-panel {

@@ -151,7 +151,7 @@ export default defineComponent({
     loadData() {
       const requestTime = new Date().toLocaleString('zh-CN', { hour12: false });
       const userId = 4440;
-      const requestUrl = `${import.meta.env.VITE_APP_API}/invitation/list`;
+      const requestUrl = `${import.meta.env.VITE_APP_API}/api/invitation/activity/list`;
 
       const params: any = {
         pageIndex: this.pagination.currentPage,
@@ -190,15 +190,15 @@ export default defineComponent({
 
           if (res.code === '00000') {
             this.pagination.total = res.total;
-            this.tableData = res.data.map((item: InvitationItem, index: number): TableRow => ({
+            this.tableData = res.data.map((item: any, index: number): TableRow => ({
               index: (this.pagination.currentPage - 1) * this.pagination.pageSize + index + 1,
               activityName: item.name,
-              activityCode: item.code,
-              activityTitle: item.title,
-              activityLink: item.activityLink ? item.activityLink.trim() : '',
-              formSubmitLink: item.formSubmitLink ? item.formSubmitLink.trim() : '',
+              activityCode: item.activityNo || '',
+              activityTitle: item.name, // 使用活动名称作为标题
+              activityLink: item.thirdLinkAddress ? item.thirdLinkAddress.trim() : '',
+              formSubmitLink: item.thirdLinkAddress ? item.thirdLinkAddress.trim() : '',
               activityTime: `${item.startTime} 至 ${item.endTime}`,
-              status: this.getStatusText(item.status),
+              status: this.getStatusText(item.isDel),
               id: item.id
             }));
             console.log('数据处理完成，共', this.tableData.length, '条记录');
@@ -217,15 +217,8 @@ export default defineComponent({
         });
     },
 
-    getStatusText(status: number | string): string {
-      const statusMap: Record<number, string> = {
-        1: '未开始',
-        2: '进行中',
-        3: '已结束',
-        4: '已暂停',
-        5: '已删除'
-      };
-      return statusMap[Number(status)] || String(status);
+    getStatusText(isDel: number | string): string {
+      return Number(isDel) === 0 ? '正常' : '已删除';
     },
 
     handleSearch() {

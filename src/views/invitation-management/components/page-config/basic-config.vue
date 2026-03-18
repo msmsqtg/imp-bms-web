@@ -1,6 +1,5 @@
 <template>
   <div class="basic-config">
-    <h3>基础设置</h3>
     <el-form :model="form" label-width="120px">
       <el-form-item label="活动名称" required>
         <el-input v-model="form.name" placeholder="请输入活动名称" :disabled="isViewMode"></el-input>
@@ -128,8 +127,8 @@ export default defineComponent({
       
       try {
         const url = formData.id 
-          ? `${import.meta.env.VITE_APP_API}/invitation/update` 
-          : `${import.meta.env.VITE_APP_API}/invitation/create`;
+          ? `${import.meta.env.VITE_APP_API}/api/invitation/update` 
+          : `${import.meta.env.VITE_APP_API}/api/invitation/create`;
         
         const res: any = await baseService.post(url, formData);
         if (res.code === '00000') {
