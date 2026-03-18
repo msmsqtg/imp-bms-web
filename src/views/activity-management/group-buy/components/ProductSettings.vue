@@ -106,8 +106,8 @@
           </div>
           <div v-else class="editor-container">
             <wang-editor
-              v-model="currentProduct.detail"
-              :default-content="currentProduct.detail"
+              v-model="safeDetail"
+              :default-content="safeDetail"
               @change="handleFormChange"
             />
           </div>
@@ -171,6 +171,19 @@ export default defineComponent({
     const currentProduct = computed(() => {
       const index = parseInt(activeProductIndex.value);
       return localForm.value[index] || {};
+    });
+
+    // 确保 detail 是字符串类型
+    const safeDetail = computed({
+      get: () => {
+        const detail = currentProduct.value.detail;
+        return typeof detail === 'string' ? detail : '';
+      },
+      set: (value) => {
+        const index = parseInt(activeProductIndex.value);
+        localForm.value[index].detail = value;
+        handleFormChange();
+      }
     });
 
     // 初始打印商品数组
@@ -263,6 +276,7 @@ export default defineComponent({
       localForm,
       activeProductIndex,
       currentProduct,
+      safeDetail,
       addProduct,
       deleteProduct,
       handleFormChange,

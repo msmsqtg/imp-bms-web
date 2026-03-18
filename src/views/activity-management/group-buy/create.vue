@@ -376,7 +376,8 @@ export default defineComponent({
       // 填充基础设置
       this.form.title = data.title;
       this.form.name = data.name;
-      this.form.remark = data.remark;
+      // 确保 remark 是字符串类型
+      this.form.remark = typeof data.remark === 'string' ? data.remark : '';
       this.form.style = String(data.style);
       this.form.key = data.key;
       this.form.secret = data.secret;
@@ -499,7 +500,7 @@ export default defineComponent({
             name: item.name,
             price: String(item.price),
             stock: String(item.stock),
-            detail: item.descr,
+            detail: typeof item.descr === 'string' ? item.descr : '',
             descrImage: item.descrImage || '',
             thumb: item.thumb || ''
           });
@@ -547,7 +548,7 @@ export default defineComponent({
             overLimit: item.isQuota === 1 ? 'forbid' : 'allow',
             limit: String(item.quotaNum),
             specStock: '',
-            detail: item.descr,
+            detail: typeof item.descr === 'string' ? item.descr : '',
             descrImage: item.descrImage || '',
             thumb: item.thumb || ''
           });

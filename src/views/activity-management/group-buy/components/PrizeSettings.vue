@@ -82,8 +82,8 @@
           </div>
           <div v-else class="editor-container">
             <wang-editor
-              v-model="currentPrize.detail"
-              :default-content="currentPrize.detail"
+              v-model="safeDetail"
+              :default-content="safeDetail"
               @change="handleFormChange"
             />
           </div>
@@ -147,6 +147,19 @@ export default defineComponent({
       return localForm.value[index] || {};
     });
 
+    // 确保 detail 是字符串类型
+    const safeDetail = computed({
+      get: () => {
+        const detail = currentPrize.value.detail;
+        return typeof detail === 'string' ? detail : '';
+      },
+      set: (value) => {
+        const index = parseInt(activePrizeIndex.value);
+        localForm.value[index].detail = value;
+        handleFormChange();
+      }
+    });
+
     // 初始打印奖品数组
     console.log('助力奖品设置页 - 初始奖品数组：', localForm.value);
     console.log('助力奖品设置页 - 初始奖品数量：', localForm.value.length);
@@ -192,6 +205,7 @@ export default defineComponent({
       localForm,
       activePrizeIndex,
       currentPrize,
+      safeDetail,
       addPrize,
       deletePrize,
       handleFormChange,

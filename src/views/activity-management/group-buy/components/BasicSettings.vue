@@ -28,8 +28,8 @@
         </div>
         <div v-else class="editor-container">
           <wang-editor
-            v-model="localForm.remark"
-            :default-content="localForm.remark"
+            v-model="safeRemark"
+            :default-content="safeRemark"
             @change="handleFormChange"
           />
         </div>
@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, watch } from 'vue';
+import { defineComponent, PropType, ref, watch, computed } from 'vue';
 import WangEditor from '@/components/wang-editor/index.vue';
 
 export default defineComponent({
@@ -96,7 +96,17 @@ export default defineComponent({
       { deep: true }
     );
 
-
+    // 确保 remark 是字符串类型
+    const safeRemark = computed({
+      get: () => {
+        const remark = localForm.value.remark;
+        return typeof remark === 'string' ? remark : '';
+      },
+      set: (value) => {
+        localForm.value.remark = value;
+        handleFormChange();
+      }
+    });
 
     const handleTimeChange = (value: any) => {
       localActivityTimeRange.value = value;
@@ -115,6 +125,7 @@ export default defineComponent({
     return {
       localForm,
       localActivityTimeRange,
+      safeRemark,
       handleTimeChange,
       handleFormChange
     };
