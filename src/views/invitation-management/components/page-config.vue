@@ -1,48 +1,39 @@
 <template>
   <div class="page-config">
     <!-- 顶部 Tab 导航 -->
-    <div class="config-tabs">
-      <el-menu
-        :default-active="activeTab"
-        class="el-menu-demo"
-        mode="horizontal"
-        @select="handleTabChange"
+    <div class="top-tabs">
+      <div
+        v-for="tab in tabs"
+        :key="tab.key"
+        :class="['tab-item', { active: activeTab === tab.key }]"
+        @click="activeTab = tab.key"
       >
-        <el-menu-item index="basic">
-          <span>基础设置</span>
-        </el-menu-item>
-        <el-menu-item index="login">
-          <span>登录页面</span>
-        </el-menu-item>
-      </el-menu>
-    </div>
-
-    <!-- 配置区域 -->
-    <div class="config-area">
-      <div class="config-content">
-        <!-- 基础设置 -->
-        <basic-config 
-          v-if="activeTab === 'basic'" 
-          :form="form" 
-          :is-view-mode="isViewMode"
-          @update:form="(value: typeof form) => form = value"
-          @save-success="handleSaveSuccess"
-        />
-
-        <!-- 登录页面 -->
-        <login-config 
-          v-if="activeTab === 'login'" 
-          :form="form" 
-          :ui-config="uiConfig" 
-          :invitation-id="form.id"
-          :is-view-mode="isViewMode"
-          @update:form="(value: typeof form) => form = value"
-          @update:ui-config="(value: typeof uiConfig) => uiConfig = value"
-        />
+        {{ tab.label }}
       </div>
     </div>
 
+    <!-- 下方内容区域 -->
+    <div class="content-area">
+      <!-- 基础设置 -->
+      <basic-config 
+        v-if="activeTab === 'basic'" 
+        :form="form" 
+        :is-view-mode="isViewMode"
+        @update:form="(value: typeof form) => form = value"
+        @save-success="handleSaveSuccess"
+      />
 
+      <!-- 登录页面 -->
+      <login-config 
+        v-if="activeTab === 'login'" 
+        :form="form" 
+        :ui-config="uiConfig" 
+        :invitation-id="form.id"
+        :is-view-mode="isViewMode"
+        @update:form="(value: typeof form) => form = value"
+        @update:ui-config="(value: typeof uiConfig) => uiConfig = value"
+      />
+    </div>
   </div>
 </template>
 
@@ -73,6 +64,10 @@ export default defineComponent({
   data() {
     return {
       activeTab: 'basic',
+      tabs: [
+        { key: 'basic', label: '基础设置' },
+        { key: 'login', label: '登录页面' }
+      ],
       form: {
         id: '',
         store_id: 0,
@@ -132,10 +127,6 @@ export default defineComponent({
     }
   },
   methods: {
-    handleTabChange(tab: string) {
-      this.activeTab = tab;
-    },
-
     getActivityTypeText(type: number | string) {
       const typeMap: Record<number, string> = {
         1: '邀约',
@@ -246,321 +237,52 @@ export default defineComponent({
   overflow: hidden;
 }
 
-.config-tabs {
+/* 顶部 Tab 导航 */
+.top-tabs {
+  display: flex;
+  background: #fff;
   width: 100%;
   border-bottom: 1px solid #e4e7ed;
-  background-color: #fff;
 }
 
-:deep(.el-menu-demo) {
-  background-color: #fff;
-  border-bottom: none;
-}
-
-:deep(.el-menu-item) {
-  background-color: #f5f7fa;
-  margin: 5px 10px;
-  border-radius: 4px;
-  border: 1px solid #e4e7ed;
-  color: #000;
-  font-weight: 500;
-  padding: 12px 20px;
-}
-
-:deep(.el-menu-demo .el-menu-item:not(.is-active)) {
-  color: #000;
-  background-color: #f5f7fa;
-}
-
-:deep(.el-menu-demo .el-menu-item:not(.is-active):hover) {
-  color: #409eff;
-  background-color: #ecf5ff;
-}
-
-:deep(.el-menu-item.is-active) {
-  color: #fff;
-  background-color: #409eff;
-  border-color: #409eff;
-  font-weight: 600;
-}
-
-:deep(.el-menu-item:hover) {
-  color: #409eff;
-  background-color: #ecf5ff;
-  border-color: #c6e2ff;
-  font-weight: 500;
-}
-
-.preview-area {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.preview-container {
-  width: 375px;
-  height: 667px;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #fff;
+.tab-item {
+  padding: 15px 30px;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
   position: relative;
-}
-
-.basic-setting-area {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.basic-content {
-  width: 100%;
-  max-width: 600px;
-}
-
-.basic-tip {
-  margin-bottom: 20px;
-}
-
-.preview-content {
-  padding: 20px;
-  height: 100%;
-  overflow-y: auto;
-}
-
-.preview-image img {
-  max-width: 100%;
-  max-height: 300px;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-.preview-placeholder {
-  width: 100%;
-  height: 200px;
-  border: 1px dashed #e4e7ed;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f9f9f9;
-  color: #909399;
-}
-
-/* 首页预览样式 */
-.mobile-content {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow-y: auto;
-  border-radius: 8px;
-}
-
-.header {
-  width: 100%;
-  height: 200px;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-align: center;
-}
-
-.brand-crown {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.promotion-banner {
-  background-color: rgba(255, 107, 107, 0.9);
-  padding: 10px 20px;
-  border-radius: 20px;
-  margin-top: 10px;
-}
-
-.promotion-text {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.product-section {
-  display: flex;
-  justify-content: space-around;
-  padding: 20px;
-  background-color: rgba(255, 255, 255, 0.8);
-  margin: 10px;
-  border-radius: 8px;
-}
-
-.product-item {
-  width: 80px;
-  height: 80px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.product-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: space-around;
-  padding: 15px;
-  margin: 10px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
-}
-
-.button {
-  padding: 8px 16px;
-  border-radius: 15px;
+  color: #606266;
   font-size: 14px;
   font-weight: 500;
 }
 
-.customer-button {
-  background-color: #409eff;
-  color: white;
+.tab-item:hover {
+  color: #17B3A3;
 }
 
-.rule-button {
-  background-color: #67c23a;
-  color: white;
+.tab-item.active {
+  color: #17B3A3;
 }
 
-.footer {
+.tab-item.active::after {
+  content: '';
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 100%;
-  padding: 20px;
-  background-color: rgba(255, 255, 255, 0.9);
-  display: flex;
-  justify-content: center;
+  right: 0;
+  height: 2px;
+  background-color: #17B3A3;
+  transition: all 0.3s;
 }
 
-.action-button {
-  padding: 12px 30px;
-  border-radius: 25px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  text-align: center;
-}
-
-.config-area {
+/* 内容区域 */
+.content-area {
   flex: 1;
-  min-width: 400px;
-  border-left: none;
-  background-color: #f5f7fa;
+  background: #fff;
   overflow-y: auto;
-}
-
-.config-content {
-  padding: 20px;
-  padding-bottom: 40px;
-}
-
-.config-panel {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.upload-container {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
-.upload-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.upload-placeholder {
-  width: 150px;
-  height: 150px;
-  border: 1px solid #e4e7ed;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f9f9f9;
-  margin-right: 10px;
-}
-
-.placeholder-icon {
-  font-size: 48px;
-  color: #409eff;
-  font-weight: bold;
-}
-
-.upload-button {
-  margin-right: 10px;
-}
-
-.upload-tip {
-  color: #909399;
-  font-size: 12px;
-}
-
-.image-preview {
-  margin-right: 10px;
-}
-
-.preview-image {
-  width: 150px;
-  height: 150px;
-  object-fit: cover;
-  border: 1px solid #e4e7ed;
-  border-radius: 4px;
-}
-
-/* 响应式调整 */
-@media (max-width: 1200px) {
-  .config-area {
-    width: 350px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .page-config {
-    flex-direction: column;
-  }
-  
-  .config-tabs {
-    width: 100%;
-    height: 60px;
-    border-right: none;
-    border-bottom: 1px solid #e4e7ed;
-  }
-  
-  .preview-area {
-    height: 400px;
-  }
-  
-  .config-area {
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid #e4e7ed;
-    flex: 1;
-  }
+  padding-bottom: 40px;
 }
 </style>

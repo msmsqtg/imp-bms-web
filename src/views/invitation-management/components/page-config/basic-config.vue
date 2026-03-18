@@ -152,15 +152,6 @@ export default defineComponent({
 
 <style scoped>
 .basic-config {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.basic-config h3 {
-  margin-bottom: 20px;
-  font-size: 18px;
-  font-weight: 600;
+  padding: 20px 0;
 }
 </style>
