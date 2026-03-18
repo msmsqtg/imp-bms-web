@@ -147,6 +147,7 @@ export default defineComponent({
 
 .rich-text-view {
   min-height: 300px;
+  width: 100%;
   padding: 10px;
   border: 1px solid #dcdfe6;
   border-radius: 4px;

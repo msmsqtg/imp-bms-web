@@ -45,7 +45,7 @@
             <template #append>人</template>
           </el-input>
         </el-form-item>
-        <el-form-item label="人数超限">
+        <el-form-item label="每人限购">
           <el-radio-group v-model="currentProduct.overLimit" :disabled="isViewMode" @change="handleFormChange">
             <el-radio label="allow">允许</el-radio>
             <el-radio label="forbid">不允许</el-radio>
@@ -197,6 +197,7 @@ export default defineComponent({
 
     const addProduct = () => {
       const newProduct = {
+        id: undefined,
         type: 'physical',
         name: '',
         price: '',
@@ -392,6 +393,7 @@ export default defineComponent({
 
 .rich-text-view {
   min-height: 300px;
+  width: 100%;
   padding: 10px;
   border: 1px solid #dcdfe6;
   border-radius: 4px;

@@ -70,7 +70,7 @@
         <div class="button-area">
           <el-button @click="handleBack">返回列表</el-button>
           <el-button @click="handlePrev" :disabled="isViewMode">上一步</el-button>
-          <el-button type="primary" @click="handleSubmit" :disabled="isViewMode">提交</el-button>
+          <el-button type="primary" @click="handleSubmitPrizes" :disabled="isViewMode">提交</el-button>
         </div>
       </div>
     </el-card>
@@ -98,6 +98,7 @@ interface SubmitData {
 }
 
 interface ProductDetail {
+  id?: number;
   impId: number;
   prizeType: number;
   productType: number;
@@ -186,6 +187,7 @@ export default defineComponent({
         },
         products: [
           {
+            id: undefined,
             type: 'physical',
             name: '',
             price: '',
@@ -202,6 +204,7 @@ export default defineComponent({
         ],
         prizeSettings: [
           {
+            id: undefined,
             enable: 'no',
             name: '',
             price: '',
@@ -496,6 +499,7 @@ export default defineComponent({
         if (item.prizeType === 2) {
           console.log('添加助力商品：', item.name);
           this.form.prizeSettings.push({
+            id: item.id,
             enable: 'yes',
             name: item.name,
             price: String(item.price),
@@ -511,6 +515,7 @@ export default defineComponent({
       if (this.form.prizeSettings.length === 0) {
         console.log('未找到助力商品，添加默认数据');
         this.form.prizeSettings.push({
+          id: undefined,
           enable: 'no',
           name: '',
           price: '',
@@ -539,6 +544,7 @@ export default defineComponent({
         if (item.prizeType === 1) {
           console.log('添加开团商品：', item.name);
           this.form.products.push({
+            id: item.id,
             type: 'physical',
             name: item.name,
             price: String(item.price),
@@ -823,8 +829,8 @@ export default defineComponent({
         });
     },
 
-    // 提交商品详情
-    handleSubmitProducts() {
+    // 提交商品详情（同时提交助力奖品）
+    async handleSubmitProducts() {
       // 查看模式下禁止提交
       if (this.isViewMode) {
         (this as any).$message.info('查看模式下不能提交数据');
@@ -836,8 +842,105 @@ export default defineComponent({
         return;
       }
 
-      // 构建商品详情数据
+      // 构建开团商品数据数组
       const productsData: ProductDetail[] = this.form.products.map(product => ({
+        id: product.id,
+        impId: this.createdImpId!,
+        prizeType: 1, // 开团奖品
+        productType: 1,
+        name: product.name,
+        price: parseFloat(product.price) || 0,
+        teamPrice: parseFloat(product.groupPrice) || 0,
+        stock: parseInt(product.stock) || 0,
+        validityPeriod: 111, // 默认值，可根据需求调整
+        teamNum: parseInt(product.groupSize) || 0,
+        isQuota: product.overLimit === 'forbid' ? 1 : 0,
+        quotaNum: parseInt(product.limit) || 0,
+        quoMsg: '您已达到该商品购买上限！',
+        thumb: product.thumb || '',
+        descrImage: product.descrImage || '',
+        descr: product.detail
+      }));
+
+      // 构建助力奖品数据数组
+      const prizesData: ProductDetail[] = this.form.prizeSettings.map(prize => ({
+        id: prize.id,
+        impId: this.createdImpId!,
+        prizeType: 2, // 助力奖品
+        productType: 1,
+        name: prize.name,
+        price: parseFloat(prize.price) || 0,
+        teamPrice: 0, // 助力奖品不需要拼团价格
+        stock: parseInt(prize.stock) || 0,
+        validityPeriod: 111, // 默认值，可根据需求调整
+        teamNum: 0, // 助力奖品不需要成团人数
+        isQuota: 0, // 助力奖品不需要限购
+        quotaNum: 0, // 助力奖品不需要限购数量
+        quoMsg: '', // 助力奖品不需要限购提示
+        thumb: prize.thumb || '',
+        descrImage: prize.descrImage || '',
+        descr: prize.detail
+      }));
+
+      // 合并开团商品和助力奖品数据
+      const allData = [...productsData, ...prizesData];
+
+      if (allData.length === 0) {
+        (this as any).$message.info('没有数据需要提交');
+        return;
+      }
+
+      const userId = 4440;
+      const requestUrl = `${import.meta.env.VITE_APP_API}/team/buy/detail/prize/add`;
+      const headers = { createUserId: userId };
+
+      console.log('=== 商品详情接口调用开始 ===');
+      console.log('请求时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+      console.log('用户ID:', userId);
+      console.log('请求URL:', requestUrl);
+      console.log('请求参数:', JSON.stringify(allData, null, 2));
+      console.log('请求头:', JSON.stringify(headers, null, 2));
+
+      try {
+        const startTime = Date.now();
+        const res: any = await baseService.post(requestUrl, allData, headers);
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+
+        console.log('=== 商品详情接口调用成功 ===');
+        console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+        console.log('请求耗时:', duration + 'ms');
+        console.log('响应数据:', JSON.stringify(res, null, 2));
+
+        if (res.code === '00000') {
+          (this as any).$message.success('商品详情保存成功');
+          // 切换到下一个 tab
+          this.activeTab = 'prize';
+        } else {
+          (this as any).$message.error('商品详情保存失败：' + res.msg);
+        }
+      } catch (error) {
+        console.error('商品详情提交失败:', error);
+        (this as any).$message.error('商品详情保存失败，请重试');
+      }
+    },
+
+    // 提交助力奖品（同时提交开团奖品）
+    async handleSubmitPrizes() {
+      // 查看模式下禁止提交
+      if (this.isViewMode) {
+        (this as any).$message.info('查看模式下不能提交数据');
+        return;
+      }
+      
+      if (!this.createdImpId) {
+        (this as any).$message.error('请先完成基础设置');
+        return;
+      }
+
+      // 构建开团商品数据数组
+      const productsData: ProductDetail[] = this.form.products.map(product => ({
+        id: product.id,
         impId: this.createdImpId!,
         prizeType: 1,
         productType: 1,
@@ -855,47 +958,67 @@ export default defineComponent({
         descr: product.detail
       }));
 
+      // 构建助力奖品数据数组
+      const prizesData: ProductDetail[] = this.form.prizeSettings.map(prize => ({
+        id: prize.id,
+        impId: this.createdImpId!,
+        prizeType: 2,
+        productType: 1,
+        name: prize.name,
+        price: parseFloat(prize.price) || 0,
+        teamPrice: 0, // 助力奖品不需要拼团价格
+        stock: parseInt(prize.stock) || 0,
+        validityPeriod: 111, // 默认值，可根据需求调整
+        teamNum: 0, // 助力奖品不需要成团人数
+        isQuota: 0, // 助力奖品不需要限购
+        quotaNum: 0, // 助力奖品不需要限购数量
+        quoMsg: '', // 助力奖品不需要限购提示
+        thumb: prize.thumb || '',
+        descrImage: prize.descrImage || '',
+        descr: prize.detail
+      }));
+
+      // 合并开团商品和助力奖品数据
+      const allData = [...productsData, ...prizesData];
+
+      if (allData.length === 0) {
+        (this as any).$message.info('没有数据需要提交');
+        return;
+      }
+
       const userId = 4440;
-      const requestUrl = `${import.meta.env.VITE_APP_API}/team/buy/detail/add`;
+      const requestUrl = `${import.meta.env.VITE_APP_API}/team/buy/detail/prize/add`;
       const headers = { createUserId: userId };
 
-      console.log('=== 商品详情接口调用开始 ===');
+      console.log('=== 助力奖品接口调用开始 ===');
       console.log('请求时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
       console.log('用户ID:', userId);
       console.log('请求URL:', requestUrl);
-      console.log('请求参数:', JSON.stringify(productsData, null, 2));
+      console.log('请求参数:', JSON.stringify(allData, null, 2));
       console.log('请求头:', JSON.stringify(headers, null, 2));
 
-      const startTime = Date.now();
+      try {
+        const startTime = Date.now();
+        const res: any = await baseService.post(requestUrl, allData, headers);
+        const endTime = Date.now();
+        const duration = endTime - startTime;
 
-      baseService.post(requestUrl, productsData, headers)
-        .then((res: any) => {
-          const endTime = Date.now();
-          const duration = endTime - startTime;
+        console.log('=== 助力奖品接口调用成功 ===');
+        console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
+        console.log('请求耗时:', duration + 'ms');
+        console.log('响应数据:', JSON.stringify(res, null, 2));
 
-          console.log('=== 商品详情接口调用成功 ===');
-          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
-          console.log('请求耗时:', duration + 'ms');
-          console.log('响应数据:', JSON.stringify(res, null, 2));
-
-          if (res.code === '00000') {
-            (this as any).$message.success('商品详情保存成功');
-            // 切换到下一个 tab
-            this.activeTab = 'product';
-          } else {
-            (this as any).$message.error('商品详情保存失败：' + res.msg);
-          }
-        })
-        .catch(error => {
-          const endTime = Date.now();
-          const duration = endTime - startTime;
-
-          console.log('=== 商品详情接口调用失败 ===');
-          console.log('响应时间:', new Date().toLocaleString('zh-CN', { hour12: false }));
-          console.log('请求耗时:', duration + 'ms');
-          console.error('错误信息:', error);
-          (this as any).$message.error('商品详情保存失败，请重试');
-        });
+        if (res.code === '00000') {
+          (this as any).$message.success('助力奖品保存成功');
+          // 跳转到列表页
+          (this as any).$router.push('/activity-management/group-buy/index');
+        } else {
+          (this as any).$message.error('助力奖品保存失败：' + res.msg);
+        }
+      } catch (error) {
+        console.error('助力奖品提交失败:', error);
+        (this as any).$message.error('助力奖品保存失败，请重试');
+      }
     },
 
   }

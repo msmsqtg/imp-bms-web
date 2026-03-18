@@ -49,7 +49,7 @@
               </div>
               <!-- 上传按钮，仅在非查看模式且没有缩略图时显示 -->
               <div v-if="!isViewMode && !currentPrize.thumb" class="upload-button">
-                <el-button type="primary" plain :disabled="isViewMode">+</el-button>
+                <el-button type="primary" plain :disabled="isViewMode" @click="uploadImage('thumb')">+</el-button>
               </div>
             </div>
             <div class="upload-tip">建议尺寸：宽750px 高750px，格式为jpg/png/gif</div>
@@ -70,7 +70,7 @@
               </div>
               <!-- 上传按钮，仅在非查看模式且详情图数量小于5张时显示 -->
               <div v-if="!isViewMode && (!currentPrize.descrImage || currentPrize.descrImage.split(',').length < 5)" class="upload-button">
-                <el-button type="primary" plain :disabled="isViewMode">+</el-button>
+                <el-button type="primary" plain :disabled="isViewMode" @click="uploadImage('descrImage')">+</el-button>
               </div>
             </div>
             <div class="upload-tip">建议尺寸：宽750px 高750px，格式为jpg/png/gif</div>
@@ -169,8 +169,50 @@ export default defineComponent({
       emit('update:form', [...localForm.value]);
     };
 
+    // 图片上传
+    const uploadImage = (type: 'thumb' | 'descrImage') => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async (e) => {
+        const target = e.target as HTMLInputElement;
+        if (target.files && target.files[0]) {
+          const file = target.files[0];
+          const formData = new FormData();
+          formData.append('file', file);
+
+          try {
+            // 导入 baseService
+            const { default: baseService } = await import('@/service/baseService');
+            const res: any = await baseService.post('/common/upload/image', formData);
+            
+            if (res.code === '00000' && res.data && res.data.url) {
+              const index = parseInt(activePrizeIndex.value);
+              if (type === 'thumb') {
+                localForm.value[index].thumb = res.data.url;
+              } else {
+                // 处理详情图，多个图片用逗号分隔
+                const currentImages = localForm.value[index].descrImage || '';
+                const imagesArray = currentImages ? currentImages.split(',') : [];
+                imagesArray.push(res.data.url);
+                localForm.value[index].descrImage = imagesArray.join(',');
+              }
+              handleFormChange();
+            } else {
+              alert('图片上传失败，请重试');
+            }
+          } catch (error) {
+            console.error('图片上传失败:', error);
+            alert('图片上传失败，请重试');
+          }
+        }
+      };
+      input.click();
+    };
+
     const addPrize = () => {
       const newPrize = {
+        id: undefined,
         enable: 'yes',
         name: '',
         price: '',
@@ -209,7 +251,8 @@ export default defineComponent({
       addPrize,
       deletePrize,
       handleFormChange,
-      handleTabClick
+      handleTabClick,
+      uploadImage
     };
   }
 });
@@ -309,6 +352,7 @@ export default defineComponent({
 
 .rich-text-view {
   min-height: 300px;
+  width: 100%;
   padding: 10px;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
