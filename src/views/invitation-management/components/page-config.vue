@@ -38,11 +38,28 @@
           <!-- 预览内容 -->
           <div v-if="activeTab === 'home'">
             <h3>首页装修预览</h3>
-            <div v-if="uiConfig.home_bg_pic" class="preview-image">
-              <img :src="uiConfig.home_bg_pic" alt="首页背景图">
-            </div>
-            <div v-else class="preview-placeholder">
-              <span>首页背景图预览</span>
+            <div class="mobile-content" :style="{ backgroundColor: uiConfig.module_bg_color || '#f5f5f5' }">
+              <div class="header" :style="{ background: uiConfig.theme_bg_pic ? `url(${uiConfig.theme_bg_pic}) no-repeat center center / cover` : '#ff6b6b' }">
+                <div class="brand-crown">品牌清仓</div>
+                <div class="promotion-banner">
+                  <div class="promotion-text" :style="{ color: uiConfig.text_color || '#fff' }">全场 99元封顶</div>
+                </div>
+              </div>
+              <div class="product-section">
+                <div class="product-item">
+                  <img src="https://via.placeholder.com/150x150?text=Product" alt="产品" class="product-image">
+                </div>
+                <div class="product-item">
+                  <img src="https://via.placeholder.com/150x150?text=Product" alt="产品" class="product-image">
+                </div>
+              </div>
+              <div class="action-buttons">
+                <div class="button customer-button">我的客户</div>
+                <div class="button rule-button">活动规则</div>
+              </div>
+              <div class="footer">
+                <div class="action-button" :style="{ backgroundColor: uiConfig.module_bg_color || '#ff6b6b', color: uiConfig.text_color || '#fff' }">立即领取</div>
+              </div>
             </div>
           </div>
           <div v-else-if="activeTab === 'login'">
@@ -435,8 +452,117 @@ export default defineComponent({
   color: #909399;
 }
 
+/* 首页预览样式 */
+.mobile-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+.header {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+}
+
+.brand-crown {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.promotion-banner {
+  background-color: rgba(255, 107, 107, 0.9);
+  padding: 10px 20px;
+  border-radius: 20px;
+  margin-top: 10px;
+}
+
+.promotion-text {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.product-section {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  margin: 10px;
+  border-radius: 8px;
+}
+
+.product-item {
+  width: 80px;
+  height: 80px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-around;
+  padding: 15px;
+  margin: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+}
+
+.button {
+  padding: 8px 16px;
+  border-radius: 15px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.customer-button {
+  background-color: #409eff;
+  color: white;
+}
+
+.rule-button {
+  background-color: #67c23a;
+  color: white;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+}
+
+.action-button {
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+}
+
 .config-area {
-  width: 400px;
+  flex: 1;
+  min-width: 400px;
   border-left: 1px solid #e4e7ed;
   background-color: #f5f7fa;
   overflow-y: auto;
