@@ -4,6 +4,7 @@
       <!-- 标签页导航 -->
       <el-tabs v-model="activeTab">
         <el-tab-pane label="基础设置" name="basic"></el-tab-pane>
+        <el-tab-pane label="分享设置" name="share"></el-tab-pane>
         <el-tab-pane label="登录页面" name="login"></el-tab-pane>
       </el-tabs>
 
@@ -23,6 +24,23 @@
         </div>
       </div>
 
+      <!-- 分享设置 -->
+      <div v-show="activeTab === 'share'" class="tab-content">
+        <ShareConfig
+          :form="form"
+          :isViewMode="isViewMode"
+          @update:form="form = $event"
+          @save-success="handleSaveSuccess"
+        />
+        
+        <!-- 按钮区域 -->
+        <div class="button-area">
+          <el-button @click="handleBack">返回列表</el-button>
+          <el-button @click="handlePrevToBasic" :disabled="isViewMode">上一步</el-button>
+          <el-button type="primary" @click="handleSubmitShare" :disabled="isViewMode">提交</el-button>
+        </div>
+      </div>
+
       <!-- 登录页面 -->
       <div v-show="activeTab === 'login'" class="tab-content">
         <LoginConfig
@@ -37,7 +55,7 @@
         <!-- 按钮区域 -->
         <div class="button-area">
           <el-button @click="handleBack">返回列表</el-button>
-          <el-button @click="handlePrev" :disabled="isViewMode">上一步</el-button>
+          <el-button @click="handlePrevToShare" :disabled="isViewMode">上一步</el-button>
           <el-button type="primary" @click="handleSubmitLogin" :disabled="isViewMode">提交</el-button>
         </div>
       </div>
@@ -50,6 +68,7 @@ import { defineComponent, ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import baseService from "@/service/baseService";
 import BasicConfig from './components/page-config/basic-config.vue';
+import ShareConfig from './components/page-config/share-config.vue';
 import LoginConfig from './components/page-config/login-config.vue';
 import emits from "@/utils/emits";
 import { EMitt } from "@/constants/enum";
@@ -59,6 +78,7 @@ export default defineComponent({
   name: "InvitationCreate",
   components: {
     BasicConfig,
+    ShareConfig,
     LoginConfig
   },
   data() {
@@ -144,8 +164,8 @@ export default defineComponent({
     },
     activeTab(newVal, oldVal) {
       console.log('activeTab 变化:', oldVal, '->', newVal);
-      // 如果切换到登录页面 tab，并且有 invitationId，则获取活动数据
-      if (newVal === 'login' && this.invitationId) {
+      // 如果切换到分享设置或登录页面 tab，并且有 invitationId，则获取活动数据
+      if ((newVal === 'share' || newVal === 'login') && this.invitationId) {
         this.loadInvitationData(this.invitationId);
       }
     },
@@ -212,8 +232,11 @@ export default defineComponent({
     handleBack() {
       this.$router.push('/invitation-management/index');
     },
-    handlePrev() {
+    handlePrevToBasic() {
       this.activeTab = 'basic';
+    },
+    handlePrevToShare() {
+      this.activeTab = 'share';
     },
     handleSaveSuccess() {
       console.log('基础设置保存成功');
@@ -321,6 +344,27 @@ export default defineComponent({
         const res: any = await baseService.post(url, this.form);
         if (res.code === '00000') {
           ElMessage.success('基础设置保存成功');
+          if (!this.form.id) {
+            this.form.id = res.data.id;
+          }
+          this.handleSaveSuccess();
+        } else {
+          ElMessage.error('保存失败：' + res.msg);
+        }
+      } catch (error) {
+        console.error('保存失败:', error);
+        ElMessage.error('保存失败，请重试');
+      }
+    },
+    async handleSubmitShare() {
+      try {
+        const url = this.form.id 
+          ? `${import.meta.env.VITE_APP_API}/api/invitation/update` 
+          : `${import.meta.env.VITE_APP_API}/api/invitation/create`;
+        
+        const res: any = await baseService.post(url, this.form);
+        if (res.code === '00000') {
+          ElMessage.success('分享设置保存成功');
           if (!this.form.id) {
             this.form.id = res.data.id;
           }

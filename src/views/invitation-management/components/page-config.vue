@@ -23,6 +23,15 @@
         @save-success="handleSaveSuccess"
       />
 
+      <!-- 分享设置 -->
+      <share-config 
+        v-if="activeTab === 'share'" 
+        :form="form" 
+        :is-view-mode="isViewMode"
+        @update:form="(value: typeof form) => form = value"
+        @save-success="handleSaveSuccess"
+      />
+
       <!-- 登录页面 -->
       <login-config 
         v-if="activeTab === 'login'" 
@@ -42,11 +51,13 @@ import { defineComponent, ref, computed, onMounted } from 'vue';
 import baseService from "@/service/baseService";
 import { ElMessage } from 'element-plus';
 import BasicConfig from './page-config/basic-config.vue';
+import ShareConfig from './page-config/share-config.vue';
 import LoginConfig from './page-config/login-config.vue';
 
 export default defineComponent({
   components: {
     BasicConfig,
+    ShareConfig,
     LoginConfig
   },
   name: "InvitationPageConfig",
@@ -66,6 +77,7 @@ export default defineComponent({
       activeTab: 'basic',
       tabs: [
         { key: 'basic', label: '基础设置' },
+        { key: 'share', label: '分享设置' },
         { key: 'login', label: '登录页面' }
       ],
       form: {

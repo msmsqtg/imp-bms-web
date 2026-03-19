@@ -138,123 +138,6 @@
           <el-radio label="0">关闭</el-radio>
         </el-radio-group>
       </el-form-item>
-      <h3>分享模式设置</h3>
-      <el-form-item label="分享模式">
-        <el-radio-group v-model="localForm.share_mode" :disabled="isViewMode" @change="handleFormChange" class="share-mode-group">
-          <el-radio label="1">邀约海报</el-radio>
-          <el-radio label="2">邀约海报加一键分享</el-radio>
-          <el-radio label="3">邀约二维码</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      
-      <!-- 微信分享设置（模式2需要） -->
-      <div v-if="localForm.share_mode === '2'">
-        <el-form-item label="微信分享标题" required>
-          <el-input v-model="localShareBgSetting.wx_share_title" placeholder="微信分享标题" :disabled="isViewMode" @input="handleShareBgSettingChange" maxlength="10" show-word-limit></el-input>
-        </el-form-item>
-        
-        <el-form-item label="微信分享内容简介" required>
-          <el-input v-model="localShareBgSetting.wx_share_desc" placeholder="微信分享内容简介" :disabled="isViewMode" @input="handleShareBgSettingChange" maxlength="30" show-word-limit></el-input>
-        </el-form-item>
-        
-        <el-form-item label="微信分享缩略图片">
-          <div class="upload-container">
-            <div class="upload-row">
-              <!-- 图片展示 -->
-              <div v-if="localShareBgSetting.wx_share_pic" class="image-preview-list">
-                <div class="image-preview-item">
-                  <img :src="String(localShareBgSetting.wx_share_pic).trim()" alt="微信分享缩略图片" class="preview-image">
-                  <el-button v-if="!isViewMode" type="danger" size="small" @click="removeShareImage('wx_share_pic')">删除</el-button>
-                </div>
-              </div>
-              <!-- 上传占位符 -->
-              <div v-else class="upload-placeholder">
-                <div class="placeholder-icon">!</div>
-              </div>
-              <!-- 上传按钮，仅在非查看模式时显示 -->
-              <div v-if="!isViewMode" class="upload-button">
-                <el-button type="primary" plain :disabled="isViewMode" @click="uploadShareImage('wx_share_pic')">+</el-button>
-              </div>
-            </div>
-            <div class="upload-tip">建议图片尺寸：640*962</div>
-          </div>
-        </el-form-item>
-      </div>
-      
-      <!-- 邀约码有效期（仅模式3需要） -->
-      <el-form-item label="邀约码有效期(秒)" required v-if="localForm.share_mode === '3'">
-        <el-input-number v-model="localShareBgSetting.invitation_code_expire" :min="0" :max="86400" :disabled="isViewMode" @change="handleShareBgSettingChange"></el-input-number>
-      </el-form-item>
-      
-      <!-- 通用分享海报设置 -->
-      <el-form-item label="分享海报背景图">
-        <div class="upload-container">
-          <div class="upload-row">
-            <!-- 图片展示 -->
-            <div v-if="localShareBgSetting.share_bg_pic" class="image-preview-list">
-              <div class="image-preview-item">
-                <img :src="String(localShareBgSetting.share_bg_pic).trim()" alt="分享海报背景图" class="preview-image">
-                <el-button v-if="!isViewMode" type="danger" size="small" @click="removeShareImage('share_bg_pic')">删除</el-button>
-              </div>
-            </div>
-            <!-- 上传占位符 -->
-            <div v-else class="upload-placeholder">
-              <div class="placeholder-icon">!</div>
-            </div>
-            <!-- 上传按钮，仅在非查看模式时显示 -->
-            <div v-if="!isViewMode" class="upload-button">
-              <el-button type="primary" plain :disabled="isViewMode" @click="uploadShareImage('share_bg_pic')">+</el-button>
-            </div>
-          </div>
-          <div class="upload-tip">建议图片尺寸：640*962</div>
-        </div>
-      </el-form-item>
-      
-      <el-form-item label="按钮样式/生成邀约海报">
-        <div class="upload-container">
-          <div class="upload-row">
-            <!-- 图片展示 -->
-            <div v-if="localShareBgSetting.share_btn_pic" class="image-preview-list">
-              <div class="image-preview-item">
-                <img :src="String(localShareBgSetting.share_btn_pic).trim()" alt="按钮样式" class="preview-image">
-                <el-button v-if="!isViewMode" type="danger" size="small" @click="removeShareImage('share_btn_pic')">删除</el-button>
-              </div>
-            </div>
-            <!-- 上传占位符 -->
-            <div v-else class="upload-placeholder">
-              <div class="placeholder-icon">!</div>
-            </div>
-            <!-- 上传按钮，仅在非查看模式时显示 -->
-            <div v-if="!isViewMode" class="upload-button">
-              <el-button type="primary" plain :disabled="isViewMode" @click="uploadShareImage('share_btn_pic')">+</el-button>
-            </div>
-          </div>
-          <div class="upload-tip">建议图片尺寸：560*96</div>
-        </div>
-      </el-form-item>
-      
-      <el-form-item label="邀约代理人海报样式配置">
-        <div class="style-config-container">
-          <div class="style-option-group">
-            <div class="style-option">
-              <el-radio-group v-model="localShareBgSetting.share_style" :disabled="isViewMode" @change="handleShareBgSettingChange">
-                <div class="style-item">
-                  <el-radio label="1">样式一(带姓名)</el-radio>
-                  <div class="style-preview-item">
-                    <img src="https://test-integral-erp-web.sqqmall.com/img/activity_mode1.c61b3059.png" alt="样式一" class="style-preview">
-                  </div>
-                </div>
-                <div class="style-item">
-                  <el-radio label="2">样式二</el-radio>
-                  <div class="style-preview-item">
-                    <img src="https://test-integral-erp-web.sqqmall.com/img/activity_mode2.b00b298a.png" alt="样式二" class="style-preview">
-                  </div>
-                </div>
-              </el-radio-group>
-            </div>
-          </div>
-        </div>
-      </el-form-item>
     </el-form>
   </div>
 </template>
@@ -314,16 +197,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const localForm = ref({ ...props.form });
     const localActivityTimeRange = ref<string[]>([]);
-    const localShareBgSetting = ref({
-      share_style: 1,
-      share_bg_pic: '',
-      wx_share_pic: '',
-      share_btn_pic: '',
-      share_id_type: 1,
-      wx_share_desc: '',
-      wx_share_title: '',
-      invitation_code_expire: 0
-    });
 
     // 初始化时间范围
     if (props.form.start_time && props.form.end_time) {
@@ -360,30 +233,7 @@ export default defineComponent({
     if (localForm.value.invitation_code_num === undefined) {
       localForm.value.invitation_code_num = 1;
     }
-    // 初始化时确保分享设置字段有正确的值
-    if (localForm.value.share_mode === undefined) {
-      localForm.value.share_mode = '1';
-    }
-    if (localForm.value.share_bg_setting === undefined) {
-      localForm.value.share_bg_setting = '{"share_style": 1, "share_bg_pic": "", "wx_share_pic": "", "share_btn_pic": "", "share_id_type": 1, "wx_share_desc": "", "wx_share_title": ""}';
-    }
-    // 解析share_bg_setting
-    try {
-      const parsedSetting = JSON.parse(localForm.value.share_bg_setting);
-      localShareBgSetting.value = {
-        share_style: 1,
-        share_bg_pic: '',
-        wx_share_pic: '',
-        share_btn_pic: '',
-        share_id_type: 1,
-        wx_share_desc: '',
-        wx_share_title: '',
-        invitation_code_expire: 0,
-        ...parsedSetting
-      };
-    } catch (error) {
-      console.error('解析share_bg_setting失败:', error);
-    }
+
 
     // 监听外部 form 变化
     watch(
@@ -436,30 +286,6 @@ export default defineComponent({
         if (newForm.invitation_code_num !== undefined) {
           localForm.value.invitation_code_num = Number(newForm.invitation_code_num);
         }
-        // 确保 share_mode 是字符串类型
-        if (newForm.share_mode !== undefined) {
-          localForm.value.share_mode = String(newForm.share_mode);
-        }
-        // 确保 share_bg_setting 是字符串类型并解析
-        if (newForm.share_bg_setting !== undefined) {
-          localForm.value.share_bg_setting = String(newForm.share_bg_setting);
-          try {
-            const parsedSetting = JSON.parse(localForm.value.share_bg_setting);
-            localShareBgSetting.value = {
-              share_style: 1,
-              share_bg_pic: '',
-              wx_share_pic: '',
-              share_btn_pic: '',
-              share_id_type: 1,
-              wx_share_desc: '',
-              wx_share_title: '',
-              invitation_code_expire: 0,
-              ...parsedSetting
-            };
-          } catch (error) {
-            console.error('解析share_bg_setting失败:', error);
-          }
-        }
         if (newForm.start_time && newForm.end_time) {
           localActivityTimeRange.value = [newForm.start_time, newForm.end_time];
         }
@@ -489,9 +315,6 @@ export default defineComponent({
     }
     if (localForm.value.sign_in_status === undefined) {
       localForm.value.sign_in_status = '0';
-    }
-    if (localForm.value.share_mode === undefined) {
-      localForm.value.share_mode = '1';
     }
 
     const handleTimeChange = (value: any) => {
@@ -553,64 +376,15 @@ export default defineComponent({
       }
     };
 
-    // 分享设置变化处理函数
-    const handleShareBgSettingChange = () => {
-      localForm.value.share_bg_setting = JSON.stringify(localShareBgSetting.value);
-      handleFormChange();
-    };
 
-    // 上传分享图片函数
-    const uploadShareImage = (field: string) => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = async (e: Event) => {
-        const target = e.target as HTMLInputElement;
-        const file = target.files?.[0];
-        if (file) {
-          const formData = new FormData();
-          formData.append('file', file);
-          try {
-            const uploadUrl = `${import.meta.env.VITE_APP_API}/common/upload/image`;
-            const res: any = await baseService.post(uploadUrl, formData);
-            if (res.code === '00000' && res.data?.url) {
-              // 只对字符串类型的字段赋值
-              if (field === 'share_bg_pic' || field === 'wx_share_pic' || field === 'share_btn_pic' || field === 'wx_share_title' || field === 'wx_share_desc') {
-                (localShareBgSetting.value as any)[field] = res.data.url;
-              }
-              handleShareBgSettingChange();
-              ElMessage.success('上传成功');
-            }
-          } catch (error) {
-            console.error('上传失败:', error);
-            ElMessage.error('上传失败');
-          }
-        }
-      };
-      input.click();
-    };
-
-    // 删除分享图片函数
-    const removeShareImage = (field: string) => {
-      // 只对字符串类型的字段赋值
-      if (field === 'share_bg_pic' || field === 'wx_share_pic' || field === 'share_btn_pic' || field === 'wx_share_title' || field === 'wx_share_desc') {
-        (localShareBgSetting.value as any)[field] = '';
-      }
-      handleShareBgSettingChange();
-      ElMessage.success('删除成功');
-    };
 
     return {
       localForm,
       localActivityTimeRange,
-      localShareBgSetting,
       handleTimeChange,
       handleFormChange,
-      handleShareBgSettingChange,
       uploadImage,
-      removeImage,
-      uploadShareImage,
-      removeShareImage
+      removeImage
     };
   }
 });
@@ -722,33 +496,6 @@ export default defineComponent({
   border-radius: 0 0 4px 4px;
 }
 
-/* 样式选项样式 */
-.style-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 200px;
-  margin: 0 20px 20px 0;
-}
-
-/* 分享模式组样式 */
-.share-mode-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
-}
-
-.share-mode-group .el-radio {
-  display: flex;
-  align-items: center;
-  margin-right: 0;
-  margin-bottom: 0;
-}
-
-.share-mode-group .el-radio__input {
-  margin-right: 5px;
-}
-
 /* 确保内容编辑区域不被限制高度 */
 .el-form {
   min-height: 100%;
@@ -759,53 +506,6 @@ export default defineComponent({
   min-height: 100%;
   overflow-y: auto;
   padding: 20px;
-}
-
-/* 样式配置容器 */
-.style-config-container {
-  width: 100%;
-}
-
-.style-option-group {
-  width: 100%;
-}
-
-.style-option {
-  width: 100%;
-}
-
-/* 确保radio组正确显示 */
-:deep(.style-option .el-radio-group) {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  width: 100%;
-}
-
-.style-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-right: 20px;
-  margin-bottom: 20px;
-}
-
-.style-preview-item {
-  margin-top: 10px;
-}
-
-.style-preview {
-  width: 200px;
-  height: auto;
-  border: 1px solid #e4e7ed;
-  border-radius: 4px;
-}
-
-/* 确保radio按钮和文字正确显示 */
-:deep(.style-item .el-radio) {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
 }
 
 /* 调整radio-group布局 */
