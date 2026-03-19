@@ -55,23 +55,24 @@
       </el-form-item>
       <h3>关联活动设置</h3>
       <el-form-item label="是否有关联活动">
-        <el-switch v-model="localForm.has_related_activity" :disabled="isViewMode" @change="handleFormChange"></el-switch>
+        <el-switch v-model="localForm.activity_switch" :disabled="isViewMode" @change="handleFormChange" :active-value="2" :inactive-value="1"></el-switch>
       </el-form-item>
       
-      <el-form-item label="选择关联活动" required v-if="localForm.has_related_activity">
-        <el-select v-model="localForm.related_activity_1" placeholder="选择关联活动" :disabled="isViewMode" @change="handleFormChange" style="width: 200px; margin-right: 10px;">
-          <el-option label="新健步走活动" value="1"></el-option>
-          <el-option label="0731健步走活动1" value="2"></el-option>
+      <el-form-item label="选择关联活动" required v-if="localForm.activity_switch === 2">
+        <el-select v-model="localForm.activity_type" placeholder="选择关联活动" :disabled="isViewMode" @change="handleRelatedActivity1Change" style="width: 200px; margin-right: 10px;">
+          <el-option label="组团" value="1"></el-option>
+          <el-option label="拼团" value="2"></el-option>
+          <el-option label="健步走" value="3"></el-option>
+          <el-option label="定时抽奖" value="4"></el-option>
         </el-select>
-        <el-select v-model="localForm.related_activity_2" placeholder="选择关联活动" :disabled="isViewMode" @change="handleFormChange" style="width: 200px;">
-          <el-option label="新健步走活动" value="1"></el-option>
-          <el-option label="0731健步走活动1" value="2"></el-option>
+        <el-select v-model="localForm.activity_id" placeholder="选择关联活动" :disabled="isViewMode" @change="handleFormChange" style="width: 200px;" :loading="relatedActivityLoading">
+          <el-option v-for="item in relatedActivityOptions" :key="item.id" :label="item.name" :value="String(item.id)"></el-option>
         </el-select>
       </el-form-item>
       
-      <el-form-item label="选择关联机构" required v-if="localForm.has_related_activity">
-        <el-select v-model="localForm.related_organization" placeholder="选择关联机构" :disabled="isViewMode" @change="handleFormChange" style="width: 200px;">
-          <el-option label="鼎翰文化" value="1"></el-option>
+      <el-form-item label="选择关联机构" required v-if="localForm.activity_switch === 2">
+        <el-select v-model="localForm.top_dept_id" placeholder="选择关联机构" :disabled="isViewMode" @change="handleFormChange" style="width: 200px;" :loading="organizationLoading">
+          <el-option v-for="item in organizationOptions" :key="item.id" :label="item.name" :value="item.id"></el-option>
         </el-select>
       </el-form-item>
       <h3>抽奖次数设置</h3>
@@ -151,16 +152,14 @@ export default defineComponent({
         is_del: 0,
         tenant_id: 1,
         home_bg_pic: [] as any[],
-        has_related_activity: false,
-        related_activity_1: '',
-        related_activity_2: '',
-        related_organization: '',
+        activity_switch: 1, // 默认不关联
+        top_dept_id: '',
         whitelist_qty_switch: 2,
         whitelist_qty_switch_msg: '',
         invitation_code_switch: 2,
         invitation_code_switch_msg: '',
         invitation_code_num: 1,
-        share_bg_setting: '{"share_style": 1, "share_bg_pic": "", "wx_share_pic": "", "share_btn_pic": "", "share_id_type": 1, "wx_share_desc": "", "wx_share_title": ""}'
+        share_bg_setting: '{"share_style": "1", "share_bg_pic": "", "wx_share_pic": "", "share_btn_pic": "", "share_id_type": 1, "wx_share_desc": "", "wx_share_title": ""}'
       })
     },
     isViewMode: {
@@ -172,6 +171,10 @@ export default defineComponent({
   setup(props, { emit }) {
     const localForm = ref({ ...props.form });
     const localActivityTimeRange = ref<string[]>([]);
+    const relatedActivityLoading = ref(false);
+    const relatedActivityOptions = ref<any[]>([]);
+    const organizationLoading = ref(false);
+    const organizationOptions = ref<any[]>([]);
 
     // 初始化时间范围
     if (props.form.start_time && props.form.end_time) {
@@ -179,17 +182,25 @@ export default defineComponent({
     }
 
     // 初始化时确保关联活动设置字段有正确的值
-    if (localForm.value.has_related_activity === undefined) {
-      localForm.value.has_related_activity = false;
+    if (localForm.value.activity_switch === undefined) {
+      localForm.value.activity_switch = 1; // 默认不关联
+    } else {
+      localForm.value.activity_switch = Number(localForm.value.activity_switch);
     }
-    if (localForm.value.related_activity_1 === undefined) {
-      localForm.value.related_activity_1 = '';
+    if (localForm.value.activity_type === undefined) {
+      localForm.value.activity_type = '';
+    } else {
+      localForm.value.activity_type = String(localForm.value.activity_type);
     }
-    if (localForm.value.related_activity_2 === undefined) {
-      localForm.value.related_activity_2 = '';
+    if (localForm.value.activity_id === undefined) {
+      localForm.value.activity_id = '';
+    } else {
+      localForm.value.activity_id = String(localForm.value.activity_id);
     }
-    if (localForm.value.related_organization === undefined) {
-      localForm.value.related_organization = '';
+    if (localForm.value.top_dept_id === undefined) {
+      localForm.value.top_dept_id = '';
+    } else {
+      localForm.value.top_dept_id = String(localForm.value.top_dept_id);
     }
     // 初始化时确保抽奖次数设置字段有正确的值
     if (localForm.value.whitelist_qty_switch === undefined) {
@@ -214,6 +225,12 @@ export default defineComponent({
     watch(
       () => props.form,
       (newForm) => {
+        console.log('=== props.form 变化 ===');
+        console.log('newForm.activity_switch:', newForm.activity_switch);
+        console.log('newForm.activity_type:', newForm.activity_type);
+        console.log('newForm.activity_id:', newForm.activity_id);
+        console.log('newForm.top_dept_id:', newForm.top_dept_id);
+        
         localForm.value = { ...newForm };
         // 确保 carrier_type 是字符串类型
         if (newForm.carrier_type !== undefined) {
@@ -225,25 +242,34 @@ export default defineComponent({
         } else {
           localForm.value.home_bg_pic = [];
         }
-        // 确保 has_related_activity 是布尔类型
-        if (newForm.has_related_activity !== undefined) {
-          localForm.value.has_related_activity = newForm.has_related_activity;
+        // 确保 activity_switch 是数字类型
+        if (newForm.activity_switch !== undefined) {
+          localForm.value.activity_switch = Number(newForm.activity_switch);
+          console.log('localForm.value.activity_switch after Number():', localForm.value.activity_switch);
         }
-        // 确保 related_activity_1 是字符串类型
-        if (newForm.related_activity_1 !== undefined) {
-          localForm.value.related_activity_1 = String(newForm.related_activity_1);
+        // 确保 activity_type 是字符串类型
+        if (newForm.activity_type !== undefined) {
+          localForm.value.activity_type = String(newForm.activity_type);
         }
-        // 确保 related_activity_2 是字符串类型
-        if (newForm.related_activity_2 !== undefined) {
-          localForm.value.related_activity_2 = String(newForm.related_activity_2);
+        // 确保 activity_id 是字符串类型
+        if (newForm.activity_id !== undefined) {
+          localForm.value.activity_id = String(newForm.activity_id);
+          // 当 activity_id 存在时，加载活动信息
+          if (newForm.activity_id) {
+            loadActivityInfo(newForm.activity_id);
+          }
         }
-        // 确保 related_organization 是字符串类型
-        if (newForm.related_organization !== undefined) {
-          localForm.value.related_organization = String(newForm.related_organization);
+        // 确保 top_dept_id 是字符串类型
+        if (newForm.top_dept_id !== undefined) {
+          localForm.value.top_dept_id = String(newForm.top_dept_id);
         }
         // 确保 whitelist_qty_switch 是数字类型
         if (newForm.whitelist_qty_switch !== undefined) {
           localForm.value.whitelist_qty_switch = Number(newForm.whitelist_qty_switch);
+        }
+        // 当 activity_type 变化时，重新加载相关活动列表
+        if (newForm.activity_type) {
+          loadRelatedActivities(newForm.activity_type);
         }
         // 确保 whitelist_qty_switch_msg 是字符串类型
         if (newForm.whitelist_qty_switch_msg !== undefined) {
@@ -264,9 +290,69 @@ export default defineComponent({
         if (newForm.start_time && newForm.end_time) {
           localActivityTimeRange.value = [newForm.start_time, newForm.end_time];
         }
+        
+        console.log('=== localForm.value 变化后 ===');
+        console.log('localForm.value.activity_switch:', localForm.value.activity_switch);
+        console.log('localForm.value.activity_type:', localForm.value.activity_type);
+        console.log('localForm.value.activity_id:', localForm.value.activity_id);
+        console.log('localForm.value.top_dept_id:', localForm.value.top_dept_id);
       },
       { deep: true }
     );
+
+    // 加载关联活动列表
+    const loadRelatedActivities = async (type: string) => {
+      relatedActivityLoading.value = true;
+      try {
+        const url = `${import.meta.env.VITE_APP_API}/team/up/list?pageSize=10&pageIndex=1&type=${type}`;
+        const res: any = await baseService.get(url);
+        console.log('=== 加载关联活动列表接口返回 ===');
+        console.log('响应数据:', JSON.stringify(res, null, 2));
+        
+        // 接口返回的数据结构是 { code: '00000', data: [活动列表] }
+        if (res.code === '00000' && res.data) {
+          // 检查 res.data 是数组还是对象
+          if (Array.isArray(res.data)) {
+            relatedActivityOptions.value = res.data;
+          } else if (res.data.data && Array.isArray(res.data.data)) {
+            relatedActivityOptions.value = res.data.data;
+          } else if (res.data.list && Array.isArray(res.data.list)) {
+            relatedActivityOptions.value = res.data.list;
+          } else {
+            relatedActivityOptions.value = [];
+          }
+        } else {
+          relatedActivityOptions.value = [];
+        }
+      } catch (error) {
+        console.error('加载关联活动列表失败:', error);
+        relatedActivityOptions.value = [];
+      } finally {
+        relatedActivityLoading.value = false;
+      }
+    };
+
+    // 根据 activity_id 查询活动信息
+    const loadActivityInfo = async (activityId: string) => {
+      if (!activityId) return;
+      
+      try {
+        // 注意：这里需要根据实际接口参数格式调整
+        // 用户建议使用 impId = activity_id 作为入参
+        const url = `${import.meta.env.VITE_APP_API}/team/up/main/info?impId=${activityId}`;
+        const res: any = await baseService.get(url);
+        if (res.code === '00000' && res.data) {
+          // 检查活动是否已经在 relatedActivityOptions 中
+          const existingIndex = relatedActivityOptions.value.findIndex(item => String(item.id) === activityId);
+          if (existingIndex === -1) {
+            // 将活动信息添加到 relatedActivityOptions 中
+            relatedActivityOptions.value.push(res.data);
+          }
+        }
+      } catch (error) {
+        console.error('加载活动信息失败:', error);
+      }
+    };
 
     // 初始化时确保 carrier_type 是字符串类型
     if (props.form.carrier_type !== undefined) {
@@ -291,6 +377,11 @@ export default defineComponent({
     if (localForm.value.sign_in_status === undefined) {
       localForm.value.sign_in_status = '0';
     }
+    
+    // 初始化时根据 activity_type 加载相关活动列表
+    if (localForm.value.activity_type) {
+      loadRelatedActivities(localForm.value.activity_type);
+    }
 
     const handleTimeChange = (value: any) => {
       localActivityTimeRange.value = value;
@@ -304,6 +395,41 @@ export default defineComponent({
     const handleFormChange = () => {
       emit('update:form', { ...localForm.value });
     };
+
+    // 处理第一个关联活动选择变化
+    const handleRelatedActivity1Change = async (value: string) => {
+      localForm.value.activity_type = value;
+      // 清空第二个关联活动的选择
+      localForm.value.activity_id = '';
+      // 根据第一个选择的类型加载第二个关联活动的选项
+      if (value) {
+        await loadRelatedActivities(value);
+      }
+      handleFormChange();
+    };
+
+    // 加载机构列表
+    const loadOrganizations = async () => {
+      organizationLoading.value = true;
+      try {
+        const url = `${import.meta.env.VITE_APP_API}/sys/dept/top/list`;
+        const res: any = await baseService.get(url);
+        if (res.code === 200 && res.data) {
+          // 接口返回的数据结构是 { code: 200, data: [机构列表] }
+          organizationOptions.value = Array.isArray(res.data) ? res.data : [];
+        } else {
+          organizationOptions.value = [];
+        }
+      } catch (error) {
+        console.error('加载机构列表失败:', error);
+        organizationOptions.value = [];
+      } finally {
+        organizationLoading.value = false;
+      }
+    };
+
+    // 初始化加载机构列表
+    loadOrganizations();
 
     // 图片上传函数
     const uploadImage = () => {
@@ -356,8 +482,13 @@ export default defineComponent({
     return {
       localForm,
       localActivityTimeRange,
+      relatedActivityLoading,
+      relatedActivityOptions,
+      organizationLoading,
+      organizationOptions,
       handleTimeChange,
       handleFormChange,
+      handleRelatedActivity1Change,
       uploadImage,
       removeImage
     };

@@ -106,13 +106,22 @@ export default defineComponent({
         data_form: '',
         c_data_form: '',
         share_mode: '1',
+        share_bg_setting: '{"share_style": "1", "share_bg_pic": "", "wx_share_pic": "", "share_btn_pic": "", "share_id_type": 1, "wx_share_desc": "", "wx_share_title": ""}',
+        activity_switch: 1,
+        top_dept_id: '',
         is_del: 0,
         tenant_id: 1,
         home_bg_pic: [] as any[],
         has_related_activity: false,
         related_activity_1: '',
         related_activity_2: '',
-        related_organization: ''
+        related_organization: '',
+        // 确保包含所有其他可能的字段
+        whitelist_qty_switch: 2,
+        whitelist_qty_switch_msg: '',
+        invitation_code_switch: 2,
+        invitation_code_switch_msg: '',
+        invitation_code_num: 1
       },
       uiConfig: {
         id: '',
@@ -283,6 +292,8 @@ export default defineComponent({
             activity_no: activityData.activityNo || '',
             activity_type: activityData.activityType,
             activity_id: activityData.activityId,
+            activity_switch: Number(activityData.activitySwitch) || 1,
+            top_dept_id: activityData.topDeptId || '',
             start_time: activityData.startTime,
             end_time: activityData.endTime,
             carrier_type: String(activityData.carrierType), // 转换为字符串类型
@@ -296,13 +307,20 @@ export default defineComponent({
             data_form: activityData.dataForm,
             c_data_form: activityData.cdataForm,
             share_mode: String(activityData.shareMode),
+            share_bg_setting: activityData.shareBgSetting || '{"share_style": 1, "share_bg_pic": "", "wx_share_pic": "", "share_btn_pic": "", "share_id_type": 1, "wx_share_desc": "", "wx_share_title": ""}',
             is_del: activityData.isDel,
             tenant_id: activityData.tenantId,
             home_bg_pic: homeBgPicArray,
-            has_related_activity: false,
-            related_activity_1: '',
-            related_activity_2: '',
-            related_organization: ''
+            has_related_activity: activityData.has_related_activity || false,
+            related_activity_1: activityData.related_activity_1 || '',
+            related_activity_2: activityData.related_activity_2 || '',
+            related_organization: activityData.related_organization || '',
+            // 确保包含所有其他可能的字段
+            whitelist_qty_switch: activityData.whitelist_qty_switch || 2,
+            whitelist_qty_switch_msg: activityData.whitelist_qty_switch_msg || '',
+            invitation_code_switch: activityData.invitation_code_switch || 2,
+            invitation_code_switch_msg: activityData.invitation_code_switch_msg || '',
+            invitation_code_num: activityData.invitation_code_num || 1
           };
           
           // 转换UI配置数据
@@ -337,14 +355,12 @@ export default defineComponent({
     },
     async handleSubmit() {
       try {
-        const url = this.form.id 
-          ? `${import.meta.env.VITE_APP_API}/api/invitation/update` 
-          : `${import.meta.env.VITE_APP_API}/api/invitation/create`;
+        const url = `${import.meta.env.VITE_APP_API}/api/invitation/activity/save`;
         
         const res: any = await baseService.post(url, this.form);
         if (res.code === '00000') {
           ElMessage.success('基础设置保存成功');
-          if (!this.form.id) {
+          if (res.data && res.data.id) {
             this.form.id = res.data.id;
           }
           this.handleSaveSuccess();
@@ -358,14 +374,12 @@ export default defineComponent({
     },
     async handleSubmitShare() {
       try {
-        const url = this.form.id 
-          ? `${import.meta.env.VITE_APP_API}/api/invitation/update` 
-          : `${import.meta.env.VITE_APP_API}/api/invitation/create`;
+        const url = `${import.meta.env.VITE_APP_API}/api/invitation/activity/save`;
         
         const res: any = await baseService.post(url, this.form);
         if (res.code === '00000') {
           ElMessage.success('分享设置保存成功');
-          if (!this.form.id) {
+          if (res.data && res.data.id) {
             this.form.id = res.data.id;
           }
           this.handleSaveSuccess();
@@ -379,15 +393,15 @@ export default defineComponent({
     },
     async handleSubmitLogin() {
       try {
-        const url = `${import.meta.env.VITE_APP_API}/api/invitation/ui/save`;
-        const data = {
-          ...this.uiConfig,
-          invitation_id: this.form.id
-        };
+        const url = `${import.meta.env.VITE_APP_API}/api/invitation/activity/save`;
         
-        const res: any = await baseService.post(url, data);
+        const res: any = await baseService.post(url, this.form);
         if (res.code === '00000') {
           ElMessage.success('登录页面设置保存成功');
+          if (res.data && res.data.id) {
+            this.form.id = res.data.id;
+          }
+          this.handleSaveSuccess();
         } else {
           ElMessage.error('保存失败：' + res.msg);
         }

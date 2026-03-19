@@ -100,6 +100,9 @@ export default defineComponent({
         data_form: '',
         c_data_form: '',
         share_mode: 1,
+        share_bg_setting: '{"share_style": "1", "share_bg_pic": "", "wx_share_pic": "", "share_btn_pic": "", "share_id_type": 1, "wx_share_desc": "", "wx_share_title": ""}',
+        activity_switch: 1,
+        top_dept_id: '',
         is_del: 0,
         tenant_id: 1
       },
@@ -196,6 +199,9 @@ export default defineComponent({
             data_form: activityData.dataForm,
             c_data_form: activityData.cdataForm,
             share_mode: activityData.shareMode,
+            share_bg_setting: activityData.shareBgSetting || '{"share_style": "1", "share_bg_pic": "", "wx_share_pic": "", "share_btn_pic": "", "share_id_type": 1, "wx_share_desc": "", "wx_share_title": ""}',
+            activity_switch: Number(activityData.activitySwitch) || 1,
+            top_dept_id: activityData.topDeptId || '',
             is_del: activityData.isDel,
             tenant_id: activityData.tenantId
           };
