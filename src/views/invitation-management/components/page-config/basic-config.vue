@@ -113,31 +113,6 @@
           show-word-limit
         ></el-input>
       </el-form-item>
-      <h3>内容设置</h3>
-      <el-form-item label="登录开关">
-        <el-radio-group v-model="localForm.login_switch" :disabled="isViewMode" @change="handleFormChange">
-          <el-radio label="1">开启</el-radio>
-          <el-radio label="2">关闭</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="资料提交开关">
-        <el-radio-group v-model="localForm.data_switch" :disabled="isViewMode" @change="handleFormChange">
-          <el-radio label="1">开启</el-radio>
-          <el-radio label="2">关闭</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="我的客户开关">
-        <el-radio-group v-model="localForm.customer_switch" :disabled="isViewMode" @change="handleFormChange">
-          <el-radio label="1">开启</el-radio>
-          <el-radio label="2">关闭</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="签到开关">
-        <el-radio-group v-model="localForm.sign_in_status" :disabled="isViewMode" @change="handleFormChange">
-          <el-radio label="1">开启</el-radio>
-          <el-radio label="0">关闭</el-radio>
-        </el-radio-group>
-      </el-form-item>
     </el-form>
   </div>
 </template>
