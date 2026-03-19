@@ -42,18 +42,12 @@
           </div>
         </div>
       </el-form-item>
-      
-      <el-form-item>
-        <el-button type="primary" @click="handleSubmit" :disabled="isViewMode">保存登录页面</el-button>
-      </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, watch, computed } from 'vue';
-import baseService from "@/service/baseService";
-import { ElMessage } from 'element-plus';
 
 export default defineComponent({
   name: "LoginConfig",
@@ -217,81 +211,12 @@ export default defineComponent({
       });
     };
 
-    // 处理提交
-    const handleSubmit = async () => {
-      if (!props.invitationId) {
-        ElMessage.error('请先保存基础设置');
-        return;
-      }
-
-      // 构建登录表单数据
-      const loginFormData = formItems.value.map(item => ({
-        form_name: item.form_name,
-        form_type: item.form_type,
-        only_switch: item.params_name === uniqueId.value ? 1 : 0,
-        params_name: item.params_name,
-        check_switch: item.check_switch,
-        choose_switch: item.choose_switch,
-        required_switch: item.required_switch
-      }));
-
-      const loginFormStr = JSON.stringify(loginFormData);
-
-      // 保存基础设置中的登录表单字段和登录开关
-      try {
-        const baseUrl = `${import.meta.env.VITE_APP_API}/api/invitation/update`;
-        const res: any = await baseService.post(baseUrl, {
-          id: props.invitationId,
-          login_form: loginFormStr,
-          login_switch: parseInt(loginSwitch.value)
-        });
-        if (res.code !== '00000') {
-          ElMessage.error('保存登录表单字段失败：' + res.msg);
-          return;
-        }
-      } catch (error) {
-        console.error('保存登录表单字段失败:', error);
-        ElMessage.error('保存登录表单字段失败，请重试');
-        return;
-      }
-
-      // 保存UI配置
-      const configData = { ...props.uiConfig, invitation_id: props.invitationId };
-      
-      try {
-        const url = configData.id != null 
-          ? `${import.meta.env.VITE_APP_API}/api/invitation/ui/update` 
-          : `${import.meta.env.VITE_APP_API}/api/invitation/ui/create`;
-        
-        const res: any = await baseService.post(url, configData);
-        if (res.code === '00000') {
-          ElMessage.success('保存成功');
-          if (configData.id == null) {
-            configData.id = res.data.id;
-            emit('update:uiConfig', configData);
-          }
-          // 更新父组件的 form
-          emit('update:form', { 
-            ...props.form, 
-            login_form: loginFormStr,
-            login_switch: parseInt(loginSwitch.value)
-          });
-        } else {
-          ElMessage.error('保存失败：' + res.msg);
-        }
-      } catch (error) {
-        console.error('保存失败:', error);
-        ElMessage.error('保存失败，请重试');
-      }
-    };
-
     return {
       formItems,
       uniqueId,
       loginSwitch,
       selectAll,
-      handleSelectAll,
-      handleSubmit
+      handleSelectAll
     };
   }
 });

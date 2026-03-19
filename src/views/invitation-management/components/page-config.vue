@@ -233,8 +233,8 @@ export default defineComponent({
 .page-config {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
-  overflow: hidden;
+  min-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
 /* 顶部 Tab 导航 */
@@ -279,8 +279,8 @@ export default defineComponent({
 .content-area {
   flex: 1;
   background: #fff;
-  overflow-y: auto;
-  height: 100%;
+  overflow-y: visible;
+  min-height: auto;
   display: flex;
   flex-direction: column;
   padding-bottom: 40px;
