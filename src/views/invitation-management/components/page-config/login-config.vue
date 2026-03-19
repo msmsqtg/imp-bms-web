@@ -81,6 +81,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch, computed } from 'vue';
 import { ElMessage } from 'element-plus';
+import baseService from "@/service/baseService";
 
 export default defineComponent({
   name: "LoginConfig",
@@ -234,7 +235,7 @@ export default defineComponent({
     };
 
     // 上传登录按钮图片
-    const uploadShareImage = (type: string) => {
+    const uploadShareImage = async (type: string) => {
       // 创建文件输入元素
       const input = document.createElement('input');
       input.type = 'file';
@@ -246,28 +247,33 @@ export default defineComponent({
         if (target.files && target.files[0]) {
           const file = target.files[0];
           
-          // 这里可以添加文件大小和类型验证
+          // 文件大小和类型验证
           if (file.size > 5 * 1024 * 1024) { // 限制5MB
             ElMessage.error('图片大小不能超过5MB');
             return;
           }
           
-          // 模拟上传过程
-          console.log('开始上传图片:', file.name);
+          // 创建FormData对象
+          const formData = new FormData();
+          formData.append('file', file);
           
-          // 这里应该调用实际的上传接口
-          // 示例：const res = await uploadService.upload(file);
-          // 假设上传成功，返回图片URL
-          
-          // 模拟上传成功，使用一个示例URL
-          // 实际项目中，应该使用真实的上传接口返回的URL
-          const imageUrl = `https://image.sqqmall.com/img/${Date.now()}.png`;
-          
-          // 更新本地状态
-          if (type === 'login_btn_pic') {
-            localLoginSetting.value.login_btn_pic = imageUrl;
-            handleFormChange();
-            ElMessage.success('图片上传成功');
+          try {
+            // 调用上传接口
+            const uploadUrl = `${import.meta.env.VITE_APP_API}/common/upload/image`;
+            const res: any = await baseService.post(uploadUrl, formData);
+            if (res.code === '00000' && res.data?.url) {
+              // 更新本地状态
+              if (type === 'login_btn_pic') {
+                localLoginSetting.value.login_btn_pic = res.data.url;
+                handleFormChange();
+                ElMessage.success('图片上传成功');
+              }
+            } else {
+              ElMessage.error('上传失败：' + (res.msg || '未知错误'));
+            }
+          } catch (error) {
+            console.error('上传失败:', error);
+            ElMessage.error('上传失败，请重试');
           }
         }
       };
@@ -460,8 +466,13 @@ export default defineComponent({
 
 /* 按钮容器样式 */
 .button-container {
-  margin-top: 10px;
+  margin-top: 0;
   display: flex;
   justify-content: center;
+}
+
+/* 删除按钮样式 */
+.button-container .el-button {
+  width: 178px;
 }
 </style>
