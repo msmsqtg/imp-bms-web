@@ -163,6 +163,9 @@ export default defineComponent({
           this.invitationId = route.query.id as string;
           console.log('通过路由变化设置 invitationId:', this.invitationId);
         }
+        if (route.query.impId) {
+          console.log('通过路由变化获取 impId:', route.query.impId);
+        }
 
         // 延迟更新标签页标题，确保在路由拦截器之后执行
         setTimeout(() => {

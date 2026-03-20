@@ -123,6 +123,7 @@ interface TableRow {
   activityTime: string;
   status: string;
   id: number | string;
+  activityId: string;
 }
 
 export default defineComponent({
@@ -199,7 +200,8 @@ export default defineComponent({
               formSubmitLink: item.thirdLinkAddress ? item.thirdLinkAddress.trim() : '',
               activityTime: `${item.startTime} 至 ${item.endTime}`,
               status: this.getStatusText(item.isDel),
-              id: item.id
+              id: item.id,
+              activityId: item.activityId || ''
             }));
             console.log('数据处理完成，共', this.tableData.length, '条记录');
           } else {
@@ -248,7 +250,8 @@ export default defineComponent({
       this.$router.push({
         path: '/invitation-management/create',
         query: {
-          id: row.id
+          id: row.id,
+          impId: row.activityId
         }
       });
     },
@@ -259,7 +262,8 @@ export default defineComponent({
         path: '/invitation-management/create',
         query: {
           id: row.id,
-          mode: 'view'
+          mode: 'view',
+          impId: row.activityId
         }
       });
     },

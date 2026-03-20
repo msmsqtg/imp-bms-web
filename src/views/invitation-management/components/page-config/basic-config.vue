@@ -269,7 +269,12 @@ export default defineComponent({
         }
         // 当 activity_type 变化时，重新加载相关活动列表
         if (newForm.activity_type) {
-          loadRelatedActivities(newForm.activity_type);
+          loadRelatedActivities(newForm.activity_type).then(() => {
+            // 重新加载活动信息，确保活动信息被添加到 relatedActivityOptions 中
+            if (newForm.activity_id) {
+              loadActivityInfo(newForm.activity_id);
+            }
+          });
         }
         // 确保 whitelist_qty_switch_msg 是字符串类型
         if (newForm.whitelist_qty_switch_msg !== undefined) {
@@ -380,7 +385,15 @@ export default defineComponent({
     
     // 初始化时根据 activity_type 加载相关活动列表
     if (localForm.value.activity_type) {
-      loadRelatedActivities(localForm.value.activity_type);
+      loadRelatedActivities(localForm.value.activity_type).then(() => {
+        // 加载活动信息，确保活动信息被添加到 relatedActivityOptions 中
+        if (localForm.value.activity_id) {
+          loadActivityInfo(localForm.value.activity_id);
+        }
+      });
+    } else if (localForm.value.activity_id) {
+      // 如果没有 activity_type，但有 activity_id，直接加载活动信息
+      loadActivityInfo(localForm.value.activity_id);
     }
 
     const handleTimeChange = (value: any) => {
