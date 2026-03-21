@@ -252,16 +252,16 @@
             <!-- 背景图片 -->
             <div v-if="localCDataSetting.bg_pic" class="image-preview-list">
               <div class="image-preview-item">
-                <img :src="localCDataSetting.bg_pic" alt="背景图片" class="preview-image btn-preview-image">
+                <img :src="localCDataSetting.bg_pic" alt="背景图片" class="preview-image bg-preview-image">
                 <div class="button-container">
                   <el-button v-if="!isViewMode" type="danger" size="small" @click="removeCDataImage('bg_pic')">删除</el-button>
                 </div>
               </div>
             </div>
-            <div v-else class="upload-placeholder btn-upload-placeholder">
+            <div v-else class="upload-placeholder bg-upload-placeholder">
               <div class="placeholder-icon">!</div>
             </div>
-            <div v-if="!isViewMode && !localCDataSetting.bg_pic" class="upload-button btn-upload-button">
+            <div v-if="!isViewMode && !localCDataSetting.bg_pic" class="upload-button bg-upload-button">
               <el-button type="primary" plain :disabled="isViewMode" @click="uploadCDataImage('bg_pic')">+</el-button>
             </div>
           </div>
@@ -1270,6 +1270,25 @@ export default defineComponent({
 .btn-upload-button {
   width: 178px;
   height: 48px;
+}
+
+/* 背景图片预览样式 */
+.bg-preview-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+}
+
+/* 背景图片占位符样式 */
+.bg-upload-placeholder {
+  width: 150px;
+  height: 150px;
+}
+
+/* 背景图片上传按钮样式 */
+.bg-upload-button {
+  width: 150px;
+  height: 150px;
 }
 
 /* 上传提示样式 */
