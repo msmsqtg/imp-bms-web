@@ -405,6 +405,40 @@ export default defineComponent({
     },
     async handleSubmitLogin() {
       try {
+        // 校验登录设置中的表单类型是否重复
+        if (this.form.login_setting) {
+          try {
+            const loginSetting = JSON.parse(this.form.login_setting);
+            if (loginSetting.form_items) {
+              const formTypes = loginSetting.form_items.map((item: any) => item.form_type);
+              const uniqueTypes = new Set(formTypes);
+              if (formTypes.length !== uniqueTypes.size) {
+                ElMessage.error('表单类型不能重复');
+                return;
+              }
+            }
+          } catch (e) {
+            console.error('解析登录设置失败:', e);
+          }
+        }
+
+        // 校验C端客户资料提交设置中的表单类型是否重复
+        if (this.form.c_data_form) {
+          try {
+            const cDataForm = JSON.parse(this.form.c_data_form);
+            if (cDataForm.form_items) {
+              const formTypes = cDataForm.form_items.map((item: any) => item.form_type);
+              const uniqueTypes = new Set(formTypes);
+              if (formTypes.length !== uniqueTypes.size) {
+                ElMessage.error('C端表单类型不能重复');
+                return;
+              }
+            }
+          } catch (e) {
+            console.error('解析C端客户资料提交设置失败:', e);
+          }
+        }
+
         const url = `${import.meta.env.VITE_APP_API}/api/invitation/activity/save`;
         
         const res: any = await baseService.post(url, this.form);
