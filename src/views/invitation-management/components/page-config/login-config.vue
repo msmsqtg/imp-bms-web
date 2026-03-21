@@ -579,7 +579,7 @@ export default defineComponent({
         form_name: item.form_name,
         form_type: item.form_type,
         only_switch: item.only_switch,
-        params_name: item.params_name,
+        params_name: item.form_type,
         check_switch: item.check_switch,
         choose_switch: item.choose_switch,
         required_switch: item.required_switch
@@ -620,7 +620,7 @@ export default defineComponent({
         form_type: newFormType,
         form_type_text: formTypeOptions.value.find(opt => opt.value === newFormType)?.label || '',
         only_switch: firstSubmitItem.value.only_switch,
-        params_name: `field_${Date.now()}`,
+        params_name: newFormType,
         check_switch: firstSubmitItem.value.check_switch,
         choose_switch: firstSubmitItem.value.choose_switch,
         required_switch: firstSubmitItem.value.required_switch
@@ -734,7 +734,7 @@ export default defineComponent({
         form_name: item.form_name,
         form_type: item.form_type,
         only_switch: item.only_switch,
-        params_name: item.params_name,
+        params_name: item.form_type,
         check_switch: item.check_switch,
         choose_switch: item.choose_switch,
         required_switch: item.required_switch
@@ -769,7 +769,7 @@ export default defineComponent({
         form_type: newFormType,
         form_type_text: formTypeOptions.value.find(opt => opt.value === newFormType)?.label || '',
         only_switch: firstCDataSubmitItem.value.only_switch,
-        params_name: `field_${Date.now()}`,
+        params_name: newFormType,
         check_switch: firstCDataSubmitItem.value.check_switch,
         choose_switch: firstCDataSubmitItem.value.choose_switch,
         required_switch: firstCDataSubmitItem.value.required_switch
@@ -963,7 +963,7 @@ export default defineComponent({
                   form_type: item.form_type || 'string_word',
                   form_type_text: formTypeOptions.value.find(opt => opt.value === item.form_type)?.label || '',
                   only_switch: item.only_switch || 0,
-                  params_name: item.params_name || `field_${Date.now()}`,
+                  params_name: item.params_name || item.form_type,
                   check_switch: item.check_switch || 0,
                   choose_switch: item.choose_switch || 1,
                   required_switch: item.required_switch || 0
@@ -1022,7 +1022,7 @@ export default defineComponent({
                   form_type: item.form_type || 'string_word',
                   form_type_text: formTypeOptions.value.find(opt => opt.value === item.form_type)?.label || '',
                   only_switch: item.only_switch || 0,
-                  params_name: item.params_name || `field_${Date.now()}`,
+                  params_name: item.params_name || item.form_type,
                   check_switch: item.check_switch || 0,
                   choose_switch: item.choose_switch || 1,
                   required_switch: item.required_switch || 0
