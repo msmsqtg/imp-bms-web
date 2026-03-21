@@ -121,7 +121,11 @@ export default defineComponent({
         whitelist_qty_switch_msg: '',
         invitation_code_switch: 2,
         invitation_code_switch_msg: '',
-        invitation_code_num: 1
+        invitation_code_num: 1,
+        // 添加提交资料设置和登录设置
+        data_setting: '',
+        login_setting: '',
+        c_data_setting: ''
       },
       uiConfig: {
         id: '',
@@ -323,7 +327,12 @@ export default defineComponent({
             whitelist_qty_switch_msg: activityData.whitelist_qty_switch_msg || '',
             invitation_code_switch: activityData.invitation_code_switch || 2,
             invitation_code_switch_msg: activityData.invitation_code_switch_msg || '',
-            invitation_code_num: activityData.invitation_code_num || 1
+            invitation_code_num: activityData.invitation_code_num || 1,
+            // 添加提交资料设置
+            data_setting: activityData.dataSetting,
+            login_setting: activityData.loginSetting,
+            // 添加C端客户资料提交设置
+            c_data_setting: activityData.cdataSetting
           };
           
           // 转换UI配置数据
