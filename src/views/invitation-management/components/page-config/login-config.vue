@@ -757,13 +757,6 @@ export default defineComponent({
     const addCDataSubmitFormItem = () => {
       const newFormType = firstCDataSubmitItem.value.form_type;
       
-      // 检查类型是否重复（包括第一行和动态行）
-      const allFormTypes = [firstCDataSubmitItem.value.form_type, ...dynamicCDataSubmitFormItems.value.map(item => item.form_type)];
-      if (allFormTypes.includes(newFormType)) {
-        ElMessage.error('表单类型不能重复');
-        return;
-      }
-      
       dynamicCDataSubmitFormItems.value.push({
         form_name: firstCDataSubmitItem.value.form_name,
         form_type: newFormType,
