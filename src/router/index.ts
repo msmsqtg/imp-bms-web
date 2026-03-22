@@ -210,6 +210,14 @@ export const registerDynamicToRouterAndNext = (route: dynamicRouteParams): void 
     title = "拼团活动";
   } else if (route.path.includes("activity-management")) {
     title = "活动管理";
+  } else if (route.path.includes("invitation-management/agent-whitelist")) {
+    title = "代理人白名单";
+  } else if (route.path.includes("invitation-management/export-record")) {
+    title = "导出记录";
+  } else if (route.path.includes("invitation-management/create")) {
+    title = "邀约活动配置";
+  } else if (route.path.includes("invitation-management")) {
+    title = "邀约活动";
   }
   const newRoute: RouteRecordRaw = {
     path: route.path,

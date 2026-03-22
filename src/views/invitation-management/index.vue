@@ -71,11 +71,12 @@
             <span v-else class="status-normal">{{ scope.row.status }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="300">
+        <el-table-column label="操作" width="400">
           <template #default="scope">
             <el-button style="padding: 0; margin-right: 5px" type="text" size="small" @click="handleEdit(scope.row)">编辑</el-button>
             <el-button style="padding: 0; margin-right: 5px" type="text" size="small" @click="handleView(scope.row)">查看</el-button>
             <el-button style="padding: 0; margin-right: 5px" type="text" size="small" @click="handleDelete(scope.row)">删除</el-button>
+            <el-button style="padding: 0; margin-right: 5px" type="text" size="small" @click="handleAgentWhitelist(scope.row)">代理人白名单</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -295,6 +296,16 @@ export default defineComponent({
           });
       }).catch(() => {
         // 取消操作
+      });
+    },
+
+    handleAgentWhitelist(row: TableRow) {
+      // 跳转到代理人白名单页面
+      this.$router.push({
+        path: '/invitation-management/agent-whitelist',
+        query: {
+          activityId: row.id
+        }
       });
     },
 
