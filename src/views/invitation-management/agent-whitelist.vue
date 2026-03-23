@@ -4,8 +4,8 @@
       <!-- 搜索和筛选区域 -->
       <div class="search-filter">
         <el-form :inline="true" class="demo-form-inline">
-          <el-form-item label="抽奖券码">
-            <el-input v-model="searchForm.lotteryCode" placeholder="请输入抽奖券码"></el-input>
+          <el-form-item label="手机号">
+            <el-input v-model="searchForm.lotteryCode" placeholder="请输入手机号"></el-input>
           </el-form-item>
           <el-form-item label="操作时间">
             <el-date-picker
@@ -240,14 +240,14 @@ export default defineComponent({
         startTime: this.searchForm.startTime,
         endTime: this.searchForm.endTime,
         status: this.searchForm.status,
-        activityId: this.activityId
+        impId: this.activityId
       };
 
       if (this.searchForm.status === '') {
         delete params.status;
       }
 
-      baseService.get(`${import.meta.env.VITE_APP_API}/api/invitation/agent/whitelist/list`, params)
+      baseService.get(`${import.meta.env.VITE_APP_API}/whitelist/record/list`, params)
         .then((res: any) => {
           if (res.code === '00000') {
             this.pagination.total = res.total;
@@ -302,7 +302,7 @@ export default defineComponent({
         type: 'error'
       }).then(() => {
         const ids = this.selectedRows.map(row => row.lotteryCode);
-        baseService.post(`${import.meta.env.VITE_APP_API}/api/invitation/agent/whitelist/batch-delete`, { ids })
+        baseService.post(`${import.meta.env.VITE_APP_API}/whitelist/record/batch-delete`, { ids, impId: this.activityId })
           .then((res: any) => {
             if (res.code === '00000') {
               ElMessage.success('批量删除成功');
@@ -323,7 +323,7 @@ export default defineComponent({
     },
 
     downloadTemplate() {
-      window.location.href = `${import.meta.env.VITE_APP_API}/api/invitation/agent/whitelist/template`;
+      window.location.href = `${import.meta.env.VITE_APP_API}/whitelist/template?impId=${this.activityId}`;
     },
 
     handleImport() {
@@ -334,9 +334,9 @@ export default defineComponent({
 
       const formData = new FormData();
       formData.append('file', this.importForm.file);
-      formData.append('activityId', String(this.activityId));
+      formData.append('impId', String(this.activityId));
 
-      baseService.post(`${import.meta.env.VITE_APP_API}/api/invitation/agent/whitelist/import`, formData, {
+      baseService.post(`${import.meta.env.VITE_APP_API}/whitelist/import`, formData, {
         'Content-Type': 'multipart/form-data'
       })
         .then((res: any) => {
@@ -356,7 +356,7 @@ export default defineComponent({
     },
 
     handleExport() {
-      window.location.href = `${import.meta.env.VITE_APP_API}/api/invitation/agent/whitelist/export?activityId=${this.activityId}`;
+      window.location.href = `${import.meta.env.VITE_APP_API}/whitelist/record/list?impId=${this.activityId}&export=true`;
     },
 
     handleViewExportRecord() {
@@ -382,10 +382,10 @@ export default defineComponent({
         pageIndex: this.logPagination.currentPage,
         pageSize: this.logPagination.pageSize,
         importBatchNo: this.logSearchForm.importBatchNo,
-        activityId: this.activityId
+        impId: this.activityId
       };
 
-      baseService.get(`${import.meta.env.VITE_APP_API}/api/invitation/agent/whitelist/import-log/list`, params)
+      baseService.get(`${import.meta.env.VITE_APP_API}/log/list`, params)
         .then((res: any) => {
           if (res.code === '00000') {
             this.logPagination.total = res.total;
@@ -414,11 +414,12 @@ export default defineComponent({
     loadLogDetailData(logId: number) {
       const params = {
         logId,
+        impId: this.activityId,
         pageIndex: this.logDetailPagination.currentPage,
         pageSize: this.logDetailPagination.pageSize
       };
 
-      baseService.get(`${import.meta.env.VITE_APP_API}/api/invitation/agent/whitelist/import-log/detail`, params)
+      baseService.get(`${import.meta.env.VITE_APP_API}/log/error/list?export=false`, params)
         .then((res: any) => {
           if (res.code === '00000') {
             this.logDetailPagination.total = res.total;
