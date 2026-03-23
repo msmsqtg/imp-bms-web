@@ -42,6 +42,15 @@
         @update:form="(value: typeof form) => form = value"
         @update:ui-config="(value: typeof uiConfig) => uiConfig = value"
       />
+
+      <!-- 模块配置 -->
+      <module-config 
+        v-if="activeTab === 'module'" 
+        :form="form" 
+        :is-view-mode="isViewMode"
+        @update:form="(value: typeof form) => form = value"
+        @save-success="handleSaveSuccess"
+      />
     </div>
   </div>
 </template>
@@ -53,12 +62,14 @@ import { ElMessage } from 'element-plus';
 import BasicConfig from './page-config/basic-config.vue';
 import ShareConfig from './page-config/share-config.vue';
 import LoginConfig from './page-config/login-config.vue';
+import ModuleConfig from './page-config/module-config.vue';
 
 export default defineComponent({
   components: {
     BasicConfig,
     ShareConfig,
-    LoginConfig
+    LoginConfig,
+    ModuleConfig
   },
   name: "InvitationPageConfig",
   props: {
@@ -78,7 +89,8 @@ export default defineComponent({
       tabs: [
         { key: 'basic', label: '基础设置' },
         { key: 'share', label: '分享设置' },
-        { key: 'login', label: '登录页面' }
+        { key: 'login', label: '登录页面' },
+        { key: 'module', label: '模块配置' }
       ],
       form: {
         id: '',
@@ -303,4 +315,6 @@ export default defineComponent({
   flex-direction: column;
   padding-bottom: 40px;
 }
+
+
 </style>

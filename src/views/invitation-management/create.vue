@@ -6,6 +6,7 @@
         <el-tab-pane label="基础设置" name="basic"></el-tab-pane>
         <el-tab-pane label="分享设置" name="share"></el-tab-pane>
         <el-tab-pane label="登录页面" name="login"></el-tab-pane>
+        <el-tab-pane label="模块配置" name="module"></el-tab-pane>
       </el-tabs>
 
       <!-- 基础设置 -->
@@ -59,6 +60,23 @@
           <el-button type="primary" @click="handleSubmitLogin" :disabled="isViewMode">提交</el-button>
         </div>
       </div>
+
+      <!-- 模块配置 -->
+      <div v-show="activeTab === 'module'" class="tab-content">
+        <ModuleConfig
+          :form="form"
+          :isViewMode="isViewMode"
+          @update:form="form = $event"
+          @save-success="handleSaveSuccess"
+        />
+        
+        <!-- 按钮区域 -->
+        <div class="button-area">
+          <el-button @click="handleBack">返回列表</el-button>
+          <el-button @click="handlePrevToLogin" :disabled="isViewMode">上一步</el-button>
+          <el-button type="primary" @click="handleSubmitModule" :disabled="isViewMode">提交</el-button>
+        </div>
+      </div>
     </el-card>
   </div>
 </template>
@@ -70,6 +88,7 @@ import baseService from "@/service/baseService";
 import BasicConfig from './components/page-config/basic-config.vue';
 import ShareConfig from './components/page-config/share-config.vue';
 import LoginConfig from './components/page-config/login-config.vue';
+import ModuleConfig from './components/page-config/module-config.vue';
 import emits from "@/utils/emits";
 import { EMitt } from "@/constants/enum";
 import { useAppStore } from "@/store";
@@ -79,7 +98,8 @@ export default defineComponent({
   components: {
     BasicConfig,
     ShareConfig,
-    LoginConfig
+    LoginConfig,
+    ModuleConfig
   },
   data() {
     return {
@@ -101,6 +121,9 @@ export default defineComponent({
         data_switch: '2',
         c_data_switch: '2',
         customer_switch: '2',
+        customer_setting: '{"customer_top_pic": "", "customer_icon_pic": "", "customer_top_color": "#D9001B", "wx_qr_code_switch": 1, "customer_lucky_kind_switch": 1, "customer_lucky_fictitious_switch": 1, "customer_xbox_whitelist_switch": 2, "customer_xbox_whitelist_type": 1}',
+        invitationRuleSwitch: 2,
+        invitationRuleSetting: '{"invitation_rule_icon": "", "invitation_rule_content": ""}',
         sign_in_status: '0',
         login_form: '',
         data_form: '',
@@ -126,7 +149,17 @@ export default defineComponent({
         // 添加提交资料设置和登录设置
         data_setting: '',
         login_setting: '',
-        c_data_setting: ''
+        c_data_setting: '',
+        // 组团列表和成团情况设置
+        team_up_switch: 2,
+        team_up_icon: '',
+        team_up_id: '',
+        team_purchase_switch: 2,
+        team_purchase_icon: '',
+        // 照片审核设置
+        third_vote_verify: 1,
+        third_vote_icon: '',
+        third_vote_activity_no: ''
       },
       uiConfig: {
         id: '',
@@ -255,6 +288,11 @@ export default defineComponent({
     handlePrevToShare() {
       this.activeTab = 'share';
     },
+    
+    // 上一步（回到登录页面）
+    handlePrevToLogin() {
+      this.activeTab = 'login';
+    },
     handleSaveSuccess() {
       console.log('基础设置保存成功');
     },
@@ -334,7 +372,22 @@ export default defineComponent({
             data_setting: activityData.dataSetting,
             login_setting: activityData.loginSetting,
             // 添加C端客户资料提交设置
-            c_data_setting: activityData.cdataSetting
+            c_data_setting: activityData.cdataSetting,
+            // 添加我的客户页面设置
+            customer_setting: activityData.customerSetting || '{"customer_top_pic": "", "customer_icon_pic": "", "customer_top_color": "#D9001B", "wx_qr_code_switch": 1, "customer_lucky_kind_switch": 1, "customer_lucky_fictitious_switch": 1, "customer_xbox_whitelist_switch": 2, "customer_xbox_whitelist_type": 1}',
+            // 添加活动规则设置
+            invitationRuleSwitch: activityData.invitationRuleSwitch || 2,
+            invitationRuleSetting: activityData.invitationRuleSetting || '{"invitation_rule_icon": "", "invitation_rule_content": ""}',
+            // 添加组团列表和成团情况设置
+            team_up_switch: activityData.teamUpSwitch || 2,
+            team_up_icon: activityData.teamUpIcon || '',
+            team_up_id: activityData.teamUpId || '',
+            team_purchase_switch: activityData.teamPurchaseSwitch || 2,
+            team_purchase_icon: activityData.teamPurchaseIcon || '',
+            // 添加照片审核设置
+            third_vote_verify: activityData.thirdVoteVerify || 1,
+            third_vote_icon: activityData.thirdVoteIcon || '',
+            third_vote_activity_no: activityData.thirdVoteActivityNo || ''
           };
           
           // 转换UI配置数据
@@ -371,7 +424,20 @@ export default defineComponent({
       try {
         const url = `${import.meta.env.VITE_APP_API}/api/invitation/activity/save`;
         
-        const res: any = await baseService.post(url, this.form);
+        // 将前端驼峰字段转换为后端下划线字段
+        const submitData = { ...this.form } as any;
+        
+        // 活动规则相关字段转换
+        if (submitData.invitationRuleSwitch !== undefined) {
+          submitData.invitation_rule_switch = submitData.invitationRuleSwitch;
+          delete submitData.invitationRuleSwitch;
+        }
+        if (submitData.invitationRuleSetting !== undefined) {
+          submitData.invitation_rule_setting = submitData.invitationRuleSetting;
+          delete submitData.invitationRuleSetting;
+        }
+        
+        const res: any = await baseService.post(url, submitData);
         if (res.code === '00000') {
           ElMessage.success('基础设置保存成功');
           if (res.data && res.data.id) {
@@ -390,7 +456,20 @@ export default defineComponent({
       try {
         const url = `${import.meta.env.VITE_APP_API}/api/invitation/activity/save`;
         
-        const res: any = await baseService.post(url, this.form);
+        // 将前端驼峰字段转换为后端下划线字段
+        const submitData = { ...this.form } as any;
+        
+        // 活动规则相关字段转换
+        if (submitData.invitationRuleSwitch !== undefined) {
+          submitData.invitation_rule_switch = submitData.invitationRuleSwitch;
+          delete submitData.invitationRuleSwitch;
+        }
+        if (submitData.invitationRuleSetting !== undefined) {
+          submitData.invitation_rule_setting = submitData.invitationRuleSetting;
+          delete submitData.invitationRuleSetting;
+        }
+        
+        const res: any = await baseService.post(url, submitData);
         if (res.code === '00000') {
           ElMessage.success('分享设置保存成功');
           if (res.data && res.data.id) {
@@ -443,9 +522,56 @@ export default defineComponent({
 
         const url = `${import.meta.env.VITE_APP_API}/api/invitation/activity/save`;
         
-        const res: any = await baseService.post(url, this.form);
+        // 将前端驼峰字段转换为后端下划线字段
+        const submitData = { ...this.form } as any;
+        
+        // 活动规则相关字段转换
+        if (submitData.invitationRuleSwitch !== undefined) {
+          submitData.invitation_rule_switch = submitData.invitationRuleSwitch;
+          delete submitData.invitationRuleSwitch;
+        }
+        if (submitData.invitationRuleSetting !== undefined) {
+          submitData.invitation_rule_setting = submitData.invitationRuleSetting;
+          delete submitData.invitationRuleSetting;
+        }
+        
+        const res: any = await baseService.post(url, submitData);
         if (res.code === '00000') {
           ElMessage.success('登录页面设置保存成功');
+          if (res.data && res.data.id) {
+            this.form.id = res.data.id;
+          }
+          this.handleSaveSuccess();
+        } else {
+          ElMessage.error('保存失败：' + res.msg);
+        }
+      } catch (error) {
+        console.error('保存失败:', error);
+        ElMessage.error('保存失败，请重试');
+      }
+    },
+    
+    // 提交模块配置
+    async handleSubmitModule() {
+      try {
+        const url = `${import.meta.env.VITE_APP_API}/api/invitation/activity/save`;
+        
+        // 将前端驼峰字段转换为后端下划线字段
+        const submitData = { ...this.form } as any;
+        
+        // 活动规则相关字段转换
+        if (submitData.invitationRuleSwitch !== undefined) {
+          submitData.invitation_rule_switch = submitData.invitationRuleSwitch;
+          delete submitData.invitationRuleSwitch;
+        }
+        if (submitData.invitationRuleSetting !== undefined) {
+          submitData.invitation_rule_setting = submitData.invitationRuleSetting;
+          delete submitData.invitationRuleSetting;
+        }
+        
+        const res: any = await baseService.post(url, submitData);
+        if (res.code === '00000') {
+          ElMessage.success('模块配置保存成功');
           if (res.data && res.data.id) {
             this.form.id = res.data.id;
           }
