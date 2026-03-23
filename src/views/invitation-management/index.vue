@@ -304,7 +304,8 @@ export default defineComponent({
       this.$router.push({
         path: '/invitation-management/agent-whitelist',
         query: {
-          activityId: row.id
+          activityId: row.id,
+          _mt: '代理人白名单'
         }
       });
     },

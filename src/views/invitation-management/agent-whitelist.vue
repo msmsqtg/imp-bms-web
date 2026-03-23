@@ -4,9 +4,6 @@
       <!-- 搜索和筛选区域 -->
       <div class="search-filter">
         <el-form :inline="true" class="demo-form-inline">
-          <el-form-item label="手机号">
-            <el-input v-model="searchForm.lotteryCode" placeholder="请输入手机号"></el-input>
-          </el-form-item>
           <el-form-item label="操作时间">
             <el-date-picker
               v-model="searchForm.startTime"
@@ -129,9 +126,10 @@
         <el-table-column prop="createTime" label="生成时间"></el-table-column>
         <el-table-column prop="content" label="简介"></el-table-column>
         <el-table-column prop="importNo" label="导入批次号"></el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column label="操作" width="200">
           <template #default="scope">
             <el-button type="text" size="small" @click="handleViewLogDetail(scope.row)">查看日志</el-button>
+            <el-button type="text" size="small" @click="handleDownloadLog(scope.row)">下载日志</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -149,9 +147,11 @@
     </el-dialog>
 
     <!-- 查看日志详情弹窗 -->
-    <el-dialog title="查看日志" v-model="showLogDetailDialog" width="600px">
+    <el-dialog title="查看日志" v-model="showLogDetailDialog" width="800px">
       <el-table :data="logDetailData" style="width: 100%">
-        <el-table-column prop="content" label="日志内容"></el-table-column>
+        <el-table-column prop="createTime" label="时间" width="200"></el-table-column>
+        <el-table-column prop="statusReason" label="状态原因"></el-table-column>
+        <el-table-column prop="tableLine" label="行号" width="100"></el-table-column>
       </el-table>
       <div class="log-detail-pagination">
         <el-pagination
@@ -162,6 +162,30 @@
           :page-size="logDetailPagination.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           :total="logDetailPagination.total"
+        ></el-pagination>
+      </div>
+    </el-dialog>
+
+    <!-- 查看导出记录弹窗 -->
+    <el-dialog title="查看导出记录" v-model="showExportRecordDialog" width="800px">
+      <el-table :data="exportRecordData" style="width: 100%">
+        <el-table-column prop="fileName" label="文件名"></el-table-column>
+        <el-table-column prop="createdTime" label="导出时间" width="200"></el-table-column>
+        <el-table-column label="操作" width="100">
+          <template #default="scope">
+            <el-button type="text" size="small" @click="handleDownloadExportFile(scope.row)">下载</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="log-detail-pagination">
+        <el-pagination
+          @size-change="handleExportRecordSizeChange"
+          @current-change="handleExportRecordCurrentChange"
+          :current-page="exportRecordPagination.currentPage"
+          :page-sizes="[10, 20, 50, 100]"
+          :page-size="exportRecordPagination.pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="exportRecordPagination.total"
         ></el-pagination>
       </div>
     </el-dialog>
@@ -200,7 +224,16 @@ interface ImportLogItem {
 }
 
 interface LogDetailItem {
-  content: string;
+  createTime: string;
+  statusReason: string;
+  tableLine: number;
+}
+
+interface ExportRecordItem {
+  id: number;
+  fileName: string;
+  downloadUrl: string;
+  createdTime: string;
 }
 
 export default defineComponent({
@@ -209,7 +242,6 @@ export default defineComponent({
     return {
       activityId: this.$route.query.activityId || '',
       searchForm: {
-        lotteryCode: '',
         startTime: '',
         endTime: '',
         status: '' as string | number
@@ -241,18 +273,31 @@ export default defineComponent({
         currentPage: 1,
         pageSize: 10,
         total: 0
+      },
+      showExportRecordDialog: false,
+      exportRecordData: [] as ExportRecordItem[],
+      exportRecordPagination: {
+        currentPage: 1,
+        pageSize: 50,
+        total: 0
       }
     };
   },
   created() {
     this.loadData();
   },
+  watch: {
+    showImportLogDialog(newVal) {
+      if (newVal) {
+        this.loadLogData();
+      }
+    }
+  },
   methods: {
     loadData() {
       const params: any = {
         pageIndex: this.pagination.currentPage,
         pageSize: this.pagination.pageSize,
-        lotteryCode: this.searchForm.lotteryCode,
         startTime: this.searchForm.startTime,
         endTime: this.searchForm.endTime,
         status: this.searchForm.status,
@@ -301,7 +346,6 @@ export default defineComponent({
 
     handleReset() {
       this.searchForm = {
-        lotteryCode: '',
         startTime: '',
         endTime: '',
         status: ''
@@ -404,12 +448,86 @@ export default defineComponent({
     },
 
     handleExport() {
-      window.location.href = `${import.meta.env.VITE_APP_API}/whitelist/record/list?impId=${this.activityId}&export=true`;
+      baseService.get(`${import.meta.env.VITE_APP_API}/whitelist/record/list`, {
+        impId: this.activityId,
+        export: true
+      }).then((res: any) => {
+        if (res.code === '00000' && res.data && res.data.length > 0) {
+          const fileUrl = res.data[0].fileUrl;
+          if (fileUrl) {
+            const link = document.createElement('a');
+            link.href = fileUrl;
+            link.download = res.data[0].fileName || '白名单数据.xlsx';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } else {
+            ElMessage.error('获取下载链接失败');
+          }
+        } else {
+          ElMessage.error(res.msg || '导出失败');
+        }
+      }).catch(error => {
+        console.error('导出失败:', error);
+        ElMessage.error('导出失败');
+      });
     },
 
     handleViewExportRecord() {
-      // 跳转到导出记录页面
-      this.$router.push('/invitation-management/export-record');
+      // 显示导出记录弹窗
+      this.showExportRecordDialog = true;
+      this.loadExportRecordData();
+    },
+
+    loadExportRecordData() {
+      const params: any = {
+        impId: this.activityId,
+        pageIndex: this.exportRecordPagination.currentPage,
+        pageSize: this.exportRecordPagination.pageSize,
+        fileType: 3
+      };
+
+      baseService.get(`${import.meta.env.VITE_APP_API}/code/download/list`, params)
+        .then((res: any) => {
+          if (res.code === '00000') {
+            this.exportRecordPagination.total = res.total;
+            this.exportRecordData = res.data.map((item: any): ExportRecordItem => ({
+              id: item.id,
+              fileName: item.fileName || '',
+              downloadUrl: item.downloadUrl || '',
+              createdTime: item.createdTime || ''
+            }));
+          } else {
+            ElMessage.error(res.msg || '获取导出记录失败');
+          }
+        })
+        .catch(error => {
+          console.error('获取导出记录失败:', error);
+          ElMessage.error('获取导出记录失败');
+        });
+    },
+
+    handleDownloadExportFile(row: ExportRecordItem) {
+      if (row.downloadUrl) {
+        const link = document.createElement('a');
+        link.href = row.downloadUrl;
+        link.download = row.fileName || '导出文件.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        ElMessage.error('下载链接不存在');
+      }
+    },
+
+    handleExportRecordSizeChange(size: number) {
+      this.exportRecordPagination.pageSize = size;
+      this.loadExportRecordData();
+    },
+
+    handleExportRecordCurrentChange(current: number) {
+      this.exportRecordPagination.currentPage = current;
+      this.loadExportRecordData();
     },
 
     handleLogSearch() {
@@ -459,6 +577,33 @@ export default defineComponent({
       this.loadLogDetailData(row.logId);
     },
 
+    handleDownloadLog(row: ImportLogItem) {
+      baseService.get(`${import.meta.env.VITE_APP_API}/log/error/list`, {
+        export: true,
+        logId: row.logId,
+        impId: this.activityId
+      }).then((res: any) => {
+        if (res.code === '00000' && res.data && res.data.length > 0) {
+          const fileUrl = res.data[0].fileUrl;
+          if (fileUrl) {
+            const link = document.createElement('a');
+            link.href = fileUrl;
+            link.download = res.data[0].fileName || '日志文件.xlsx';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          } else {
+            ElMessage.error('获取下载链接失败');
+          }
+        } else {
+          ElMessage.error(res.msg || '下载失败');
+        }
+      }).catch(error => {
+        console.error('下载失败:', error);
+        ElMessage.error('下载失败');
+      });
+    },
+
     loadLogDetailData(logId: number) {
       const params = {
         logId,
@@ -472,7 +617,9 @@ export default defineComponent({
           if (res.code === '00000') {
             this.logDetailPagination.total = res.total;
             this.logDetailData = res.data.map((item: any): LogDetailItem => ({
-              content: item.content || ''
+              createTime: item.createTime || '',
+              statusReason: item.statusReason || '',
+              tableLine: item.tableLine || 0
             }));
           } else {
             ElMessage.error(res.msg || '获取日志详情失败');

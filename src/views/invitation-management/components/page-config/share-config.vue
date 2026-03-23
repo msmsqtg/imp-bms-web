@@ -116,6 +116,10 @@
           </div>
         </div>
       </el-form-item>
+
+      <el-form-item label="B端邀约海报地址链接">
+        <el-input v-model="localForm.share_bg_url" placeholder="请输入B端邀约海报地址链接" :disabled="isViewMode" @input="handleFormChange"></el-input>
+      </el-form-item>
     </el-form>
   </div>
 </template>
@@ -151,6 +155,7 @@ export default defineComponent({
         c_data_form: '',
         share_mode: '1',
         share_bg_setting: '{"share_style": 1, "share_bg_pic": "", "wx_share_pic": "", "share_btn_pic": "", "share_id_type": 1, "wx_share_desc": "", "wx_share_title": ""}',
+        share_bg_url: '',
         is_del: 0,
         tenant_id: 1
       })
@@ -180,6 +185,9 @@ export default defineComponent({
     }
     if (localForm.value.share_bg_setting === undefined) {
       localForm.value.share_bg_setting = '{"share_style": "1", "share_bg_pic": "", "wx_share_pic": "", "share_btn_pic": "", "share_id_type": 1, "wx_share_desc": "", "wx_share_title": ""}';
+    }
+    if (localForm.value.share_bg_url === undefined) {
+      localForm.value.share_bg_url = '';
     }
     // 解析share_bg_setting
     try {
