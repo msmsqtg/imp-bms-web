@@ -52,12 +52,20 @@
       <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column prop="index" label="序号" width="80"></el-table-column>
-        <el-table-column prop="importBatchNo" label="导入批次号"></el-table-column>
-        <el-table-column prop="customerName" label="客群名称"></el-table-column>
-        <el-table-column prop="lotteryCode" label="抽奖券码"></el-table-column>
-        <el-table-column prop="defaultPrizeLevel" label="默认奖项等级"></el-table-column>
-        <el-table-column prop="status" label="使用状态"></el-table-column>
-        <el-table-column prop="operateTime" label="操作时间"></el-table-column>
+        <el-table-column prop="status" label="使用状态" width="100"></el-table-column>
+        <el-table-column prop="idCardNo" label="身份证号码"></el-table-column>
+        <el-table-column prop="salesmanName" label="姓名"></el-table-column>
+        <el-table-column prop="numericWord" label="数字编码"></el-table-column>
+        <el-table-column prop="orgLevel1" label="机构名称"></el-table-column>
+        <el-table-column prop="salesmanMobile" label="手机号码"></el-table-column>
+        <el-table-column prop="stringWord" label="字符串"></el-table-column>
+        <el-table-column prop="qty" label="总抽奖次数"></el-table-column>
+        <el-table-column prop="usableQty" label="剩余抽奖次数"></el-table-column>
+        <el-table-column label="操作" width="120">
+          <template #default="scope">
+            <el-button type="danger" size="small" @click="handleDelete(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
 
       <!-- 分页 -->
@@ -107,8 +115,8 @@
       <div class="log-search">
         <el-form :inline="true">
           <el-form-item label="导入批次号">
-            <el-input v-model="logSearchForm.importBatchNo" placeholder="请输入导入批次号"></el-input>
-          </el-form-item>
+          <el-input v-model="logSearchForm.importNo" placeholder="请输入导入批次号"></el-input>
+        </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="handleLogSearch">查询</el-button>
             <el-button @click="handleLogReset">重置</el-button>
@@ -119,8 +127,8 @@
         <el-table-column prop="index" label="序号" width="80"></el-table-column>
         <el-table-column prop="logId" label="日志ID"></el-table-column>
         <el-table-column prop="createTime" label="生成时间"></el-table-column>
-        <el-table-column prop="summary" label="简介"></el-table-column>
-        <el-table-column prop="importBatchNo" label="导入批次号"></el-table-column>
+        <el-table-column prop="content" label="简介"></el-table-column>
+        <el-table-column prop="importNo" label="导入批次号"></el-table-column>
         <el-table-column label="操作" width="120">
           <template #default="scope">
             <el-button type="text" size="small" @click="handleViewLogDetail(scope.row)">查看日志</el-button>
@@ -167,20 +175,28 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 
 interface WhitelistItem {
   index: number;
-  importBatchNo: string;
-  customerName: string;
-  lotteryCode: string;
-  defaultPrizeLevel: string;
   status: string;
-  operateTime: string;
+  idCardNo: string | null;
+  salesmanName: string | null;
+  numericWord: string | null;
+  orgLevel1: string | null;
+  salesmanMobile: string | null;
+  stringWord: string | null;
+  qty: number | null;
+  usableQty: number | null;
+  lotteryCode?: string;
+  no?: string;
+  type?: number;
+  id?: number;
+  impId?: number;
 }
 
 interface ImportLogItem {
   index: number;
   logId: number;
   createTime: string;
-  summary: string;
-  importBatchNo: string;
+  content: string;
+  importNo: string;
 }
 
 interface LogDetailItem {
@@ -211,7 +227,7 @@ export default defineComponent({
       },
       showImportLogDialog: false,
       logSearchForm: {
-        importBatchNo: ''
+        importNo: ''
       },
       logTableData: [] as ImportLogItem[],
       logPagination: {
@@ -253,12 +269,20 @@ export default defineComponent({
             this.pagination.total = res.total;
             this.tableData = res.data.map((item: any, index: number): WhitelistItem => ({
               index: (this.pagination.currentPage - 1) * this.pagination.pageSize + index + 1,
-              importBatchNo: item.importBatchNo || '',
-              customerName: item.customerName || '',
-              lotteryCode: item.lotteryCode || '',
-              defaultPrizeLevel: item.defaultPrizeLevel || '',
-              status: item.status === 1 ? '未使用' : '已使用',
-              operateTime: item.operateTime || ''
+              status: item.status === 1 ? '正常' : '已使用',
+              idCardNo: item.idCardNo,
+              salesmanName: item.salesmanName,
+              numericWord: item.numericWord,
+              orgLevel1: item.orgLevel1,
+              salesmanMobile: item.salesmanMobile,
+              stringWord: item.stringWord,
+              qty: item.qty,
+              usableQty: item.usableQty,
+              lotteryCode: item.no,
+              no: item.no,
+              type: item.type,
+              id: item.id,
+              impId: item.impId
             }));
           } else {
             ElMessage.error(res.msg || '获取数据失败');
@@ -301,8 +325,10 @@ export default defineComponent({
         cancelButtonText: '取消',
         type: 'error'
       }).then(() => {
-        const ids = this.selectedRows.map(row => row.lotteryCode);
-        baseService.post(`${import.meta.env.VITE_APP_API}/whitelist/record/batch-delete`, { ids, impId: this.activityId })
+        const ids = this.selectedRows.map(row => row.id);
+        const type = this.selectedRows[0]?.type || 1;
+        const impId = this.selectedRows[0]?.impId;
+        baseService.post(`${import.meta.env.VITE_APP_API}/whitelist/record/delete`, { ids, impId, type })
           .then((res: any) => {
             if (res.code === '00000') {
               ElMessage.success('批量删除成功');
@@ -314,6 +340,28 @@ export default defineComponent({
           .catch(error => {
             console.error('批量删除失败:', error);
             ElMessage.error('批量删除失败');
+          });
+      });
+    },
+
+    handleDelete(row: any) {
+      ElMessageBox.confirm('确定要删除这条数据吗？', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'error'
+      }).then(() => {
+        baseService.post(`${import.meta.env.VITE_APP_API}/whitelist/record/delete`, { ids: [row.id], impId: row.impId, type: row.type })
+          .then((res: any) => {
+            if (res.code === '00000') {
+              ElMessage.success('删除成功');
+              this.loadData();
+            } else {
+              ElMessage.error(res.msg || '删除失败');
+            }
+          })
+          .catch(error => {
+            console.error('删除失败:', error);
+            ElMessage.error('删除失败');
           });
       });
     },
@@ -371,7 +419,7 @@ export default defineComponent({
 
     handleLogReset() {
       this.logSearchForm = {
-        importBatchNo: ''
+        importNo: ''
       };
       this.logPagination.currentPage = 1;
       this.loadLogData();
@@ -381,7 +429,7 @@ export default defineComponent({
       const params: any = {
         pageIndex: this.logPagination.currentPage,
         pageSize: this.logPagination.pageSize,
-        importBatchNo: this.logSearchForm.importBatchNo,
+        importNo: this.logSearchForm.importNo,
         impId: this.activityId
       };
 
@@ -393,8 +441,8 @@ export default defineComponent({
               index: (this.logPagination.currentPage - 1) * this.logPagination.pageSize + index + 1,
               logId: item.id,
               createTime: item.createTime || '',
-              summary: item.summary || '',
-              importBatchNo: item.importBatchNo || ''
+              content: item.content || '',
+              importNo: item.importNo || ''
             }));
           } else {
             ElMessage.error(res.msg || '获取日志数据失败');
